@@ -21,6 +21,8 @@
     <string name="dashboard_launch">Launch</string>
     <string name="dashboard_method">Method</string>
     <string name="dashboard_css_injection">CSS Injection</string>
+    <string name="dashboard_injection_paused">Injection paused</string>
+    <string name="dashboard_no_active_rules">No active rules</string>
     <string name="dashboard_rules_count">%d rules</string>
     <string name="dashboard_rules_updated">Updated %d rules</string>
     <string name="dashboard_last_checked">Last checked %s</string>
