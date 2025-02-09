@@ -78,9 +78,9 @@ missing force stop on Amazon Shopping, or LSPosed not activated.
 </details>
 
 <details>
-<summary>Sync says "remote failed" or "embedded only"</summary>
+<summary>Sync says "remote failed" or "bundled only"</summary>
 
-Embedded selectors are still applied. Check connectivity, reset the selector URL in settings,
+Bundled selectors are still applied. Check connectivity, reset the selector URL in settings,
 and refresh again.
 </details>
 
