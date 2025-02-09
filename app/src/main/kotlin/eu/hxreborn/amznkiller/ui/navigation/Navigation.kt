@@ -30,11 +30,11 @@ import androidx.navigation3.ui.NavDisplay
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
-import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
 import eu.hxreborn.amznkiller.ui.screen.dashboard.DashboardScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.LicensesScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.SettingsScreen
 import eu.hxreborn.amznkiller.ui.theme.Tokens
+import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
 import kotlinx.serialization.Serializable
 import soup.compose.material.motion.animation.materialSharedAxisXIn
 import soup.compose.material.motion.animation.materialSharedAxisXOut

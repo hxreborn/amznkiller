@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -83,12 +82,12 @@ import eu.hxreborn.amznkiller.selectors.MergeResult
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
-import eu.hxreborn.amznkiller.ui.screen.dashboard.AppUiState
-import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
 import eu.hxreborn.amznkiller.ui.state.AppPrefsState
+import eu.hxreborn.amznkiller.ui.state.AppUiState
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
+import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -793,7 +792,6 @@ private class PreviewSettingsViewModel : AppViewModel() {
     override fun setXposedActive(
         active: Boolean,
         frameworkVersion: String?,
-        frameworkPrivilege: String?,
     ) {
     }
 

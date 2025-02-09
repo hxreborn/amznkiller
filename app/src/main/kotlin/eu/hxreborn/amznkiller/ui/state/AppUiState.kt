@@ -1,8 +1,7 @@
-package eu.hxreborn.amznkiller.ui.screen.dashboard
+package eu.hxreborn.amznkiller.ui.state
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import eu.hxreborn.amznkiller.ui.state.AppPrefsState
 
 @Stable
 sealed interface AppUiState {

@@ -1,7 +1,8 @@
-package eu.hxreborn.amznkiller.ui.screen.dashboard
+package eu.hxreborn.amznkiller.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import eu.hxreborn.amznkiller.prefs.PrefSpec
+import eu.hxreborn.amznkiller.ui.state.AppUiState
 import kotlinx.coroutines.flow.StateFlow
 
 abstract class AppViewModel : ViewModel() {
@@ -12,7 +13,6 @@ abstract class AppViewModel : ViewModel() {
     abstract fun setXposedActive(
         active: Boolean,
         frameworkVersion: String? = null,
-        frameworkPrivilege: String? = null,
     )
 
     abstract fun <T : Any> savePref(

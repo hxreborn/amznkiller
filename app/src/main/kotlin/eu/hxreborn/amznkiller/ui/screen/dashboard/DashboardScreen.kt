@@ -77,9 +77,12 @@ import eu.hxreborn.amznkiller.ui.component.RulesBottomSheet
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.state.AppPrefsState
+import eu.hxreborn.amznkiller.ui.state.AppUiState
 import eu.hxreborn.amznkiller.ui.state.SelectorSyncEvent
+import eu.hxreborn.amznkiller.ui.state.resolveMessage
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.relativeTime
+import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -294,6 +297,11 @@ fun DashboardScreen(
     }
 }
 
+private enum class UpdateStatus { Refreshing, Error, UpToDate, Stale }
+
+@Composable
+private fun lastCheckedLine(lastFetched: Long): String = stringResource(R.string.dashboard_last_checked, relativeTime(lastFetched))
+
 @Composable
 private fun UpdatesCard(
     prefs: AppPrefsState,
@@ -301,10 +309,18 @@ private fun UpdatesCard(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val outcomeEvent = prefs.lastRefreshOutcome?.event
     val isError = outcomeEvent is SelectorSyncEvent.Error
     val isPersistedFailure = prefs.isRefreshFailed && !isError
-    val isUpToDate = !prefs.isStale && !isError && !isPersistedFailure && prefs.lastFetched > 0L
+
+    val status =
+        when {
+            prefs.isRefreshing -> UpdateStatus.Refreshing
+            isError || isPersistedFailure -> UpdateStatus.Error
+            !prefs.isStale && !isError && !isPersistedFailure && prefs.lastFetched > 0L -> UpdateStatus.UpToDate
+            else -> UpdateStatus.Stale
+        }
 
     val shape = Tokens.CardShape
     Row(
@@ -321,15 +337,15 @@ private fun UpdatesCard(
             modifier = Modifier.size(24.dp),
             contentAlignment = Alignment.Center,
         ) {
-            when {
-                prefs.isRefreshing -> {
+            when (status) {
+                UpdateStatus.Refreshing -> {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
                     )
                 }
 
-                isError || isPersistedFailure -> {
+                UpdateStatus.Error -> {
                     Icon(
                         imageVector = Icons.Outlined.ErrorOutline,
                         contentDescription = null,
@@ -337,7 +353,7 @@ private fun UpdatesCard(
                     )
                 }
 
-                isUpToDate -> {
+                UpdateStatus.UpToDate -> {
                     Icon(
                         imageVector = Icons.Rounded.CloudDone,
                         contentDescription = null,
@@ -345,7 +361,7 @@ private fun UpdatesCard(
                     )
                 }
 
-                else -> {
+                UpdateStatus.Stale -> {
                     Icon(
                         imageVector = Icons.Rounded.SystemUpdate,
                         contentDescription = null,
@@ -358,91 +374,46 @@ private fun UpdatesCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text =
-                    when {
-                        prefs.isRefreshing -> {
-                            stringResource(R.string.hero_checking_title)
-                        }
-
-                        isError || isPersistedFailure -> {
-                            stringResource(R.string.hero_error_title)
-                        }
-
-                        isUpToDate -> {
-                            stringResource(
-                                R.string.hero_operational_title,
-                            )
-                        }
-
-                        else -> {
-                            stringResource(R.string.hero_stale_title)
-                        }
+                    when (status) {
+                        UpdateStatus.Refreshing -> stringResource(R.string.hero_checking_title)
+                        UpdateStatus.Error -> stringResource(R.string.hero_error_title)
+                        UpdateStatus.UpToDate -> stringResource(R.string.hero_operational_title)
+                        UpdateStatus.Stale -> stringResource(R.string.hero_stale_title)
                     },
                 style = MaterialTheme.typography.bodyLarge,
             )
+            val lastChecked =
+                if (prefs.lastFetched > 0L) lastCheckedLine(prefs.lastFetched) else null
             Text(
                 text =
-                    when {
-                        prefs.isRefreshing -> {
-                            stringResource(
-                                R.string.hero_checking_subtitle,
-                            )
+                    when (status) {
+                        UpdateStatus.Refreshing -> {
+                            stringResource(R.string.hero_checking_subtitle)
                         }
 
-                        isError -> {
-                            val error = outcomeEvent as SelectorSyncEvent.Error
-                            if (error.messageResId != 0) {
-                                stringResource(error.messageResId)
+                        UpdateStatus.Error -> {
+                            if (isError) {
+                                (outcomeEvent as SelectorSyncEvent.Error).resolveMessage(context::getString)
                             } else {
-                                error.fallback
-                                    ?: stringResource(R.string.snackbar_update_failed)
+                                stringResource(R.string.hero_error_subtitle)
                             }
                         }
 
-                        isPersistedFailure -> {
-                            stringResource(R.string.hero_error_subtitle)
+                        UpdateStatus.UpToDate -> {
+                            stringResource(R.string.hero_operational_subtitle) + "\n" + lastChecked
                         }
 
-                        isUpToDate -> {
-                            buildString {
-                                append(
-                                    stringResource(
-                                        R.string.hero_operational_subtitle,
-                                    ),
-                                )
-                                append("\n")
-                                append(
-                                    stringResource(
-                                        R.string.dashboard_last_checked,
-                                        relativeTime(prefs.lastFetched),
-                                    ),
-                                )
-                            }
-                        }
-
-                        else -> {
-                            buildString {
-                                append(
-                                    stringResource(
-                                        R.string.hero_stale_subtitle,
-                                    ),
-                                )
-                                if (prefs.lastFetched > 0L) {
-                                    append("\n")
-                                    append(
-                                        stringResource(
-                                            R.string.dashboard_last_checked,
-                                            relativeTime(
-                                                prefs.lastFetched,
-                                            ),
-                                        ),
-                                    )
-                                }
+                        UpdateStatus.Stale -> {
+                            if (lastChecked != null) {
+                                stringResource(R.string.hero_stale_subtitle) + "\n" + lastChecked
+                            } else {
+                                stringResource(R.string.hero_stale_subtitle)
                             }
                         }
                     },
                 style = MaterialTheme.typography.bodyMedium,
                 color =
-                    if (isError) {
+                    if (status == UpdateStatus.Error) {
                         MaterialTheme.colorScheme.error
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -498,16 +469,8 @@ private fun SystemEnvironmentCard(
                 )
                 Text(
                     text =
-                        if (prefs.isXposedActive && prefs.frameworkVersion != null) {
-                            stringResource(
-                                R.string.env_xposed_active,
-                                prefs.frameworkVersion,
-                            )
-                        } else if (prefs.isXposedActive) {
-                            stringResource(
-                                R.string.env_xposed_active,
-                                "Unknown",
-                            )
+                        if (prefs.isXposedActive) {
+                            stringResource(R.string.env_xposed_active, prefs.frameworkVersion ?: "Unknown")
                         } else {
                             stringResource(R.string.env_xposed_inactive)
                         },
@@ -773,11 +736,7 @@ private fun formatUpdateEventMessage(
         }
 
         is SelectorSyncEvent.Error -> {
-            if (event.messageResId != 0) {
-                context.getString(event.messageResId)
-            } else {
-                event.fallback ?: context.getString(R.string.snackbar_update_failed)
-            }
+            event.resolveMessage { context.getString(it) }
         }
     }
 
@@ -798,7 +757,6 @@ private class PreviewAppViewModel : AppViewModel() {
                     AppPrefsState(
                         isXposedActive = true,
                         frameworkVersion = "LSPosed v1.11.0",
-                        frameworkPrivilege = "Zygisk",
                         isRefreshing = false,
                         isRefreshFailed = false,
                         isStale = false,
@@ -821,7 +779,6 @@ private class PreviewAppViewModel : AppViewModel() {
     override fun setXposedActive(
         active: Boolean,
         frameworkVersion: String?,
-        frameworkPrivilege: String?,
     ) {
     }
 

@@ -6,7 +6,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import eu.hxreborn.amznkiller.ui.navigation.BottomNav
 import eu.hxreborn.amznkiller.ui.navigation.MainNavDisplay
 import eu.hxreborn.amznkiller.ui.navigation.Screen
-import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
+import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
 
 @Composable
 fun MainScaffold(viewModel: AppViewModel) {

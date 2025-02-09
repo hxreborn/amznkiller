@@ -11,11 +11,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepositoryImpl
-import eu.hxreborn.amznkiller.ui.screen.dashboard.AppUiState
-import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
-import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModelFactory
+import eu.hxreborn.amznkiller.ui.state.AppUiState
 import eu.hxreborn.amznkiller.ui.theme.AppTheme
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
+import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
+import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModelFactory
 import io.github.libxposed.service.XposedService
 import io.github.libxposed.service.XposedServiceHelper
 
@@ -55,23 +55,9 @@ class MainActivity :
 
     override fun onServiceBind(service: XposedService) {
         remotePrefs = service.getRemotePreferences(Prefs.GROUP)
-        val privilege = service.frameworkPrivilege
         viewModel.setXposedActive(
             active = true,
             frameworkVersion = "${service.frameworkName} v${service.frameworkVersion}",
-            frameworkPrivilege =
-                when (privilege) {
-                    XposedService.Privilege.FRAMEWORK_PRIVILEGE_ROOT -> {
-                        "Zygisk"
-                    }
-
-                    else -> {
-                        privilege.name
-                            .removePrefix("FRAMEWORK_PRIVILEGE_")
-                            .lowercase()
-                            .replaceFirstChar { it.uppercase() }
-                    }
-                },
         )
     }
 

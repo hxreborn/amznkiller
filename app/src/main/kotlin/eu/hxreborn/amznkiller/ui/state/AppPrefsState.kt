@@ -17,7 +17,6 @@ data class AppPrefsState(
     val useDynamicColor: Boolean = Prefs.USE_DYNAMIC_COLOR.default,
     val isXposedActive: Boolean = false,
     val frameworkVersion: String? = null,
-    val frameworkPrivilege: String? = null,
     val isRefreshing: Boolean = false,
     val isRefreshFailed: Boolean = false,
     val lastRefreshOutcome: SelectorSyncOutcome? = null,
