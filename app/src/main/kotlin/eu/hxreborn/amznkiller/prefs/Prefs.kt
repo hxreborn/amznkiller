@@ -16,6 +16,7 @@ object Prefs {
     val INJECTION_ENABLED = BoolPref("injection_enabled", true)
     val WEBVIEW_DEBUGGING = BoolPref("webview_debugging", false)
 
+    val LAST_REFRESH_FAILED = BoolPref("last_refresh_failed", false)
     val AUTO_UPDATE = BoolPref("auto_update", true)
 
     val DARK_THEME_CONFIG = StringPref("dark_theme_config", "follow_system")
@@ -26,6 +27,7 @@ object Prefs {
             SELECTOR_URL,
             CACHED_SELECTORS,
             LAST_FETCHED,
+            LAST_REFRESH_FAILED,
             DEBUG_LOGS,
             INJECTION_ENABLED,
             WEBVIEW_DEBUGGING,

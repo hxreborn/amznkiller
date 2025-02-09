@@ -12,7 +12,7 @@ Xposed module built on the modern LSPosed API that hides ads and sponsored conte
 - Remove sponsored cards, video carousels, and other promotional UI in the Amazon app
 - Maintained built-in selector list with remote updates. Optionally use your own self-hosted selector list via custom URL.
 - Selector sanitization blocks common CSS injection patterns
-- Material 3 companion app
+- Material 3 Expressive settings UI with Jetpack Compose
 - Recommended alongside Private DNS and hosts-based blocking
 - Free and open source (FOSS)
 
