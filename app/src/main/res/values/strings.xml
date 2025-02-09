@@ -62,7 +62,7 @@
     <string name="settings_dynamic_color_summary">Use Material You colors from wallpaper</string>
     <string name="settings_css_injection_summary">Inject CSS rules into Amazon app to hide ads and sponsored junk</string>
     <string name="settings_webview_debugging">WebView debugging</string>
-    <string name="settings_webview_debugging_summary">Attach DevTools to Amazon WebViews. Enable only when needed</string>
+    <string name="settings_webview_debugging_summary">Attach DevTools to Amazon WebViews. Requires force stopping Amazon to take effect</string>
     <string name="settings_debug_logs_summary">Write verbose hook and injection logs. Disable when not debugging</string>
 
     <string name="settings_rule_management">Rule Management</string>
