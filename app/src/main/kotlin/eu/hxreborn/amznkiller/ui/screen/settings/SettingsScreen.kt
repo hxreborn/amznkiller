@@ -26,7 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.FormatPaint
 import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Link
@@ -492,7 +492,7 @@ fun SettingsScreen(
                     key = "report_issue",
                     icon = {
                         Icon(
-                            imageVector = Icons.Outlined.ErrorOutline,
+                            imageVector = Icons.Outlined.Feedback,
                             contentDescription = null,
                         )
                     },
