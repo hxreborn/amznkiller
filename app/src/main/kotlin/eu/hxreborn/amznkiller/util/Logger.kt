@@ -1,6 +1,7 @@
 package eu.hxreborn.amznkiller.util
 
 import android.util.Log
+import eu.hxreborn.amznkiller.prefs.PrefsManager
 import io.github.libxposed.api.XposedModule
 
 object Logger {
@@ -23,5 +24,13 @@ object Logger {
             module?.log(msg, t)
             Log.d(TAG, msg, t)
         }
+    }
+
+    fun logDebug(
+        msg: String,
+        t: Throwable? = null,
+    ) {
+        if (!PrefsManager.debugLogs) return
+        log(msg, t)
     }
 }

@@ -30,7 +30,7 @@ object SelectorUpdater {
         val all = (remote.getOrDefault(emptyList()) + embedded).toSortedSet()
         val error = remote.exceptionOrNull()
         if (error != null) {
-            Logger.log("Remote fetch failed", error)
+            Logger.logDebug("Remote fetch failed", error)
             return MergeResult.Partial(selectors = all, error = error)
         }
         return MergeResult.Success(selectors = all)
@@ -40,20 +40,20 @@ object SelectorUpdater {
     fun refresh(prefs: SharedPreferences) {
         val url = Prefs.SELECTOR_URL.read(prefs)
         if (url.isBlank()) {
-            Logger.log("No selector URL configured, using embedded only")
+            Logger.logDebug("No selector URL configured, using embedded only")
             val embedded = EmbeddedSelectors.load()
             if (embedded.isEmpty()) return
             prefs.edit(commit = true) {
                 Prefs.CACHED_SELECTORS.write(this, embedded.sorted().joinToString("\n"))
                 Prefs.LAST_FETCHED.write(this, System.currentTimeMillis())
             }
-            Logger.log("Cached ${embedded.size} embedded selectors")
+            Logger.logDebug("Cached ${embedded.size} embedded selectors")
             return
         }
 
         val result = fetchMerged(url)
         if (result.selectors.isEmpty()) {
-            Logger.log("No selectors after merge, keeping existing cache")
+            Logger.logDebug("No selectors after merge, keeping existing cache")
             return
         }
 
@@ -61,6 +61,6 @@ object SelectorUpdater {
             Prefs.CACHED_SELECTORS.write(this, result.selectors.joinToString("\n"))
             Prefs.LAST_FETCHED.write(this, System.currentTimeMillis())
         }
-        Logger.log("Cached ${result.selectors.size} selectors")
+        Logger.logDebug("Cached ${result.selectors.size} selectors")
     }
 }

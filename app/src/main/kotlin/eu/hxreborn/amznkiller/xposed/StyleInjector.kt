@@ -33,7 +33,7 @@ object StyleInjector {
         if (!PrefsManager.injectionEnabled) return
         val selectors = PrefsManager.selectors
         if (selectors.isEmpty()) {
-            Logger.log("inject: no selectors")
+            Logger.logDebug("inject: no selectors")
             return
         }
 
@@ -68,7 +68,7 @@ object StyleInjector {
                     hash = hash,
                 )
             validatedHash = 0
-            Logger.log("Built CSS script: ${selectors.size} selectors")
+            Logger.logDebug("Built CSS script: ${selectors.size} selectors")
         }
 
         val current = cached ?: return
@@ -84,15 +84,15 @@ object StyleInjector {
                 webView.evaluateJavascript(script) { result ->
                     if (!shouldValidate) return@evaluateJavascript
                     if (result == null || result == "null") {
-                        Logger.log("CSS validation returned null")
+                        Logger.logDebug("CSS validation returned null")
                         return@evaluateJavascript
                     }
 
                     if (!result.contains("\"ok\":true")) {
-                        Logger.log("CSS validation failed: $result")
+                        Logger.logDebug("CSS validation failed: $result")
                     }
                 }
-            }.onFailure { Logger.log("Failed to evaluate JS injection", it) }
+            }.onFailure { Logger.logDebug("Failed to evaluate JS injection", it) }
         }
 
         // Mark before enqueue to dedupe across callbacks for the same navigation.
@@ -103,7 +103,7 @@ object StyleInjector {
             } else {
                 webView.post { eval() }
             }
-        }.onFailure { Logger.log("Failed to enqueue JS injection", it) }
+        }.onFailure { Logger.logDebug("Failed to enqueue JS injection", it) }
     }
 
     private fun buildInjectScript(
