@@ -22,6 +22,10 @@ object PrefsManager {
     var injectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default
         private set
 
+    @Volatile
+    var webviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default
+        private set
+
     fun init(xposed: XposedInterface) {
         runCatching {
             remotePrefs = xposed.getRemotePreferences(Prefs.GROUP)
@@ -40,6 +44,7 @@ object PrefsManager {
                 selectors = SelectorSanitizer.sanitize(raw.lineSequence())
                 debugLogs = Prefs.DEBUG_LOGS.read(prefs)
                 injectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
+                webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
             }
         }.onFailure { Logger.log("refreshCache() failed", it) }
     }
