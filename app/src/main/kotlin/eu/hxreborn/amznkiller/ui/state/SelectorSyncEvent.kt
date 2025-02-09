@@ -1,5 +1,7 @@
 package eu.hxreborn.amznkiller.ui.state
 
+import androidx.annotation.StringRes
+
 sealed interface SelectorSyncEvent {
     data class Updated(
         val added: Int,
@@ -9,7 +11,8 @@ sealed interface SelectorSyncEvent {
     data object UpToDate : SelectorSyncEvent
 
     data class Error(
-        val message: String,
+        @StringRes val messageResId: Int = 0,
+        val fallback: String? = null,
     ) : SelectorSyncEvent
 }
 

@@ -303,7 +303,8 @@ private fun UpdatesCard(
 ) {
     val outcomeEvent = prefs.lastRefreshOutcome?.event
     val isError = outcomeEvent is SelectorSyncEvent.Error
-    val isUpToDate = !prefs.isStale && !isError && prefs.lastFetched > 0L
+    val isPersistedFailure = prefs.isRefreshFailed && !isError
+    val isUpToDate = !prefs.isStale && !isError && !isPersistedFailure && prefs.lastFetched > 0L
 
     val shape = Tokens.CardShape
     Row(
@@ -328,7 +329,7 @@ private fun UpdatesCard(
                     )
                 }
 
-                isError -> {
+                isError || isPersistedFailure -> {
                     Icon(
                         imageVector = Icons.Outlined.ErrorOutline,
                         contentDescription = null,
@@ -362,7 +363,7 @@ private fun UpdatesCard(
                             stringResource(R.string.hero_checking_title)
                         }
 
-                        isError -> {
+                        isError || isPersistedFailure -> {
                             stringResource(R.string.hero_error_title)
                         }
 
@@ -388,7 +389,17 @@ private fun UpdatesCard(
                         }
 
                         isError -> {
-                            outcomeEvent.message
+                            val error = outcomeEvent as SelectorSyncEvent.Error
+                            if (error.messageResId != 0) {
+                                stringResource(error.messageResId)
+                            } else {
+                                error.fallback
+                                    ?: stringResource(R.string.snackbar_update_failed)
+                            }
+                        }
+
+                        isPersistedFailure -> {
+                            stringResource(R.string.hero_error_subtitle)
                         }
 
                         isUpToDate -> {
@@ -762,7 +773,11 @@ private fun formatUpdateEventMessage(
         }
 
         is SelectorSyncEvent.Error -> {
-            event.message
+            if (event.messageResId != 0) {
+                context.getString(event.messageResId)
+            } else {
+                event.fallback ?: context.getString(R.string.snackbar_update_failed)
+            }
         }
     }
 

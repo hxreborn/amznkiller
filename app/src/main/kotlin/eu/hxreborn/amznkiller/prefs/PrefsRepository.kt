@@ -45,6 +45,7 @@ class PrefsRepositoryImpl(
                         isStale =
                             lastFetched == 0L ||
                                 System.currentTimeMillis() - lastFetched > Prefs.STALE_THRESHOLD_MS,
+                        isRefreshFailed = Prefs.LAST_REFRESH_FAILED.read(localPrefs),
                         darkThemeConfig =
                             runCatching {
                                 DarkThemeConfig.valueOf(

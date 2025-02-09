@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,10 +17,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CloudSync
@@ -33,8 +36,13 @@ import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
@@ -43,6 +51,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -62,6 +71,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
@@ -560,6 +570,7 @@ private fun ThemeDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SelectorUrlDialog(
     currentUrl: String,
@@ -571,11 +582,29 @@ private fun SelectorUrlDialog(
     var testResult by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    AlertDialog(
+    BasicAlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_selector_url_dialog_title)) },
-        text = {
-            Column {
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            modifier = Modifier.width(320.dp),
+            shape = RoundedCornerShape(28.dp),
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+            color = AlertDialogDefaults.containerColor,
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = stringResource(R.string.settings_selector_url_dialog_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.settings_selector_url_dialog_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(16.dp))
+
                 OutlinedTextField(
                     value = url,
                     onValueChange = {
@@ -583,44 +612,17 @@ private fun SelectorUrlDialog(
                         testResult = null
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
+                    singleLine = false,
+                    maxLines = 4,
+                    textStyle = MaterialTheme.typography.bodySmall,
                 )
+                Spacer(Modifier.height(12.dp))
 
-                if (isTesting) {
-                    Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                        )
-                        Spacer(Modifier.padding(start = 8.dp))
-                        Text(
-                            text = stringResource(R.string.settings_selector_url_testing),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-
-                testResult?.let { result ->
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = result,
-                        style = MaterialTheme.typography.bodySmall,
-                        color =
-                            if (result.startsWith("Failed")) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Row {
-                TextButton(
-                    onClick = {
-                        if (url.isNotBlank() && !isTesting) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    FilledTonalButton(
+                        onClick = {
                             isTesting = true
                             testResult = null
                             scope.launch {
@@ -638,41 +640,77 @@ private fun SelectorUrlDialog(
                                                 }
 
                                                 is MergeResult.Partial -> {
-                                                    "Partial: ${mergeResult.selectors.size} selectors (remote failed)"
+                                                    "Failed, using ${mergeResult.selectors.size} bundled selectors"
                                                 }
                                             }
                                         },
                                         onFailure = { "Failed: ${it.message}" },
                                     )
                             }
-                        }
-                    },
-                    enabled = url.isNotBlank() && !isTesting,
-                ) {
-                    Text(stringResource(R.string.settings_selector_url_test))
+                        },
+                        enabled = url.isNotBlank() && !isTesting,
+                    ) {
+                        Text(stringResource(R.string.settings_selector_url_test))
+                    }
+                    Spacer(Modifier.width(12.dp))
+
+                    if (isTesting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.settings_selector_url_testing),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+
+                    testResult?.let { result ->
+                        Text(
+                            text = result,
+                            style = MaterialTheme.typography.bodySmall,
+                            color =
+                                if (result.startsWith("Failed")) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                        )
+                    }
                 }
-                TextButton(
-                    onClick = {
-                        url = Prefs.SELECTOR_URL.default
-                        testResult = null
-                    },
+
+                Spacer(Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(stringResource(R.string.settings_selector_url_reset))
-                }
-                TextButton(
-                    onClick = { onSave(url) },
-                    enabled = url.isNotBlank(),
-                ) {
-                    Text(stringResource(R.string.settings_selector_url_save))
+                    TextButton(
+                        onClick = {
+                            url = Prefs.SELECTOR_URL.default
+                            testResult = null
+                        },
+                    ) {
+                        Text(stringResource(R.string.settings_filter_list_default))
+                    }
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(android.R.string.cancel))
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Button(
+                        onClick = { onSave(url) },
+                        enabled = url.isNotBlank(),
+                    ) {
+                        Text(stringResource(R.string.settings_selector_url_save))
+                    }
                 }
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(android.R.string.cancel))
-            }
-        },
-    )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
