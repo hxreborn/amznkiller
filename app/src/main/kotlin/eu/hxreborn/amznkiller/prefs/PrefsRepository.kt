@@ -1,0 +1,86 @@
+package eu.hxreborn.amznkiller.prefs
+
+import android.content.SharedPreferences
+import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
+import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+
+interface PrefsRepository {
+    val state: Flow<FilterPrefsState>
+
+    fun <T : Any> save(
+        pref: PrefSpec<T>,
+        value: T,
+    )
+
+    fun getCurrentSelectors(): List<String>
+
+    fun getSelectorUrl(): String
+
+    fun syncLocalToRemote()
+}
+
+class PrefsRepositoryImpl(
+    private val localPrefs: SharedPreferences,
+    private val remotePrefsProvider: () -> SharedPreferences?,
+) : PrefsRepository {
+    override val state: Flow<FilterPrefsState> =
+        callbackFlow {
+            fun emit() {
+                val raw = Prefs.CACHED_SELECTORS.read(localPrefs)
+                val selectors = raw.lines().filter { it.isNotBlank() }
+                trySend(
+                    FilterPrefsState(
+                        cachedSelectors = selectors,
+                        selectorCount = selectors.size,
+                        lastFetched = Prefs.LAST_FETCHED.read(localPrefs),
+                        debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
+                        darkThemeConfig =
+                            runCatching {
+                                DarkThemeConfig.valueOf(
+                                    Prefs.DARK_THEME_CONFIG.read(localPrefs).uppercase(),
+                                )
+                            }.getOrDefault(DarkThemeConfig.FOLLOW_SYSTEM),
+                        useDynamicColor = Prefs.USE_DYNAMIC_COLOR.read(localPrefs),
+                    ),
+                )
+            }
+
+            emit()
+            val listener =
+                SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> emit() }
+            localPrefs.registerOnSharedPreferenceChangeListener(listener)
+            awaitClose { localPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
+        }
+
+    override fun <T : Any> save(
+        pref: PrefSpec<T>,
+        value: T,
+    ) {
+        localPrefs.edit().also { pref.write(it, value) }.apply()
+        remotePrefsProvider()?.edit()?.also { pref.write(it, value) }?.apply()
+    }
+
+    override fun getCurrentSelectors(): List<String> {
+        val raw = Prefs.CACHED_SELECTORS.read(localPrefs)
+        return raw.lines().filter { it.isNotBlank() }
+    }
+
+    override fun getSelectorUrl(): String = Prefs.SELECTOR_URL.read(localPrefs)
+
+    override fun syncLocalToRemote() {
+        val remote = remotePrefsProvider() ?: return
+        val editor = remote.edit()
+        for (spec in Prefs.all) {
+            @Suppress("UNCHECKED_CAST")
+            when (spec) {
+                is StringPref -> spec.write(editor, spec.read(localPrefs))
+                is BoolPref -> spec.write(editor, spec.read(localPrefs))
+                is LongPref -> spec.write(editor, spec.read(localPrefs))
+            }
+        }
+        editor.apply()
+    }
+}

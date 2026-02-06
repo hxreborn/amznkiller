@@ -1,0 +1,6 @@
+*.kt linguist-language=Kotlin linguist-detectable
+*.kts linguist-language=Kotlin linguist-detectable
+lists/*.txt linguist-language=AdBlock linguist-detectable
+lists/generated/*.txt linguist-language=AdBlock linguist-detectable
+*.xml linguist-language=XML
+*.pro linguist-language=Prolog linguist-detectable=false

@@ -1,0 +1,40 @@
+name: Update selectors
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Extract and merge selectors
+        run: python tools/update_selectors.py update
+
+      - name: Check for changes
+        id: diff
+        run: |
+          git diff --quiet -- 'lists/' 'app/src/main/resources/payload/' \
+            && echo "changed=false" >> "$GITHUB_OUTPUT" \
+            || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create PR
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: 'chore(selectors): update from upstream lists'
+          branch: update-selectors
+          labels: selectors
+          body: |
+            Auto-generated from upstream adblock lists.
+            Review diff in `lists/generated/` before merging.

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AmznKiller</string>
+    <string name="app_bar_title">AmznKiller</string>
+    <string name="app_desc">Strip out ads and purge low-quality promotional products from Amazon Shopping</string>
+
+    <string name="status_active">Filtering Active</string>
+    <string name="status_inactive">Module Inactive</string>
+    <string name="status_no_rules">No rules loaded</string>
+
+    <string name="control_title">Control</string>
+    <string name="control_check_updates">Check for Updates</string>
+    <string name="control_open_amazon">Open Amazon</string>
+
+    <string name="about_created_by">Created by hxreborn</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_report_issue">Report Issue</string>
+
+    <string name="snackbar_up_to_date">Already up to date</string>
+    <string name="snackbar_updated">Updated (%s rules)</string>
+    <string name="snackbar_amazon_not_installed">Amazon Shopping not installed</string>
+
+    <string name="rules_copied">Copied to clipboard</string>
+    <string name="rules_copy">Copy all</string>
+    <string name="rules_search_hint">Search selectors\u2026</string>
+    <string name="rules_selectors_count">%d CSS selectors</string>
+
+    <string name="tagline_1">"Jeff won\'t miss the $0.02."</string>
+    <string name="tagline_2">The cart is yours. The data is yours.</string>
+    <string name="tagline_3">Just the product. No side effects.</string>
+    <string name="tagline_4">Ad-free is the new luxury.</string>
+    <string name="tagline_5">Amazon, as it should be.</string>
+    <string name="tagline_6">Window shopping, not window tracking.</string>
+    <string name="tagline_7">Your wallet, your rules.</string>
+    <string name="tagline_8">Sponsored products removed.</string>
+    <string name="tagline_9">Sorry Jeff, not today.</string>
+    <string name="tagline_10">Because ads are annoying.</string>
+    <string name="tagline_11">Keeping it clean.</string>
+    <string name="tagline_12">Focus on the goods.</string>
+    <string name="tagline_13">Jeff has enough yachts. No ads today.</string>
+    <string name="tagline_14">One less dollar for the rocket fund.</string>
+    <string name="tagline_15">Blue Origin can wait. Shop in peace.</string>
+    <string name="tagline_16">"Jeff\'s wallet is full enough."</string>
+    <string name="tagline_17">Unsubscribing from the propaganda.</string>
+    <string name="tagline_18">Bezos blocked. Nice try.</string>
+    <string name="tagline_19">404: Ads Not Found.</string>
+    <string name="tagline_20">"Loading\u2026 just kidding, it\'s instant."</string>
+    <string name="tagline_21">Buying things you actually need.</string>
+    <string name="tagline_22">Look at the product, not the banner.</string>
+    <string name="tagline_23">Silence, Brand</string>
+    <string name="tagline_24">WebView Sanitized</string>
+    <string name="tagline_25">No free revenue today</string>
+    <string name="tagline_26">Amazon, but cleaner</string>
+</resources>
