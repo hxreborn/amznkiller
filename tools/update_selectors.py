@@ -15,6 +15,7 @@ import hashlib
 import json
 import re
 import sys
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,7 +35,6 @@ UPSTREAM_OUT = GEN_DIR / "upstream.txt"
 MERGED_OUT = GEN_DIR / "merged.txt"
 METADATA_OUT = GEN_DIR / "metadata.json"
 
-SELECTORS_REMOTE = PAYLOAD_DIR / "selectors-remote.css"
 EMBEDDED_CSS = PAYLOAD_DIR / "embedded.css"
 
 _AMAZON_RE = re.compile(
@@ -45,8 +45,12 @@ _AMAZON_RE = re.compile(
 
 # Procedural pseudo-classes that are NOT valid CSS — reject selectors containing these
 _PROCEDURAL = (
+    ":-abp-",
+    ":contains(",
     ":has-text(",
     ":matches-css(",
+    ":matches-css-after(",
+    ":matches-css-before(",
     ":xpath(",
     ":upward(",
     ":remove(",
@@ -100,20 +104,58 @@ def has_procedural(selector: str) -> bool:
 def split_toplevel_commas(selector: str) -> list[str]:
     """Split a CSS selector on top-level commas (not inside brackets/parens)."""
     parts: list[str] = []
-    depth = 0
+    paren_depth = 0
+    bracket_depth = 0
+    quote: str | None = None
+    escape = False
     current: list[str] = []
+
     for ch in selector:
-        if ch in ("(", "["):
-            depth += 1
+        if escape:
             current.append(ch)
-        elif ch in (")", "]"):
-            depth = max(0, depth - 1)
+            escape = False
+            continue
+
+        if ch == "\\":
             current.append(ch)
-        elif ch == "," and depth == 0:
+            escape = True
+            continue
+
+        if quote is not None:
+            current.append(ch)
+            if ch == quote:
+                quote = None
+            continue
+
+        if ch in ("'", '"'):
+            current.append(ch)
+            quote = ch
+            continue
+
+        if ch == "[":
+            bracket_depth += 1
+            current.append(ch)
+            continue
+        if ch == "]":
+            bracket_depth = max(0, bracket_depth - 1)
+            current.append(ch)
+            continue
+        if ch == "(":
+            paren_depth += 1
+            current.append(ch)
+            continue
+        if ch == ")":
+            paren_depth = max(0, paren_depth - 1)
+            current.append(ch)
+            continue
+
+        if ch == "," and paren_depth == 0 and bracket_depth == 0:
             parts.append("".join(current).strip())
             current = []
-        else:
-            current.append(ch)
+            continue
+
+        current.append(ch)
+
     tail = "".join(current).strip()
     if tail:
         parts.append(tail)
@@ -252,7 +294,7 @@ def load_lines(path: Path) -> set[str]:
 
 def write_sorted(path: Path, selectors: set[str] | frozenset[str]) -> None:
     sorted_sels = sorted(selectors)
-    path.write_text("\n".join(sorted_sels) + "\n" if sorted_sels else "")
+    path.write_text(("\n".join(sorted_sels) + "\n") if sorted_sels else "")
 
 
 # ---------------------------------------------------------------------------
@@ -266,8 +308,84 @@ def validate_output(selectors: set[str]) -> list[str]:
             errors.append(f"contains '##': {s}")
         if "#@#" in s:
             errors.append(f"contains '#@#': {s}")
+        if "{" in s or "}" in s:
+            errors.append(f"contains curly brace: {s}")
+        if "/*" in s or "*/" in s:
+            errors.append(f"contains comment token: {s}")
+        if "\x00" in s:
+            errors.append(f"contains NUL byte: {s!r}")
+        if "\r" in s or "\n" in s:
+            errors.append(f"contains newline: {s!r}")
+        if has_procedural(s):
+            errors.append(f"contains unsupported/procedural selector: {s}")
+        if s.lstrip().startswith((">", "+", "~")):
+            errors.append(f"starts with a combinator (invalid in style rules): {s}")
+        errors.extend(_validate_balanced(s))
         if not s.strip():
             errors.append("whitespace-only selector")
+    return errors
+
+
+def _validate_balanced(selector: str) -> list[str]:
+    """Heuristic syntax checks to avoid selectors that can break CSS parsing.
+
+    We can't fully parse CSS selectors in stdlib, but we can cheaply catch:
+    - unbalanced () and []
+    - unbalanced quotes
+    - dangling backslash escapes
+    """
+    errors: list[str] = []
+    paren_depth = 0
+    bracket_depth = 0
+    quote: str | None = None
+    escape = False
+
+    for ch in selector:
+        if escape:
+            escape = False
+            continue
+
+        if ch == "\\":
+            escape = True
+            continue
+
+        if quote is not None:
+            if ch == quote:
+                quote = None
+            continue
+
+        if ch in ("'", '"'):
+            quote = ch
+            continue
+
+        if ch == "(":
+            paren_depth += 1
+            continue
+        if ch == ")":
+            paren_depth -= 1
+            if paren_depth < 0:
+                errors.append(f"unbalanced ')': {selector}")
+                paren_depth = 0
+            continue
+        if ch == "[":
+            bracket_depth += 1
+            continue
+        if ch == "]":
+            bracket_depth -= 1
+            if bracket_depth < 0:
+                errors.append(f"unbalanced ']': {selector}")
+                bracket_depth = 0
+            continue
+
+    if escape:
+        errors.append(f"dangling backslash escape: {selector}")
+    if quote is not None:
+        errors.append(f"unbalanced quote {quote}: {selector}")
+    if paren_depth != 0:
+        errors.append(f"unbalanced parentheses: {selector}")
+    if bracket_depth != 0:
+        errors.append(f"unbalanced brackets: {selector}")
+
     return errors
 
 
@@ -344,7 +462,6 @@ def cmd_update() -> int:
 
     # APK fallback uses manual selectors only; remote fetch gets full merged set
     write_sorted(EMBEDDED_CSS, manual)
-    write_sorted(SELECTORS_REMOTE, merged)
 
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     lock = {
@@ -392,7 +509,6 @@ def cmd_update() -> int:
     print(f"  {MERGED_OUT}")
     print(f"  {LOCK_FILE}")
     print(f"  {METADATA_OUT}")
-    print(f"  {SELECTORS_REMOTE}")
     print(f"  {EMBEDDED_CSS}")
 
     return 0
@@ -402,7 +518,7 @@ def cmd_validate() -> int:
     """Validate all output files for correctness."""
     all_errors: list[str] = []
 
-    for path in (MERGED_OUT, UPSTREAM_OUT, SELECTORS_REMOTE, EMBEDDED_CSS):
+    for path in (MERGED_OUT, UPSTREAM_OUT, EMBEDDED_CSS):
         errors = validate_file(path)
         if errors:
             all_errors.extend(f"{path.name}: {e}" for e in errors)
@@ -410,9 +526,10 @@ def cmd_validate() -> int:
     # Check for duplicates in merged output
     if MERGED_OUT.exists():
         lines = [l.strip() for l in MERGED_OUT.read_text().splitlines() if l.strip()]
-        if len(lines) != len(set(lines)):
-            dupes = [l for l in lines if lines.count(l) > 1]
-            all_errors.append(f"merged.txt: {len(set(dupes))} duplicate selectors")
+        counts = Counter(lines)
+        dupes = [l for l, c in counts.items() if c > 1]
+        if dupes:
+            all_errors.append(f"merged.txt: {len(dupes)} duplicate selectors")
 
     # Embedded must be subset of merged
     if EMBEDDED_CSS.exists() and MERGED_OUT.exists():
