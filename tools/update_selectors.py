@@ -342,8 +342,7 @@ def cmd_update() -> int:
     write_sorted(UPSTREAM_OUT, upstream_filtered)
     write_sorted(MERGED_OUT, merged)
 
-    # embedded = manual only (APK fallback if remote fetch fails)
-    # remote = merged (fetched at runtime by RemoteFetcher.kt)
+    # APK fallback uses manual selectors only; remote fetch gets full merged set
     write_sorted(EMBEDDED_CSS, manual)
     write_sorted(SELECTORS_REMOTE, merged)
 
