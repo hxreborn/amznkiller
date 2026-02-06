@@ -2,6 +2,7 @@ package eu.hxreborn.amznkiller.ui.screen
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,12 +38,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.FilterUiState
 import eu.hxreborn.amznkiller.ui.FilterViewModel
+import eu.hxreborn.amznkiller.ui.animation.AnimationState
 import eu.hxreborn.amznkiller.ui.animation.rememberFillLevelState
 import eu.hxreborn.amznkiller.ui.component.AboutCard
 import eu.hxreborn.amznkiller.ui.component.ControlCard
 import eu.hxreborn.amznkiller.ui.component.RulesBottomSheet
 import eu.hxreborn.amznkiller.ui.component.StatusCard
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
+import kotlinx.coroutines.launch
 
 private const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
 
@@ -82,13 +86,14 @@ fun FilterListScreen(viewModel: FilterViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var showRulesSheet by remember { mutableStateOf(false) }
+    var pendingEvent by remember { mutableStateOf<UpdateEvent?>(null) }
     val taglineRes = rememberSaveable { taglines.random() }
 
     LaunchedEffect(Unit) {
         viewModel.updateEvents.collect { event ->
-            val message = formatUpdateEventMessage(context, event)
-            snackbarHostState.showSnackbar(message)
+            pendingEvent = event
         }
     }
 
@@ -121,6 +126,20 @@ fun FilterListScreen(viewModel: FilterViewModel) {
                     rememberFillLevelState(
                         isRefreshing = prefs.isRefreshing,
                         isError = prefs.isRefreshFailed,
+                        onStateChange = { state ->
+                            if (state is AnimationState.Completed) {
+                                pendingEvent?.let { event ->
+                                    val message = formatUpdateEventMessage(context, event)
+                                    if (event is UpdateEvent.Error) {
+                                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                    }
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(message)
+                                    }
+                                    pendingEvent = null
+                                }
+                            }
+                        },
                     )
 
                 Column(
@@ -145,7 +164,6 @@ fun FilterListScreen(viewModel: FilterViewModel) {
 
                     StatusCard(
                         isActive = prefs.isXposedActive,
-                        isRefreshing = prefs.isRefreshing,
                         fillState = fillState,
                         selectorCount = prefs.selectorCount,
                         lastFetched = prefs.lastFetched,
