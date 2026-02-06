@@ -1,0 +1,71 @@
+package eu.hxreborn.amznkiller.ui
+
+import android.content.SharedPreferences
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import eu.hxreborn.amznkiller.App
+import eu.hxreborn.amznkiller.prefs.Prefs
+import eu.hxreborn.amznkiller.prefs.PrefsRepositoryImpl
+import eu.hxreborn.amznkiller.ui.screen.FilterListScreen
+import eu.hxreborn.amznkiller.ui.theme.AppTheme
+import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
+import io.github.libxposed.service.XposedService
+import io.github.libxposed.service.XposedServiceHelper
+
+class MainActivity :
+    ComponentActivity(),
+    XposedServiceHelper.OnServiceListener {
+    private var remotePrefs: SharedPreferences? = null
+    private lateinit var viewModel: FilterViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
+
+        val localPrefs = getSharedPreferences(Prefs.GROUP, MODE_PRIVATE)
+        val repository = PrefsRepositoryImpl(localPrefs) { remotePrefs }
+        viewModel =
+            ViewModelProvider(
+                this,
+                FilterViewModelFactory(repository),
+            )[FilterViewModel::class.java]
+
+        App.addServiceListener(this)
+
+        setContent {
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+            val prefs = (uiState.value as? FilterUiState.Success)?.prefs
+
+            AppTheme(
+                darkThemeConfig = prefs?.darkThemeConfig ?: DarkThemeConfig.FOLLOW_SYSTEM,
+                useDynamicColor = prefs?.useDynamicColor ?: true,
+            ) {
+                FilterListScreen(viewModel = viewModel)
+            }
+        }
+    }
+
+    override fun onServiceBind(service: XposedService) {
+        remotePrefs = service.getRemotePreferences(Prefs.GROUP)
+        viewModel.setXposedActive(true)
+    }
+
+    override fun onServiceDied(service: XposedService) {
+        remotePrefs = null
+        viewModel.setXposedActive(false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        App.removeServiceListener(this)
+    }
+
+    companion object {
+        @JvmStatic
+        fun isXposedEnabled(): Boolean = false
+    }
+}

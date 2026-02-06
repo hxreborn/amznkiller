@@ -1,0 +1,19 @@
+{
+  "sources": [
+    {
+      "name": "EasyList",
+      "url": "https://easylist.to/easylist/easylist.txt",
+      "enabled": true
+    },
+    {
+      "name": "uBlock Origin filters",
+      "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+      "enabled": true
+    },
+    {
+      "name": "uBlock Origin quick-fixes",
+      "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
+      "enabled": true
+    }
+  ]
+}
