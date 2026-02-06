@@ -51,21 +51,27 @@ class FilterViewModel(
         )
 
     fun refreshAll() {
+        if (refreshing.value) return
         viewModelScope.launch(Dispatchers.IO) {
             refreshing.value = true
             lastRefreshFailed.value = false
             val oldSelectors = repository.getCurrentSelectors().toSet()
             runCatching {
                 val url = repository.getSelectorUrl()
-                val newSelectors = SelectorUpdater.fetchMerged(url)
-                if (newSelectors.isEmpty()) {
+                val result = SelectorUpdater.fetchMerged(url)
+                if (result.selectors.isEmpty()) {
                     lastRefreshFailed.value = true
                     _updateEvents.emit(UpdateEvent.Error("No selectors fetched"))
                     return@runCatching
                 }
-                val added = (newSelectors - oldSelectors).size
-                val removed = (oldSelectors - newSelectors).size
-                val merged = newSelectors.sorted().joinToString("\n")
+                if (result.remoteFailed) {
+                    lastRefreshFailed.value = true
+                    _updateEvents.emit(UpdateEvent.Error("Remote fetch failed, using embedded"))
+                    return@runCatching
+                }
+                val added = (result.selectors - oldSelectors).size
+                val removed = (oldSelectors - result.selectors).size
+                val merged = result.selectors.sorted().joinToString("\n")
                 repository.save(Prefs.CACHED_SELECTORS, merged)
                 repository.save(Prefs.LAST_FETCHED, System.currentTimeMillis())
                 if (added == 0 && removed == 0) {

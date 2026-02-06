@@ -48,32 +48,33 @@ fun rememberFillLevelState(
             } finally {
                 job.cancelAndJoin()
             }
-        } else if (animatable.value > 0f) {
-            val job =
-                launch {
-                    snapshotFlow { animatable.value }
-                        .distinctUntilChanged()
-                        .collect { value -> onStateChangeUpdated(AnimationState.Finishing(value)) }
+        } else {
+            if (animatable.value > 0f) {
+                val job =
+                    launch {
+                        snapshotFlow { animatable.value }
+                            .distinctUntilChanged()
+                            .collect { value -> onStateChangeUpdated(AnimationState.Finishing(value)) }
+                    }
+                try {
+                    if (animatable.value < FILL_MIN_TARGET) {
+                        val remainingMs =
+                            ((FILL_MIN_TARGET - animatable.value) / FILL_MIN_TARGET * 1500)
+                                .toInt()
+                        animatable.animateTo(FILL_MIN_TARGET, fillCatchUpSpec(remainingMs))
+                    }
+                    if (isErrorUpdated) {
+                        val drainMs = (animatable.value * 800).toInt()
+                        animatable.animateTo(0f, fillDrainSpec(drainMs))
+                    } else {
+                        animatable.animateTo(1f, fillFinishSpec())
+                        delay(DRAIN_DELAY_MS)
+                        animatable.snapTo(0f)
+                    }
+                } finally {
+                    job.cancelAndJoin()
                 }
-            try {
-                if (animatable.value < FILL_MIN_TARGET) {
-                    val remainingMs =
-                        ((FILL_MIN_TARGET - animatable.value) / FILL_MIN_TARGET * 1500)
-                            .toInt()
-                    animatable.animateTo(FILL_MIN_TARGET, fillCatchUpSpec(remainingMs))
-                }
-                if (isErrorUpdated) {
-                    val drainMs = (animatable.value * 800).toInt()
-                    animatable.animateTo(0f, fillDrainSpec(drainMs))
-                } else {
-                    animatable.animateTo(1f, fillFinishSpec())
-                    delay(DRAIN_DELAY_MS)
-                    animatable.snapTo(0f)
-                }
-            } finally {
-                job.cancelAndJoin()
             }
-
             onStateChangeUpdated(AnimationState.Completed)
         }
     }

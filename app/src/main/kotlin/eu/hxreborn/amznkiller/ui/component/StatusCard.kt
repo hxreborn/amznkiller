@@ -30,7 +30,6 @@ import eu.hxreborn.amznkiller.ui.animation.waveFill
 @Composable
 fun StatusCard(
     isActive: Boolean,
-    isRefreshing: Boolean,
     fillState: FillLevelState,
     selectorCount: Int,
     lastFetched: Long,
