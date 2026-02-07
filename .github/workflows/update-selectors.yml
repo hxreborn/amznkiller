@@ -35,10 +35,13 @@ jobs:
             lists/generated/merged.txt \
             app/src/main/resources/payload/embedded.css
 
-      - name: Check for changes
+      - name: Check for selector changes
         id: diff
         run: |
-          git diff --quiet -- 'lists/' 'app/src/main/resources/payload/' \
+          git diff --quiet -- \
+            'lists/generated/merged.txt' \
+            'lists/generated/upstream.txt' \
+            'app/src/main/resources/payload/embedded.css' \
             && echo "changed=false" >> "$GITHUB_OUTPUT" \
             || echo "changed=true" >> "$GITHUB_OUTPUT"
 
