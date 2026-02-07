@@ -1,0 +1,43 @@
+name: False Positive
+description: Selector hiding legitimate Amazon content
+labels: ["false-positive"]
+body:
+  - type: textarea
+    id: what_hidden
+    attributes:
+      label: What's being hidden
+      placeholder: Product reviews section disappears on detail page
+
+  - type: dropdown
+    id: location
+    attributes:
+      label: Where
+      options:
+        - Search results
+        - Product page
+        - Home feed
+        - Cart / checkout
+        - Browse / category page
+        - Order history
+        - Account pages
+        - Other
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      placeholder: Drag and drop image showing the missing element
+
+  - type: textarea
+    id: suspected_selector
+    attributes:
+      label: Suspected selector (optional)
+      description: From the rules list in the companion app
+      placeholder: ".a-section.product-carousel"
+      render: css
+
+  - type: input
+    id: amazon_version
+    attributes:
+      label: Amazon Shopping version
+      placeholder: "26.24.2.100"

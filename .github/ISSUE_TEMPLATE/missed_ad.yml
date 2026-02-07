@@ -1,0 +1,41 @@
+name: Missed Ad
+description: Ad element not blocked, needs new selector
+labels: ["missed-ad"]
+body:
+  - type: dropdown
+    id: location
+    attributes:
+      label: Where does the ad appear
+      options:
+        - Search results
+        - Product page
+        - Home feed
+        - Cart / checkout
+        - Browse / category page
+        - Other
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Ad description
+      placeholder: Sponsored Products carousel between search results
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      placeholder: Drag and drop image here
+
+  - type: textarea
+    id: dom_info
+    attributes:
+      label: DOM inspector info (optional)
+      description: "From chrome://inspect \u2192 WebView element tree"
+      placeholder: <div class="a-section sponsored-products">...</div>
+      render: html
+
+  - type: input
+    id: amazon_version
+    attributes:
+      label: Amazon Shopping version
+      placeholder: "26.24.2.100"
