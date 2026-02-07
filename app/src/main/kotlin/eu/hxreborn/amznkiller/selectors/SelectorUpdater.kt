@@ -2,7 +2,7 @@ package eu.hxreborn.amznkiller.selectors
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import eu.hxreborn.amznkiller.net.TextFetcher
+import eu.hxreborn.amznkiller.http.HttpClient
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.util.Logger
 
@@ -23,7 +23,7 @@ object SelectorUpdater {
     fun fetchMerged(url: String): MergeResult {
         val remote =
             runCatching {
-                val raw = TextFetcher.fetch(url)
+                val raw = HttpClient.fetch(url)
                 SelectorSanitizer.sanitize(raw.lineSequence())
             }
         val embedded = EmbeddedSelectors.load()

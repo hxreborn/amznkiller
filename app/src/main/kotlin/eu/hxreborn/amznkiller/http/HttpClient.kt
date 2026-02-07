@@ -1,4 +1,4 @@
-package eu.hxreborn.amznkiller.net
+package eu.hxreborn.amznkiller.http
 
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -6,10 +6,10 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
 
-object TextFetcher {
+object HttpClient {
     private const val MAX_BYTES = 512_000L
-    private const val CONNECT_TIMEOUT_MS = 15_000
-    private const val READ_TIMEOUT_MS = 30_000
+    private const val CONNECT_TIMEOUT_MS = 10_000
+    private const val READ_TIMEOUT_MS = 10_000
     private const val BUFFER_SIZE = 8192
 
     fun fetch(url: String): String {

@@ -11,7 +11,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepositoryImpl
-import eu.hxreborn.amznkiller.ui.screen.DashboardScreen
+import eu.hxreborn.amznkiller.ui.screen.dashboard.DashboardScreen
+import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterUiState
+import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterViewModel
+import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterViewModelFactory
 import eu.hxreborn.amznkiller.ui.theme.AppTheme
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import io.github.libxposed.service.XposedService

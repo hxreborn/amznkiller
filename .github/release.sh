@@ -53,17 +53,23 @@ if [[ ! -f ".github/cliff.toml" ]]; then
 fi
 
 # MAJOR * 100000 + MINOR * 10000 + PATCH * 100 + PRE
-# PRE = trailing number from pre-release suffix (beta2 → 2), 0 if stable
+# PRE = 1 if pre-release (alpha/beta/rc/dev), 0 if stable
 PRE_SUFFIX="${BASH_REMATCH[4]}"
 PRE=0
-if [[ "$PRE_SUFFIX" =~ ([0-9]+)$ ]]; then
-	PRE="${BASH_REMATCH[1]}"
+PRE_RELEASE_TYPE=""
+if [[ -n "$PRE_SUFFIX" ]] && [[ "$PRE_SUFFIX" =~ ^-?(alpha|beta|rc|dev) ]]; then
+	PRE_RELEASE_TYPE="${BASH_REMATCH[1]}"
+	PRE=1
 fi
 VERSION_CODE=$(( MAJOR * 100000 + MINOR * 10000 + PATCH * 100 + PRE ))
 
 PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
 
-echo "Releasing ${PREV_TAG} → ${TAG} (versionCode=$VERSION_CODE)"
+if [[ -n "$PRE_RELEASE_TYPE" ]]; then
+	echo "Releasing ${PREV_TAG} → ${TAG} (versionCode=$VERSION_CODE, pre-release=$PRE_RELEASE_TYPE)"
+else
+	echo "Releasing ${PREV_TAG} → ${TAG} (versionCode=$VERSION_CODE)"
+fi
 echo ""
 git cliff --config .github/cliff.toml --tag "$TAG" --unreleased
 echo ""

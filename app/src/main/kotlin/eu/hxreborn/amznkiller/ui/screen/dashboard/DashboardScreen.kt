@@ -1,4 +1,4 @@
-package eu.hxreborn.amznkiller.ui.screen
+package eu.hxreborn.amznkiller.ui.screen.dashboard
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
@@ -38,8 +38,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.R
-import eu.hxreborn.amznkiller.ui.FilterUiState
-import eu.hxreborn.amznkiller.ui.FilterViewModel
 import eu.hxreborn.amznkiller.ui.animation.AnimationState
 import eu.hxreborn.amznkiller.ui.animation.BUTTON_UNLOCK_THRESHOLD
 import eu.hxreborn.amznkiller.ui.animation.rememberFillLevelState

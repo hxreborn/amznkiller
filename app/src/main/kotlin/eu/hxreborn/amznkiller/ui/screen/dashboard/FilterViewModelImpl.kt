@@ -1,13 +1,11 @@
-package eu.hxreborn.amznkiller.ui
+package eu.hxreborn.amznkiller.ui.screen.dashboard
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepository
 import eu.hxreborn.amznkiller.selectors.MergeResult
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
-import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,17 +19,17 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class FilterViewModel(
+class FilterViewModelImpl(
     private val repository: PrefsRepository,
-) : ViewModel() {
+) : FilterViewModel() {
     private val refreshing = MutableStateFlow(false)
     private val lastRefreshFailed = MutableStateFlow(false)
     private val xposedActive = MutableStateFlow(false)
 
     private val _updateEvents = MutableSharedFlow<UpdateEvent>()
-    val updateEvents: SharedFlow<UpdateEvent> = _updateEvents.asSharedFlow()
+    override val updateEvents: SharedFlow<UpdateEvent> = _updateEvents.asSharedFlow()
 
-    val uiState: StateFlow<FilterUiState> =
+    override val uiState: StateFlow<FilterUiState> =
         combine(
             repository.state,
             refreshing,
@@ -51,7 +49,7 @@ class FilterViewModel(
             initialValue = FilterUiState.Loading,
         )
 
-    fun refreshAll() {
+    override fun refreshAll() {
         if (refreshing.value) return
         viewModelScope.launch(Dispatchers.IO) {
             refreshing.value = true
@@ -94,22 +92,14 @@ class FilterViewModel(
         }
     }
 
-    fun setXposedActive(active: Boolean) {
+    override fun setXposedActive(active: Boolean) {
         xposedActive.value = active
     }
-}
-
-sealed interface FilterUiState {
-    data object Loading : FilterUiState
-
-    data class Success(
-        val prefs: FilterPrefsState,
-    ) : FilterUiState
 }
 
 class FilterViewModelFactory(
     private val repository: PrefsRepository,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = FilterViewModel(repository) as T
+    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T = FilterViewModelImpl(repository) as T
 }
