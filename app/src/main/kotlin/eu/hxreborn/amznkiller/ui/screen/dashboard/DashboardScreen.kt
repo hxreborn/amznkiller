@@ -1,6 +1,5 @@
 package eu.hxreborn.amznkiller.ui.screen.dashboard
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -93,9 +92,7 @@ fun DashboardScreen(
         topBar = {
             LargeTopAppBar(
                 title = {
-                    val isExpandedSlot =
-                        LocalTextStyle.current.fontSize >=
-                            MaterialTheme.typography.headlineMedium.fontSize
+                    val isExpandedSlot = LocalTextStyle.current.fontSize >= MaterialTheme.typography.headlineMedium.fontSize
                     Column {
                         Text(
                             text = stringResource(R.string.app_bar_title),
@@ -107,8 +104,7 @@ fun DashboardScreen(
                                 } else {
                                     LocalTextStyle.current
                                 },
-                            maxLines =
-                                if (isExpandedSlot) Tokens.ExpandedTitleMaxLines else 1,
+                            maxLines = if (isExpandedSlot) Tokens.ExpandedTitleMaxLines else 1,
                         )
                         Text(
                             text = tagline,
@@ -161,8 +157,7 @@ fun DashboardScreen(
                                     if (animState.value >= BUTTON_UNLOCK_THRESHOLD) {
                                         buttonLocked = false
                                         pendingEvent?.let { event ->
-                                            val message =
-                                                formatUpdateEventMessage(context, event)
+                                            val message = formatUpdateEventMessage(context, event)
                                             scope.launch {
                                                 snackbarHostState.showSnackbar(message)
                                             }
@@ -220,9 +215,7 @@ fun DashboardScreen(
                                 isRefreshing = buttonLocked || prefs.isRefreshing,
                                 onUpdate = { viewModel.refreshAll() },
                                 onOpenAmazon = {
-                                    val intent =
-                                        context.packageManager
-                                            .getLaunchIntentForPackage(AMAZON_PACKAGE)
+                                    val intent = context.packageManager.getLaunchIntentForPackage(AMAZON_PACKAGE)
                                     if (intent != null) {
                                         context.startActivity(intent)
                                     } else {
@@ -266,6 +259,7 @@ private fun formatUpdateEventMessage(
         }
     }
 
+@Suppress("ViewModelConstructorInComposable")
 @PreviewLightDark
 @Composable
 private fun DashboardScreenPreview() {
