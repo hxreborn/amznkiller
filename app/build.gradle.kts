@@ -1,45 +1,8 @@
-import java.io.ByteArrayOutputStream
-
 plugins {
     alias(libs.plugins.agp.app)
     alias(libs.plugins.kotlin)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ktlint)
-}
-
-fun gitStdout(vararg args: String): String? {
-    val stdout = ByteArrayOutputStream()
-    val output =
-        runCatching {
-            exec {
-                commandLine(args.toList())
-                standardOutput = stdout
-            }
-            stdout.toString().trim()
-        }.getOrNull()
-
-    return output?.takeIf { it.isNotBlank() }
-}
-
-fun semverBase1000(versionName: String): Int {
-    val semver = versionName.removePrefix("v").substringBefore("-")
-    val parts = semver.split('.')
-    val major = parts.getOrNull(0)?.toIntOrNull() ?: 0
-    val minor = parts.getOrNull(1)?.toIntOrNull() ?: 0
-    val patch = parts.getOrNull(2)?.toIntOrNull() ?: 0
-    return major * 1_000_000 + minor * 1_000 + patch
-}
-
-val gitCommitCount: Int by lazy {
-    gitStdout("git", "rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0
-}
-
-val gitDescribe: String by lazy {
-    gitStdout("git", "describe", "--tags", "--always")?.removePrefix("v") ?: "0.0.0"
-}
-
-val gitSha: String by lazy {
-    gitStdout("git", "rev-parse", "--short", "HEAD") ?: "unknown"
 }
 
 android {
@@ -51,13 +14,8 @@ android {
         minSdk = 31
         targetSdk = 36
 
-        val baseVersionName =
-            project.findProperty("version.name")?.toString()
-                ?: gitDescribe
-
-        versionName = baseVersionName
-        versionCode = semverBase1000(baseVersionName) * 1000 + gitCommitCount
-        buildConfigField("String", "GIT_SHA", "\"$gitSha\"")
+        versionName = project.property("version.name").toString()
+        versionCode = project.property("version.code").toString().toInt()
     }
 
     androidResources {
