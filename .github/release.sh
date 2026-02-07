@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+compute_version_code() {
+	local version="$1"
+	local major="${version%%.*}"
+	local rest="${version#*.}"
+	local minor="${rest%%.*}"
+	local commits=$(( $(git rev-list --count HEAD) + 1 ))
+	echo $(( major * 100000 + minor * 10000 + commits ))
+}
+
+# Allow sourcing without running the release flow
+[[ "${1:-}" == "--source-only" ]] && return 0 2>/dev/null || true
+if [[ "${1:-}" == "--source-only" ]]; then exit 0; fi
+
 VERSION_INPUT=${1:-}
 
 if [[ -z "$VERSION_INPUT" ]]; then
@@ -24,9 +37,6 @@ if [[ ! "$VERSION" =~ $SEMVER_RE ]]; then
 	exit 1
 fi
 
-MAJOR="${BASH_REMATCH[1]}"
-MINOR="${BASH_REMATCH[2]}"
-PATCH="${BASH_REMATCH[3]}"
 TAG="v$VERSION"
 
 if [[ -n "$(git status --porcelain)" ]]; then
@@ -52,18 +62,14 @@ if [[ ! -f ".github/cliff.toml" ]]; then
 	exit 1
 fi
 
-# MAJOR * 100000 + MINOR * 10000 + PATCH * 100 + PRE
-# PRE = 1 if pre-release (alpha/beta/rc/dev), 0 if stable
+PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+VERSION_CODE=$(compute_version_code "$VERSION")
+
 PRE_SUFFIX="${BASH_REMATCH[4]}"
-PRE=0
 PRE_RELEASE_TYPE=""
 if [[ -n "$PRE_SUFFIX" ]] && [[ "$PRE_SUFFIX" =~ ^-?(alpha|beta|rc|dev) ]]; then
 	PRE_RELEASE_TYPE="${BASH_REMATCH[1]}"
-	PRE=1
 fi
-VERSION_CODE=$(( MAJOR * 100000 + MINOR * 10000 + PATCH * 100 + PRE ))
-
-PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
 
 if [[ -n "$PRE_RELEASE_TYPE" ]]; then
 	echo "Releasing ${PREV_TAG} → ${TAG} (versionCode=$VERSION_CODE, pre-release=$PRE_RELEASE_TYPE)"
