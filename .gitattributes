@@ -12,3 +12,4 @@ lists/generated/*.txt linguist-language=AdBlock linguist-detectable
 
 *.yml linguist-detectable=false
 *.yaml linguist-detectable=false
+*.toml linguist-detectable=false
