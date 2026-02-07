@@ -16,9 +16,9 @@ import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-internal lateinit var module: ModuleEntry
+internal lateinit var module: AmznkillerModule
 
-class ModuleEntry(
+class AmznkillerModule(
     base: XposedInterface,
     param: ModuleLoadedParam,
 ) : XposedModule(base, param) {
@@ -49,7 +49,7 @@ class ModuleEntry(
 
             if (PrefsManager.selectors.isEmpty()) {
                 Logger.log("No cached selectors, loading embedded fallback...")
-                PrefsManager.selectors = EmbeddedSelectors.load()
+                PrefsManager.setFallbackSelectors(EmbeddedSelectors.load())
                 Logger.log(
                     "Embedded: ${PrefsManager.selectors.size} selectors loaded",
                 )
@@ -108,13 +108,14 @@ class ModuleEntry(
                             ).show()
                     }
                 },
-                1500,
+                TOAST_DELAY_MS,
             )
         }
     }
 
     companion object {
         const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
+        private const val TOAST_DELAY_MS = 1500L
         val executor: ExecutorService = Executors.newSingleThreadExecutor()
     }
 }
