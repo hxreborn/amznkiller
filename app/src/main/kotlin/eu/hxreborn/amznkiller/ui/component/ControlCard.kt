@@ -45,14 +45,6 @@ fun ControlCard(
                     .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.control_title),
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.titleMedium,
-            )
-
-            Spacer(Modifier.height(16.dp))
-
             FilledTonalButton(
                 onClick = onUpdate,
                 modifier =
