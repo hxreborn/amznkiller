@@ -66,6 +66,7 @@ jobs:
 
       - name: Generate release notes
         id: changelog
+        continue-on-error: true
         uses: orhun/git-cliff-action@v4
         with:
           config: .github/cliff.toml
@@ -78,5 +79,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           prerelease: ${{ steps.version.outputs.prerelease }}
-          body: ${{ steps.changelog.outputs.content }}
+          body: ${{ steps.changelog.outputs.content || '' }}
           files: app/build/outputs/apk/release/*.apk
