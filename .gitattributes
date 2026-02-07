@@ -1,13 +1,14 @@
 lists/*.txt linguist-language=AdBlock linguist-detectable
 lists/generated/*.txt linguist-language=AdBlock linguist-detectable
 
-# Make GitHub Linguist count automation scripts/config under .github/
 .github/** linguist-detectable=true
 .github/** -linguist-documentation
 .github/** -linguist-vendored
 
-# Exclude binary/static assets
 .github/assets/** linguist-vendored
 .github/assets/** linguist-detectable=false
 
 *.sh linguist-detectable=true
+
+*.yml linguist-detectable=false
+*.yaml linguist-detectable=false
