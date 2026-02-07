@@ -1,6 +1,13 @@
-*.kt linguist-language=Kotlin linguist-detectable
-*.kts linguist-language=Kotlin linguist-detectable
 lists/*.txt linguist-language=AdBlock linguist-detectable
 lists/generated/*.txt linguist-language=AdBlock linguist-detectable
-*.xml linguist-language=XML
-*.pro linguist-language=Prolog linguist-detectable=false
+
+# Make GitHub Linguist count automation scripts/config under .github/
+.github/** linguist-detectable=true
+.github/** -linguist-documentation
+.github/** -linguist-vendored
+
+# Exclude binary/static assets
+.github/assets/** linguist-vendored
+.github/assets/** linguist-detectable=false
+
+*.sh linguist-detectable=true
