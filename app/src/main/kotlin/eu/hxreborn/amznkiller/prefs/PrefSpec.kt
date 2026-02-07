@@ -14,6 +14,11 @@ sealed class PrefSpec<T : Any>(
     )
 
     fun reset(editor: SharedPreferences.Editor) = write(editor, default)
+
+    fun copyTo(
+        from: SharedPreferences,
+        to: SharedPreferences.Editor,
+    ) = write(to, read(from))
 }
 
 class BoolPref(

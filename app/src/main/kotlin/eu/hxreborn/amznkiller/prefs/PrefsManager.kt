@@ -1,6 +1,7 @@
 package eu.hxreborn.amznkiller.prefs
 
 import android.content.SharedPreferences
+import eu.hxreborn.amznkiller.selectors.SelectorSanitizer
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 
@@ -11,6 +12,7 @@ object PrefsManager {
 
     @Volatile
     var selectors: List<String> = emptyList()
+        private set
 
     @Volatile
     var debugLogs: Boolean = Prefs.DEBUG_LOGS.default
@@ -31,10 +33,14 @@ object PrefsManager {
         runCatching {
             remotePrefs?.let { prefs ->
                 val raw = Prefs.CACHED_SELECTORS.read(prefs)
-                selectors = raw.lines().filter { it.isNotBlank() }
+                selectors = SelectorSanitizer.sanitize(raw.lineSequence())
                 debugLogs = Prefs.DEBUG_LOGS.read(prefs)
             }
         }.onFailure { Logger.log("refreshCache() failed", it) }
+    }
+
+    fun setFallbackSelectors(fallback: List<String>) {
+        selectors = fallback
     }
 
     fun isStale(): Boolean {

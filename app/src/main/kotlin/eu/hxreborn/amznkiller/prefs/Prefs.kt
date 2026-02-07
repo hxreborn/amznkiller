@@ -7,7 +7,7 @@ object Prefs {
     val SELECTOR_URL =
         StringPref(
             "selector_url",
-            "https://raw.githubusercontent.com/hxreborn/amznkiller/main/app/src/main/resources/payload/selectors-remote.css",
+            "https://raw.githubusercontent.com/hxreborn/amznkiller/main/lists/generated/merged.txt",
         )
     val CACHED_SELECTORS = StringPref("cached_selectors", "")
     val LAST_FETCHED = LongPref("last_fetched", 0L)
@@ -25,4 +25,6 @@ object Prefs {
             DARK_THEME_CONFIG,
             USE_DYNAMIC_COLOR,
         )
+
+    fun parseSelectors(raw: String): List<String> = raw.lines().filter { it.isNotBlank() }
 }

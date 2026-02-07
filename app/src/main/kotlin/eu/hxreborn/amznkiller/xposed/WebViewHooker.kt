@@ -47,7 +47,6 @@ class PageHooker : XposedInterface.Hooker {
                         .onSuccess { Logger.log("WebView debugging enabled") }
                         .onFailure { Logger.log("WebView debugging failed", it) }
                 }
-                return
             }
             StyleInjector.inject(webView)
         }

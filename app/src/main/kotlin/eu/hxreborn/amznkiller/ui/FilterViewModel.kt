@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepository
+import eu.hxreborn.amznkiller.selectors.MergeResult
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
@@ -64,20 +65,26 @@ class FilterViewModel(
                     _updateEvents.emit(UpdateEvent.Error("No selectors fetched"))
                     return@runCatching
                 }
-                if (result.remoteFailed) {
-                    lastRefreshFailed.value = true
-                    _updateEvents.emit(UpdateEvent.Error("Remote fetch failed, using embedded"))
-                    return@runCatching
-                }
-                val added = (result.selectors - oldSelectors).size
-                val removed = (oldSelectors - result.selectors).size
-                val merged = result.selectors.sorted().joinToString("\n")
-                repository.save(Prefs.CACHED_SELECTORS, merged)
-                repository.save(Prefs.LAST_FETCHED, System.currentTimeMillis())
-                if (added == 0 && removed == 0) {
-                    _updateEvents.emit(UpdateEvent.UpToDate)
-                } else {
-                    _updateEvents.emit(UpdateEvent.Updated(added, removed))
+                when (result) {
+                    is MergeResult.Partial -> {
+                        lastRefreshFailed.value = true
+                        _updateEvents.emit(
+                            UpdateEvent.Error("Remote fetch failed, using embedded"),
+                        )
+                    }
+
+                    is MergeResult.Success -> {
+                        val added = (result.selectors - oldSelectors).size
+                        val removed = (oldSelectors - result.selectors).size
+                        val merged = result.selectors.sorted().joinToString("\n")
+                        repository.save(Prefs.CACHED_SELECTORS, merged)
+                        repository.save(Prefs.LAST_FETCHED, System.currentTimeMillis())
+                        if (added == 0 && removed == 0) {
+                            _updateEvents.emit(UpdateEvent.UpToDate)
+                        } else {
+                            _updateEvents.emit(UpdateEvent.Updated(added, removed))
+                        }
+                    }
                 }
             }.onFailure {
                 lastRefreshFailed.value = true

@@ -30,7 +30,7 @@ class PrefsRepositoryImpl(
         callbackFlow {
             fun emit() {
                 val raw = Prefs.CACHED_SELECTORS.read(localPrefs)
-                val selectors = raw.lines().filter { it.isNotBlank() }
+                val selectors = Prefs.parseSelectors(raw)
                 trySend(
                     FilterPrefsState(
                         cachedSelectors = selectors,
@@ -63,24 +63,15 @@ class PrefsRepositoryImpl(
         remotePrefsProvider()?.edit()?.also { pref.write(it, value) }?.apply()
     }
 
-    override fun getCurrentSelectors(): List<String> {
-        val raw = Prefs.CACHED_SELECTORS.read(localPrefs)
-        return raw.lines().filter { it.isNotBlank() }
-    }
+    override fun getCurrentSelectors(): List<String> =
+        Prefs.parseSelectors(Prefs.CACHED_SELECTORS.read(localPrefs))
 
     override fun getSelectorUrl(): String = Prefs.SELECTOR_URL.read(localPrefs)
 
     override fun syncLocalToRemote() {
         val remote = remotePrefsProvider() ?: return
         val editor = remote.edit()
-        for (spec in Prefs.all) {
-            @Suppress("UNCHECKED_CAST")
-            when (spec) {
-                is StringPref -> spec.write(editor, spec.read(localPrefs))
-                is BoolPref -> spec.write(editor, spec.read(localPrefs))
-                is LongPref -> spec.write(editor, spec.read(localPrefs))
-            }
-        }
+        Prefs.all.forEach { it.copyTo(localPrefs, editor) }
         editor.apply()
     }
 }
