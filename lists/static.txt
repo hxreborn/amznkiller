@@ -4,9 +4,11 @@
 .ape-wrapper
 .dp-widget-card-deck:has([data-ad-placement-metadata])
 .s-result-item.AdHolder
+.s-result-item:has(.s-messaging-widget-results-header)
 .s-result-item:has([data-ad-feedback])
 .s-result-item:has([data-ad-feedback-label-id])
 .s-result-list > .a-section:has(.sbv-ad-content-container)
+.p13n-sc-unified-ad-label
 .sbv-video-single-product
 .sponsored-products-detail-mobile
 #detailILM_feature_div
@@ -27,8 +29,10 @@
 [id^="ape_"]
 [id^="mobile-dp-ilm"]
 div.s-inner-result-item > div.sg-col-inner:has(a.puis-sponsored-label-text)
+.s-result-item:has(.puis-sponsored-label-text)
 div[cel_widget_id*="_ad-placements-"]
 div[cel_widget_id*="Deals3Ads"]
+[class*="_adFeedbackWrapper_"]
 div[cel_widget_id*="desktop-dp-"]
 div[cel_widget_id="sp-orderdetails-desktop-carousel_desktop-yo-orderdetails_0"]
 div[cel_widget_id="sp-orderdetails-mobile-list_mobile-yo-orderdetails_0"]
@@ -40,7 +44,9 @@ div[cel_widget_id="sp-typ-mobile-carousel_mobile-typ-carousels_2"]
 div[cel_widget_id="sp_phone_detail_thematic"]
 div[cel_widget_id="typ-ads"]
 div[cel_widget_id^="LEFT-SAFE_FRAME-"]
+.s-result-item:has(div[cel_widget_id^="MAIN-FEATURED_ASINS_LIST-"])
 div[cel_widget_id^="MAIN-FEATURED_ASINS_LIST-"]
+div[cel_widget_id^="MAIN-VIDEO_SINGLE_PRODUCT-"]
 div[cel_widget_id^="adplacements:"]
 div[cel_widget_id^="multi-brand-"]
 div[cel_widget_id^="sb-"]
