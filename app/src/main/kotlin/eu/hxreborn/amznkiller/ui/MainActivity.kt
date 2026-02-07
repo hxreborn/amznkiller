@@ -5,13 +5,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepositoryImpl
-import eu.hxreborn.amznkiller.ui.screen.FilterListScreen
+import eu.hxreborn.amznkiller.ui.screen.DashboardScreen
 import eu.hxreborn.amznkiller.ui.theme.AppTheme
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import io.github.libxposed.service.XposedService
@@ -21,20 +21,20 @@ class MainActivity :
     ComponentActivity(),
     XposedServiceHelper.OnServiceListener {
     private var remotePrefs: SharedPreferences? = null
-    private lateinit var viewModel: FilterViewModel
+
+    private val viewModel: FilterViewModel by viewModels {
+        FilterViewModelFactory(
+            PrefsRepositoryImpl(
+                localPrefs = getSharedPreferences(Prefs.GROUP, MODE_PRIVATE),
+                remotePrefsProvider = { remotePrefs },
+            ),
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        val localPrefs = getSharedPreferences(Prefs.GROUP, MODE_PRIVATE)
-        val repository = PrefsRepositoryImpl(localPrefs) { remotePrefs }
-        viewModel =
-            ViewModelProvider(
-                this,
-                FilterViewModelFactory(repository),
-            )[FilterViewModel::class.java]
 
         App.addServiceListener(this)
 
@@ -46,7 +46,7 @@ class MainActivity :
                 darkThemeConfig = prefs?.darkThemeConfig ?: DarkThemeConfig.FOLLOW_SYSTEM,
                 useDynamicColor = prefs?.useDynamicColor ?: true,
             ) {
-                FilterListScreen(viewModel = viewModel)
+                DashboardScreen(viewModel = viewModel)
             }
         }
     }

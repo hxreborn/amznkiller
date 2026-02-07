@@ -1,18 +1,20 @@
 package eu.hxreborn.amznkiller.ui.screen
 
 import android.content.Intent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -46,13 +48,14 @@ import eu.hxreborn.amznkiller.ui.component.ControlCard
 import eu.hxreborn.amznkiller.ui.component.RulesBottomSheet
 import eu.hxreborn.amznkiller.ui.component.StatusCard
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
+import eu.hxreborn.amznkiller.ui.theme.Tokens
 import kotlinx.coroutines.launch
 
 private const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterListScreen(viewModel: FilterViewModel) {
+fun DashboardScreen(viewModel: FilterViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -77,8 +80,23 @@ fun FilterListScreen(viewModel: FilterViewModel) {
         topBar = {
             LargeTopAppBar(
                 title = {
+                    val isExpandedSlot =
+                        LocalTextStyle.current.fontSize >=
+                            MaterialTheme.typography.headlineMedium.fontSize
                     Column {
-                        Text(stringResource(R.string.app_bar_title))
+                        Text(
+                            text = stringResource(R.string.app_bar_title),
+                            style =
+                                if (isExpandedSlot) {
+                                    MaterialTheme.typography.headlineLarge.copy(
+                                        lineHeight = Tokens.ExpandedTitleLineHeight,
+                                    )
+                                } else {
+                                    LocalTextStyle.current
+                                },
+                            maxLines =
+                                if (isExpandedSlot) Tokens.ExpandedTitleMaxLines else 1,
+                        )
                         Text(
                             text = tagline,
                             style = MaterialTheme.typography.bodySmall,
@@ -151,44 +169,53 @@ fun FilterListScreen(viewModel: FilterViewModel) {
                         },
                     )
 
-                Column(
+                BoxWithConstraints(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .padding(padding)
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp),
+                            .padding(padding),
                 ) {
-                    StatusCard(
-                        isActive = prefs.isXposedActive,
-                        fillState = fillState,
-                        selectorCount = prefs.selectorCount,
-                        lastFetched = prefs.lastFetched,
-                        onShowRules = { showRulesSheet = true },
-                    )
+                    val minContentHeight = maxHeight + 1.dp
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp),
+                    ) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = minContentHeight),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            StatusCard(
+                                isActive = prefs.isXposedActive,
+                                fillState = fillState,
+                                selectorCount = prefs.selectorCount,
+                                lastFetched = prefs.lastFetched,
+                                onShowRules = { showRulesSheet = true },
+                            )
 
-                    Spacer(Modifier.height(12.dp))
+                            ControlCard(
+                                isRefreshing = buttonLocked || prefs.isRefreshing,
+                                onUpdate = { viewModel.refreshAll() },
+                                onOpenAmazon = {
+                                    val intent =
+                                        context.packageManager
+                                            .getLaunchIntentForPackage(AMAZON_PACKAGE)
+                                    if (intent != null) {
+                                        context.startActivity(intent)
+                                    } else {
+                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                    }
+                                },
+                            )
 
-                    ControlCard(
-                        isRefreshing = buttonLocked || prefs.isRefreshing,
-                        onUpdate = { viewModel.refreshAll() },
-                        onOpenAmazon = {
-                            val intent =
-                                context.packageManager
-                                    .getLaunchIntentForPackage(AMAZON_PACKAGE)
-                            if (intent != null) {
-                                context.startActivity(intent)
-                            } else {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                            }
-                        },
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    AboutCard()
-
-                    Spacer(Modifier.height(100.dp))
+                            AboutCard()
+                        }
+                    }
                 }
 
                 if (showRulesSheet) {
