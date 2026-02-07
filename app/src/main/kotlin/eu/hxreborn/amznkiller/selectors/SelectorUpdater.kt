@@ -6,10 +6,18 @@ import eu.hxreborn.amznkiller.net.TextFetcher
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.util.Logger
 
-data class MergeResult(
-    val selectors: Set<String>,
-    val remoteFailed: Boolean,
-)
+sealed class MergeResult {
+    abstract val selectors: Set<String>
+
+    data class Success(
+        override val selectors: Set<String>,
+    ) : MergeResult()
+
+    data class Partial(
+        override val selectors: Set<String>,
+        val error: Throwable,
+    ) : MergeResult()
+}
 
 object SelectorUpdater {
     fun fetchMerged(url: String): MergeResult {
@@ -18,12 +26,14 @@ object SelectorUpdater {
                 val raw = TextFetcher.fetch(url)
                 SelectorSanitizer.sanitize(raw.lineSequence())
             }
-        if (remote.isFailure) {
-            Logger.log("Remote fetch failed", remote.exceptionOrNull())
-        }
         val embedded = EmbeddedSelectors.load()
         val all = (remote.getOrDefault(emptyList()) + embedded).toSortedSet()
-        return MergeResult(selectors = all, remoteFailed = remote.isFailure)
+        val error = remote.exceptionOrNull()
+        if (error != null) {
+            Logger.log("Remote fetch failed", error)
+            return MergeResult.Partial(selectors = all, error = error)
+        }
+        return MergeResult.Success(selectors = all)
     }
 
     // Fetch, merge, and write to SharedPreferences

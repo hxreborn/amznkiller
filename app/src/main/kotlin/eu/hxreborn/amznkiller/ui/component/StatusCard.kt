@@ -19,12 +19,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.animation.FillLevelState
+import eu.hxreborn.amznkiller.ui.animation.applyWobble
 import eu.hxreborn.amznkiller.ui.animation.rememberWavePhase
+import eu.hxreborn.amznkiller.ui.animation.rememberWobbleState
 import eu.hxreborn.amznkiller.ui.animation.waveFill
 
 @Composable
@@ -44,6 +47,7 @@ fun StatusCard(
         }
 
     val wavePhase = rememberWavePhase()
+    val wobble = rememberWobbleState()
     val showLiquid = fillState.value > 0f
 
     ElevatedCard(
@@ -57,7 +61,13 @@ fun StatusCard(
                     .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(contentAlignment = Alignment.Center) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier =
+                    Modifier
+                        .clickable { wobble.trigger() }
+                        .graphicsLayer { applyWobble(wobble) },
+            ) {
                 Icon(
                     imageVector =
                         if (showLiquid || !isActive) {

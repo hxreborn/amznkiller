@@ -1,0 +1,41 @@
+name: Validate selectors
+
+on:
+  pull_request:
+    paths:
+      - 'lists/**'
+      - 'app/src/main/resources/payload/**'
+      - 'tools/update_selectors.py'
+      - 'tools/selector-ci/**'
+      - '.github/workflows/update-selectors.yml'
+      - '.github/workflows/validate-selectors.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python validation (heuristics)
+        run: python tools/update_selectors.py validate
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install selector validator deps
+        working-directory: tools/selector-ci
+        run: npm ci --no-audit --no-fund
+
+      - name: Chromium validation (insertRule)
+        run: |
+          node tools/selector-ci/validate.mjs \
+            lists/manual.txt \
+            lists/generated/merged.txt \
+            app/src/main/resources/payload/embedded.css
+

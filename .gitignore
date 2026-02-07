@@ -12,10 +12,30 @@
 .vscode/
 *.code-workspace
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.py[cod]
+*$py.class
+.python-version
+venv/
+.env/
+env/
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+
 # Local configuration
 local.properties
 .mcp.json
 *.patch
+.env
+.env.local
 
 # Logs / tmp
 .DS_Store
@@ -44,11 +64,13 @@ test-output/
 *.keystore
 release.keystore
 
-# Documentation
-*.docx
-*.txt
+# Local APK artifacts
+installed/
+
+# Generated selector lists (tools/update_selectors.py regenerates)
+lists/generated/*.txt
+!lists/generated/merged.txt
 
 # Exceptions - keep these tracked
 !gradle/wrapper/gradle-wrapper.properties
 !gradle/libs.versions.toml
-!fastlane/metadata/android/en-US/changelogs/*.txt
