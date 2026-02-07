@@ -91,12 +91,6 @@ fun AboutCard(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Text(
-                text = "commit ${BuildConfig.GIT_SHA}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
             Spacer(Modifier.height(16.dp))
 
             FlowRow(
