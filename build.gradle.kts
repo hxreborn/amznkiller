@@ -1,9 +1,23 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.Exec
 
 plugins {
     base
+    alias(libs.plugins.versions)
+}
+
+fun isStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    return stableKeyword || regex.matches(version)
+}
+
+tasks.withType<DependencyUpdatesTask> {
+    rejectVersionIf {
+        !isStable(candidate.version) && isStable(currentVersion)
+    }
 }
 
 tasks.named<Delete>("clean") {
