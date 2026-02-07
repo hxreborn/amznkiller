@@ -25,6 +25,21 @@
     <string name="rules_search_hint">Search selectors\u2026</string>
     <string name="rules_selectors_count">%d CSS selectors</string>
 
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_settings">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Dynamic color</string>
+    <string name="settings_advanced">Advanced</string>
+    <string name="settings_debug_logs">Debug logs</string>
+    <string name="settings_theme_summary">Choose light, dark, or system default</string>
+    <string name="settings_dynamic_color_summary">Use Material You colors from wallpaper</string>
+    <string name="settings_css_injection_summary">Inject custom styles into Amazon WebViews</string>
+    <string name="settings_debug_logs_summary">Log detailed module activity for troubleshooting</string>
+
     <string-array name="taglines">
         <item>Jeff won\'t miss the $0.02</item>
         <item>The cart is yours. The data is yours</item>

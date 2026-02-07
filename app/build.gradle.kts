@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.serialization)
 }
 
 android {
@@ -122,6 +123,10 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.activity.compose)
     implementation(libs.splashscreen)
+    implementation(libs.navigation3.runtime)
+    implementation(libs.navigation3.ui)
+    implementation(libs.compose.preferences)
+    implementation(libs.material.motion.compose.core)
 }
 
 tasks.named("preBuild").configure {

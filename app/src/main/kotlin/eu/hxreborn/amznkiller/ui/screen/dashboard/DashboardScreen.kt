@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -39,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.PrefSpec
-import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.animation.AnimationState
 import eu.hxreborn.amznkiller.ui.animation.BUTTON_UNLOCK_THRESHOLD
 import eu.hxreborn.amznkiller.ui.animation.rememberFillLevelState
@@ -63,7 +64,10 @@ private const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(viewModel: FilterViewModel) {
+fun DashboardScreen(
+    viewModel: FilterViewModel,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -85,6 +89,7 @@ fun DashboardScreen(viewModel: FilterViewModel) {
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             LargeTopAppBar(
                 title = {
@@ -121,14 +126,19 @@ fun DashboardScreen(viewModel: FilterViewModel) {
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { padding ->
+    ) { innerPadding ->
+        val mergedPadding =
+            PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = contentPadding.calculateBottomPadding(),
+            )
         when (val state = uiState) {
             is FilterUiState.Loading -> {
                 Box(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .padding(padding),
+                            .padding(mergedPadding),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
@@ -181,7 +191,7 @@ fun DashboardScreen(viewModel: FilterViewModel) {
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .padding(padding),
+                            .padding(mergedPadding),
                 ) {
                     val minContentHeight = maxHeight + 1.dp
                     Column(
@@ -208,10 +218,6 @@ fun DashboardScreen(viewModel: FilterViewModel) {
 
                             ControlCard(
                                 isRefreshing = buttonLocked || prefs.isRefreshing,
-                                injectionEnabled = prefs.injectionEnabled,
-                                onToggleInjection = { enabled ->
-                                    viewModel.savePref(Prefs.INJECTION_ENABLED, enabled)
-                                },
                                 onUpdate = { viewModel.refreshAll() },
                                 onOpenAmazon = {
                                     val intent =
