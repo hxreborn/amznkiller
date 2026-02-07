@@ -13,6 +13,7 @@ sealed class PrefSpec<T : Any>(
         value: T,
     )
 
+    // TODO: Add in overflow menu later
     fun reset(editor: SharedPreferences.Editor) = write(editor, default)
 
     fun copyTo(

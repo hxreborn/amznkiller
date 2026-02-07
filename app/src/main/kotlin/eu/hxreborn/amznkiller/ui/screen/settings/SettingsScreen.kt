@@ -355,6 +355,7 @@ private inline fun LazyListScope.switchPreference(
     }
 }
 
+@Suppress("ViewModelConstructorInComposable")
 @PreviewLightDark
 @Composable
 private fun SettingsScreenPreview() {
@@ -390,5 +391,6 @@ private class PreviewSettingsViewModel : FilterViewModel() {
     override fun <T : Any> savePref(
         pref: PrefSpec<T>,
         value: T,
-    ) {}
+    ) {
+    }
 }

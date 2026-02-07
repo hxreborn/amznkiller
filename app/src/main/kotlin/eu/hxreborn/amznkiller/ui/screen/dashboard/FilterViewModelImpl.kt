@@ -73,6 +73,7 @@ class FilterViewModelImpl(
                     }
 
                     is MergeResult.Success -> {
+                        // TODO: Improve
                         val added = (result.selectors - oldSelectors).size
                         val removed = (oldSelectors - result.selectors).size
                         val merged = result.selectors.sorted().joinToString("\n")
@@ -87,6 +88,7 @@ class FilterViewModelImpl(
                 }
             }.onFailure {
                 lastRefreshFailed.value = true
+                // TODO: i18n
                 _updateEvents.emit(UpdateEvent.Error(it.message ?: "Update failed"))
             }
             refreshing.value = false
