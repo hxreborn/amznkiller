@@ -49,9 +49,7 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          title: 'chore(selectors): update from upstream lists'
+          title: 'chore: sync upstream selectors'
           branch: update-selectors
           labels: selectors
-          body: |
-            Auto-generated from upstream adblock lists.
-            Review diff in `lists/generated/` before merging.
+          body: Auto-generated from upstream adblock lists.
