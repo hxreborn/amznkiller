@@ -1,7 +1,6 @@
 package eu.hxreborn.amznkiller.xposed
 
 import android.webkit.WebView
-import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedInterface.AfterHookCallback
@@ -40,13 +39,11 @@ class PageHooker : XposedInterface.Hooker {
             val webView = callback.args[0] as? WebView ?: return
             val url = callback.args[1] as? String ?: return
             if (!url.contains("amazon.")) return
-            if (BuildConfig.DEBUG) {
-                if (!WebViewHooker.debuggingEnabled) {
-                    WebViewHooker.debuggingEnabled = true
-                    runCatching { WebView.setWebContentsDebuggingEnabled(true) }
-                        .onSuccess { Logger.log("WebView debugging enabled") }
-                        .onFailure { Logger.log("WebView debugging failed", it) }
-                }
+            if (!WebViewHooker.debuggingEnabled) {
+                WebViewHooker.debuggingEnabled = true
+                runCatching { WebView.setWebContentsDebuggingEnabled(true) }
+                    .onSuccess { Logger.log("WebView debugging enabled") }
+                    .onFailure { Logger.log("WebView debugging failed", it) }
             }
             StyleInjector.inject(webView)
         }

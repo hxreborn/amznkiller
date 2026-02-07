@@ -16,6 +16,7 @@ object StyleInjector {
     private var validatedHash: Int = 0
 
     fun inject(webView: WebView) {
+        if (!PrefsManager.injectionEnabled) return
         val selectors = PrefsManager.selectors
         if (selectors.isEmpty()) {
             Logger.log("inject: no selectors")

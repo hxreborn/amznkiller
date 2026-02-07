@@ -10,6 +10,7 @@
 
     <string name="control_check_updates">Update lists</string>
     <string name="control_open_amazon">Launch Amazon</string>
+    <string name="control_css_injection">CSS injection</string>
 
     <string name="about_created_by">Created by hxreborn</string>
     <string name="about_github">Source Code</string>

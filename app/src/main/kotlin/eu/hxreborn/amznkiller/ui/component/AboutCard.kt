@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -35,6 +36,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
+import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
+import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 
 private const val REPO_URL = "https://github.com/hxreborn/amznkiller"
 
@@ -140,6 +143,16 @@ fun AboutCard(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun AboutCardPreview() {
+    PreviewWrapper {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            AboutCard()
         }
     }
 }

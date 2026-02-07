@@ -37,6 +37,7 @@ class PrefsRepositoryImpl(
                         selectorCount = selectors.size,
                         lastFetched = Prefs.LAST_FETCHED.read(localPrefs),
                         debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
+                        injectionEnabled = Prefs.INJECTION_ENABLED.read(localPrefs),
                         darkThemeConfig =
                             runCatching {
                                 DarkThemeConfig.valueOf(

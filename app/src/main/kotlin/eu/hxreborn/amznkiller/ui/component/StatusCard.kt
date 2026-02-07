@@ -26,9 +26,12 @@ import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.animation.FillLevelState
 import eu.hxreborn.amznkiller.ui.animation.applyWobble
+import eu.hxreborn.amznkiller.ui.animation.rememberFillLevelState
 import eu.hxreborn.amznkiller.ui.animation.rememberWavePhase
 import eu.hxreborn.amznkiller.ui.animation.rememberWobbleState
 import eu.hxreborn.amznkiller.ui.animation.waveFill
+import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
+import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 
 @Composable
 fun StatusCard(
@@ -154,5 +157,20 @@ internal fun relativeTime(millis: Long): String {
                 .getDateInstance(java.text.DateFormat.SHORT)
                 .format(java.util.Date(millis))
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun StatusCardPreview() {
+    val fillState = rememberFillLevelState(isRefreshing = false)
+    PreviewWrapper {
+        StatusCard(
+            isActive = true,
+            fillState = fillState,
+            selectorCount = 42,
+            lastFetched = System.currentTimeMillis() - 3_600_000,
+            onShowRules = {},
+        )
     }
 }

@@ -38,6 +38,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.R
+import eu.hxreborn.amznkiller.prefs.PrefSpec
+import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.animation.AnimationState
 import eu.hxreborn.amznkiller.ui.animation.BUTTON_UNLOCK_THRESHOLD
 import eu.hxreborn.amznkiller.ui.animation.rememberFillLevelState
@@ -45,8 +47,16 @@ import eu.hxreborn.amznkiller.ui.component.AboutCard
 import eu.hxreborn.amznkiller.ui.component.ControlCard
 import eu.hxreborn.amznkiller.ui.component.RulesBottomSheet
 import eu.hxreborn.amznkiller.ui.component.StatusCard
+import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
+import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
 import eu.hxreborn.amznkiller.ui.theme.Tokens
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 private const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
@@ -198,6 +208,10 @@ fun DashboardScreen(viewModel: FilterViewModel) {
 
                             ControlCard(
                                 isRefreshing = buttonLocked || prefs.isRefreshing,
+                                injectionEnabled = prefs.injectionEnabled,
+                                onToggleInjection = { enabled ->
+                                    viewModel.savePref(Prefs.INJECTION_ENABLED, enabled)
+                                },
                                 onUpdate = { viewModel.refreshAll() },
                                 onOpenAmazon = {
                                     val intent =
@@ -245,3 +259,49 @@ private fun formatUpdateEventMessage(
             event.message
         }
     }
+
+@PreviewLightDark
+@Composable
+private fun DashboardScreenPreview() {
+    PreviewWrapper {
+        DashboardScreen(viewModel = PreviewFilterViewModel())
+    }
+}
+
+private class PreviewFilterViewModel : FilterViewModel() {
+    private val _uiState =
+        MutableStateFlow(
+            FilterUiState.Success(
+                prefs =
+                    FilterPrefsState(
+                        isXposedActive = true,
+                        isRefreshing = false,
+                        isRefreshFailed = false,
+                        selectorCount = 42,
+                        lastFetched = System.currentTimeMillis() - 3_600_000,
+                        cachedSelectors =
+                            listOf(
+                                ".s-sponsored-label",
+                                ".a-section.a-spacing-none",
+                                "[data-component-type=\"sp\"]",
+                            ),
+                        injectionEnabled = true,
+                    ),
+            ),
+        )
+    override val uiState: StateFlow<FilterUiState> = _uiState.asStateFlow()
+    private val _updateEvents = MutableSharedFlow<UpdateEvent>()
+    override val updateEvents: SharedFlow<UpdateEvent> = _updateEvents
+
+    override fun refreshAll() {
+    }
+
+    override fun setXposedActive(active: Boolean) {
+    }
+
+    override fun <T : Any> savePref(
+        pref: PrefSpec<T>,
+        value: T,
+    ) {
+    }
+}

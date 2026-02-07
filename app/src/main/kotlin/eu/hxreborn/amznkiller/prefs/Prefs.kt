@@ -12,6 +12,7 @@ object Prefs {
     val CACHED_SELECTORS = StringPref("cached_selectors", "")
     val LAST_FETCHED = LongPref("last_fetched", 0L)
     val DEBUG_LOGS = BoolPref("debug_logs", false)
+    val INJECTION_ENABLED = BoolPref("injection_enabled", true)
 
     val DARK_THEME_CONFIG = StringPref("dark_theme_config", "follow_system")
     val USE_DYNAMIC_COLOR = BoolPref("use_dynamic_color", true)
@@ -22,6 +23,7 @@ object Prefs {
             CACHED_SELECTORS,
             LAST_FETCHED,
             DEBUG_LOGS,
+            INJECTION_ENABLED,
             DARK_THEME_CONFIG,
             USE_DYNAMIC_COLOR,
         )

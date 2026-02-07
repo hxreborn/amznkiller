@@ -8,6 +8,7 @@ data class FilterPrefsState(
     val selectorCount: Int = 0,
     val lastFetched: Long = 0L,
     val debugLogs: Boolean = Prefs.DEBUG_LOGS.default,
+    val injectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default,
     val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
     val useDynamicColor: Boolean = Prefs.USE_DYNAMIC_COLOR.default,
     val isXposedActive: Boolean = false,

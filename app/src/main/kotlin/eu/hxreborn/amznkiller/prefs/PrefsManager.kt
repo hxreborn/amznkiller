@@ -18,6 +18,10 @@ object PrefsManager {
     var debugLogs: Boolean = Prefs.DEBUG_LOGS.default
         private set
 
+    @Volatile
+    var injectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default
+        private set
+
     fun init(xposed: XposedInterface) {
         runCatching {
             remotePrefs = xposed.getRemotePreferences(Prefs.GROUP)
@@ -35,6 +39,7 @@ object PrefsManager {
                 val raw = Prefs.CACHED_SELECTORS.read(prefs)
                 selectors = SelectorSanitizer.sanitize(raw.lineSequence())
                 debugLogs = Prefs.DEBUG_LOGS.read(prefs)
+                injectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
             }
         }.onFailure { Logger.log("refreshCache() failed", it) }
     }

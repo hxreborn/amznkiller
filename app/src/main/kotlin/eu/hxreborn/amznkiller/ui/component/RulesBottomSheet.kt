@@ -37,6 +37,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.R
+import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
+import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,3 +139,22 @@ private fun selectorColor(selector: String): Color =
         selector.startsWith("[") -> MaterialTheme.colorScheme.secondary
         else -> MaterialTheme.colorScheme.onSurface
     }
+
+@PreviewLightDark
+@Composable
+private fun RulesBottomSheetPreview() {
+    PreviewWrapper {
+        RulesBottomSheet(
+            selectors =
+                listOf(
+                    ".s-sponsored-label",
+                    ".a-section.a-spacing-none",
+                    "[data-component-type=\"sp\"]",
+                    "#ams-detail-right-vsp",
+                    ".ad-container",
+                    "[aria-label*=\"Sponsored\"]",
+                ),
+            onDismiss = {},
+        )
+    }
+}

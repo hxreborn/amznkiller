@@ -2,6 +2,7 @@ package eu.hxreborn.amznkiller.ui.screen.dashboard
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import eu.hxreborn.amznkiller.prefs.PrefSpec
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepository
 import eu.hxreborn.amznkiller.selectors.MergeResult
@@ -94,6 +95,13 @@ class FilterViewModelImpl(
 
     override fun setXposedActive(active: Boolean) {
         xposedActive.value = active
+    }
+
+    override fun <T : Any> savePref(
+        pref: PrefSpec<T>,
+        value: T,
+    ) {
+        repository.save(pref, value)
     }
 }
 
