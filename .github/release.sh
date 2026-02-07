@@ -42,25 +42,35 @@ fi
 
 git pull --ff-only
 
+if ! command -v git-cliff &>/dev/null; then
+	echo "Error: git-cliff not installed"
+	exit 1
+fi
+
+if [[ ! -f ".github/cliff.toml" ]]; then
+	echo "Error: .github/cliff.toml not found"
+	exit 1
+fi
+
 # MAJOR * 100000 + MINOR * 10000 + PATCH * 100
 # Leaves 100 build slots per patch for hotfix rebuilds
 VERSION_CODE=$(( MAJOR * 100000 + MINOR * 10000 + PATCH * 100 ))
 
-echo "Releasing $TAG (versionCode=$VERSION_CODE)"
+PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+
+echo "Releasing ${PREV_TAG} → ${TAG} (versionCode=$VERSION_CODE)"
 echo ""
-
-sed -i "s/^version\.code=.*/version.code=${VERSION_CODE}/" gradle.properties
-sed -i "s/^version\.name=.*/version.name=${VERSION}/" gradle.properties
-
-git diff gradle.properties
+git cliff --config .github/cliff.toml --tag "$TAG" --unreleased
 echo ""
 
 read -rp "Commit, tag, and push? [y/N] " confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-	git checkout gradle.properties
 	echo "Aborted"
 	exit 1
 fi
+
+sed -i "s/^version\.code=.*/version.code=${VERSION_CODE}/" gradle.properties
+sed -i "s/^version\.name=.*/version.name=${VERSION}/" gradle.properties
 
 git add gradle.properties
 git commit -m "chore: release $TAG"
