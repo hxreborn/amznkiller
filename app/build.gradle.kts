@@ -7,32 +7,39 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-val gitCommitCount: Int by lazy {
-    ByteArrayOutputStream()
-        .also { stdout ->
+fun gitStdout(vararg args: String): String? {
+    val stdout = ByteArrayOutputStream()
+    val output =
+        runCatching {
             exec {
-                commandLine("git", "rev-list", "--count", "HEAD")
+                commandLine(args.toList())
                 standardOutput = stdout
             }
-        }.toString()
-        .trim()
-        .toIntOrNull() ?: 0
+            stdout.toString().trim()
+        }.getOrNull()
+
+    return output?.takeIf { it.isNotBlank() }
+}
+
+fun semverBase1000(versionName: String): Int {
+    val semver = versionName.removePrefix("v").substringBefore("-")
+    val parts = semver.split('.')
+    val major = parts.getOrNull(0)?.toIntOrNull() ?: 0
+    val minor = parts.getOrNull(1)?.toIntOrNull() ?: 0
+    val patch = parts.getOrNull(2)?.toIntOrNull() ?: 0
+    return major * 1_000_000 + minor * 1_000 + patch
+}
+
+val gitCommitCount: Int by lazy {
+    gitStdout("git", "rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0
 }
 
 val gitDescribe: String by lazy {
-    ByteArrayOutputStream()
-        .also { stdout ->
-            exec {
-                commandLine("git", "describe", "--tags", "--always")
-                standardOutput = stdout
-            }
-        }.toString()
-        .trim()
-        .removePrefix("v")
+    gitStdout("git", "describe", "--tags", "--always")?.removePrefix("v") ?: "0.0.0"
 }
 
-val versionMajor: Int by lazy {
-    gitDescribe.removePrefix("v").substringBefore(".").toIntOrNull() ?: 0
+val gitSha: String by lazy {
+    gitStdout("git", "rev-parse", "--short", "HEAD") ?: "unknown"
 }
 
 android {
@@ -43,10 +50,14 @@ android {
         applicationId = namespace
         minSdk = 31
         targetSdk = 36
-        versionCode = project.findProperty("version.code")?.toString()?.toInt()
-            ?: (versionMajor * 10000 + gitCommitCount)
-        versionName = project.findProperty("version.name")?.toString()
-            ?: gitDescribe
+
+        val baseVersionName =
+            project.findProperty("version.name")?.toString()
+                ?: gitDescribe
+
+        versionName = baseVersionName
+        versionCode = semverBase1000(baseVersionName) * 1000 + gitCommitCount
+        buildConfigField("String", "GIT_SHA", "\"$gitSha\"")
     }
 
     androidResources {
@@ -152,6 +163,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.activity.compose)
+    implementation(libs.splashscreen)
 }
 
 tasks.named("preBuild").configure {

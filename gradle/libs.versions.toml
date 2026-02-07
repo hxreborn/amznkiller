@@ -7,6 +7,7 @@ lifecycle = "2.10.0"
 core-ktx = "1.17.0"
 compose-bom = "2026.01.00"
 activity-compose = "1.12.3"
+splashscreen = "1.0.1"
 material3 = "1.5.0-alpha13"
 
 [libraries]
@@ -23,6 +24,7 @@ compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 compose-material-icons = { group = "androidx.compose.material", name = "material-icons-extended" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
