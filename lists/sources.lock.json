@@ -1,14 +1,14 @@
 {
-  "generated": "2026-02-06T20:06:14+00:00",
+  "generated": "2026-02-07T06:02:51+00:00",
   "sources": {
     "EasyList": {
       "url": "https://easylist.to/easylist/easylist.txt",
-      "checksum": "sha256:f5416f17297e5598",
+      "checksum": "sha256:d5f0bedaabc7f989",
       "selectors_extracted": 52,
       "exceptions_extracted": 0,
       "dropped_negated": 0,
       "dropped_procedural": 0,
-      "dropped_non_amazon": 9744,
+      "dropped_non_amazon": 9746,
       "dropped_no_domain": 13659
     },
     "uBlock Origin filters": {
@@ -23,7 +23,7 @@
     },
     "uBlock Origin quick-fixes": {
       "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
-      "checksum": "sha256:9eb7b52993b69d06",
+      "checksum": "sha256:dca8348527ef7e87",
       "selectors_extracted": 0,
       "exceptions_extracted": 0,
       "dropped_negated": 23,
