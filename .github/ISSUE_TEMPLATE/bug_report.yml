@@ -1,0 +1,69 @@
+name: Bug Report
+description: Crashes, activation issues, UI glitches, fetch failures
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Issue type
+      options:
+        - Module not activating
+        - UI bug or crash
+        - Selector fetch failure
+        - Other
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: What happened? What did you expect?
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      placeholder: Pixel 9 Pro
+
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+      placeholder: "15 QPR2"
+
+  - type: input
+    id: rom
+    attributes:
+      label: Build / ROM
+      placeholder: AP4A.250205.002 / LineageOS 22.1
+
+  - type: input
+    id: lsposed
+    attributes:
+      label: LSPosed version
+      placeholder: 1.11.0 (7209)
+
+  - type: input
+    id: root
+    attributes:
+      label: Root solution
+      placeholder: Magisk 28.1 / KernelSU 1.0.3 / APatch 11012
+
+  - type: input
+    id: amazon_version
+    attributes:
+      label: Amazon Shopping version
+      placeholder: "26.24.2.100"
+
+  - type: input
+    id: module_version
+    attributes:
+      label: Module version
+      placeholder: 0.1.0 (1005)
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: LSPosed log zip, logcat output, or companion app errors
+      placeholder: Drag file here or paste a link
+      render: shell
