@@ -1,5 +1,5 @@
 ! Selectors listed here are excluded from the merged output even if upstream lists include them.
 ! One CSS selector per line. Lines starting with ! are comments.
 
-! Broken backslash escaping from EasyList — manual.txt has the correct single-quoted version
+! Broken backslash escaping from EasyList; static.txt has the correct single-quoted version
 div[data-a-carousel-options*="\\\"isSponsoredProduct\\\":\\\"true\\\""]

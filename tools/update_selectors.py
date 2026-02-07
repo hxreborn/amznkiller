@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """Fetch upstream adblock lists, extract Amazon-scoped cosmetic selectors,
-merge with hand-curated manual list, and write output files.
+merge with hand-curated static list, and write output files.
 
 Subcommands:
-    update   — fetch, parse, merge, write all outputs
-    validate — check output files for correctness (standalone or CI gate)
-
-Stdlib-only. No external dependencies.
+    update:   fetch, parse, merge, write all outputs
+    validate: check output files
 """
 
 from __future__ import annotations
@@ -28,8 +26,8 @@ PAYLOAD_DIR = ROOT / "app" / "src" / "main" / "resources" / "payload"
 
 SOURCES_JSON = LISTS_DIR / "sources.json"
 LOCK_FILE = LISTS_DIR / "sources.lock.json"
-MANUAL_FILE = LISTS_DIR / "manual.txt"
-DENYLIST_FILE = LISTS_DIR / "manual_denylist.txt"
+STATIC_FILE = LISTS_DIR / "static.txt"
+DENYLIST_FILE = LISTS_DIR / "static_denylist.txt"
 
 UPSTREAM_OUT = GEN_DIR / "upstream.txt"
 MERGED_OUT = GEN_DIR / "merged.txt"
@@ -43,7 +41,7 @@ _AMAZON_RE = re.compile(
     r"(?:\.\*|\.[a-z]{2,3}(?:\.[a-z]{2})?)$"
 )
 
-# Procedural pseudo-classes that are NOT valid CSS — reject selectors containing these
+# Procedural pseudo-classes, not valid CSS
 _PROCEDURAL = (
     ":-abp-",
     ":contains(",
@@ -64,10 +62,6 @@ _PROCEDURAL = (
 FETCH_TIMEOUT = 30
 
 
-# ---------------------------------------------------------------------------
-# Data types
-# ---------------------------------------------------------------------------
-
 @dataclass
 class SourceStats:
     name: str
@@ -87,10 +81,6 @@ class ParseResult:
     negative: set[str] = field(default_factory=set)
     stats: list[SourceStats] = field(default_factory=list)
 
-
-# ---------------------------------------------------------------------------
-# Parsing helpers
-# ---------------------------------------------------------------------------
 
 def is_amazon_domain(domain: str) -> bool:
     return bool(_AMAZON_RE.match(domain))
@@ -163,11 +153,6 @@ def split_toplevel_commas(selector: str) -> list[str]:
 
 
 def find_separator(line: str) -> tuple[str, int] | None:
-    """Find the first cosmetic filter separator in a line.
-
-    Returns (separator_type, index) or None.
-    Checks in order: #@#, #?#, ##+js(, ##^, ##
-    """
     idx = line.find("#@#")
     if idx != -1:
         return ("#@#", idx)
@@ -270,10 +255,6 @@ def parse_source(raw: str, stats: SourceStats) -> tuple[set[str], set[str]]:
     return positive, negative
 
 
-# ---------------------------------------------------------------------------
-# I/O helpers
-# ---------------------------------------------------------------------------
-
 def fetch_list(url: str) -> str:
     req = Request(url, headers={"User-Agent": "amznkiller/1.0 (selector-updater)"})
     with urlopen(req, timeout=FETCH_TIMEOUT) as resp:
@@ -281,7 +262,7 @@ def fetch_list(url: str) -> str:
 
 
 def load_lines(path: Path) -> set[str]:
-    """Read non-blank, non-comment lines. Comment prefix is ! (not # — CSS IDs start with #)."""
+    """Read non-blank, non-comment lines. Comment prefix is ! because # starts CSS IDs."""
     if not path.exists():
         return set()
     lines = set()
@@ -296,10 +277,6 @@ def write_sorted(path: Path, selectors: set[str] | frozenset[str]) -> None:
     sorted_sels = sorted(selectors)
     path.write_text(("\n".join(sorted_sels) + "\n") if sorted_sels else "")
 
-
-# ---------------------------------------------------------------------------
-# Validation
-# ---------------------------------------------------------------------------
 
 def validate_output(selectors: set[str]) -> list[str]:
     errors = []
@@ -327,13 +304,6 @@ def validate_output(selectors: set[str]) -> list[str]:
 
 
 def _validate_balanced(selector: str) -> list[str]:
-    """Heuristic syntax checks to avoid selectors that can break CSS parsing.
-
-    We can't fully parse CSS selectors in stdlib, but we can cheaply catch:
-    - unbalanced () and []
-    - unbalanced quotes
-    - dangling backslash escapes
-    """
     errors: list[str] = []
     paren_depth = 0
     bracket_depth = 0
@@ -390,16 +360,11 @@ def _validate_balanced(selector: str) -> list[str]:
 
 
 def validate_file(path: Path) -> list[str]:
-    """Validate a selector file on disk."""
     if not path.exists():
         return [f"file not found: {path}"]
     selectors = load_lines(path)
     return validate_output(selectors)
 
-
-# ---------------------------------------------------------------------------
-# Subcommands
-# ---------------------------------------------------------------------------
 
 def cmd_update() -> int:
     GEN_DIR.mkdir(parents=True, exist_ok=True)
@@ -444,11 +409,11 @@ def cmd_update() -> int:
         )
 
     upstream = result.positive - result.negative
-    manual = load_lines(MANUAL_FILE)
+    static = load_lines(STATIC_FILE)
     denylist = load_lines(DENYLIST_FILE)
 
     upstream_filtered = upstream - denylist
-    merged = manual | upstream_filtered
+    merged = static | upstream_filtered
 
     errors = validate_output(merged)
     if errors:
@@ -460,15 +425,15 @@ def cmd_update() -> int:
     write_sorted(UPSTREAM_OUT, upstream_filtered)
     write_sorted(MERGED_OUT, merged)
 
-    # APK fallback uses manual selectors only; remote fetch gets full merged set
-    write_sorted(EMBEDDED_CSS, manual)
+    # APK fallback uses static selectors only; remote fetch gets full merged set
+    write_sorted(EMBEDDED_CSS, static)
 
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     lock = {
         "generated": now,
         "sources": {},
         "total_upstream": len(upstream_filtered),
-        "total_manual": len(manual),
+        "total_static": len(static),
         "total_denylisted": len(denylist & upstream),
         "total_exceptions_applied": len(result.positive & result.negative),
         "total_merged": len(merged),
@@ -486,22 +451,22 @@ def cmd_update() -> int:
         }
     LOCK_FILE.write_text(json.dumps(lock, indent=2) + "\n")
 
-    new_from_upstream = upstream_filtered - manual
+    new_from_upstream = upstream_filtered - static
     metadata = {
         "generated": now,
         "total_merged": len(merged),
-        "from_manual": len(manual),
+        "from_static": len(static),
         "from_upstream_only": len(new_from_upstream),
-        "overlap": len(manual & upstream_filtered),
+        "overlap": len(static & upstream_filtered),
         "denylisted": len(denylist & upstream),
         "exceptions_applied": len(result.positive & result.negative),
     }
     METADATA_OUT.write_text(json.dumps(metadata, indent=2) + "\n")
 
     print(f"\nDone: {len(merged)} merged selectors")
-    print(f"  Manual: {len(manual)}")
+    print(f"  Static: {len(static)}")
     print(f"  Upstream-only: {len(new_from_upstream)}")
-    print(f"  Overlap: {len(manual & upstream_filtered)}")
+    print(f"  Overlap: {len(static & upstream_filtered)}")
     print(f"  Denylisted: {len(denylist & upstream)}")
     print(f"  Exceptions applied: {len(result.positive & result.negative)}")
     print(f"\nWrote:")
@@ -515,7 +480,6 @@ def cmd_update() -> int:
 
 
 def cmd_validate() -> int:
-    """Validate all output files for correctness."""
     all_errors: list[str] = []
 
     # UPSTREAM_OUT is generated by `update` and may not exist in a fresh checkout
@@ -553,10 +517,6 @@ def cmd_validate() -> int:
     print("Validation passed.")
     return 0
 
-
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
 
 def main() -> int:
     if len(sys.argv) < 2:
