@@ -35,7 +35,7 @@ jobs:
       - name: Chromium validation (insertRule)
         run: |
           node tools/selector-ci/validate.mjs \
-            lists/manual.txt \
+            lists/static.txt \
             lists/generated/merged.txt \
             app/src/main/resources/payload/embedded.css
 

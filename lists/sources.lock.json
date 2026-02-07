@@ -33,7 +33,7 @@
     }
   },
   "total_upstream": 51,
-  "total_manual": 69,
+  "total_static": 69,
   "total_denylisted": 1,
   "total_exceptions_applied": 0,
   "total_merged": 71

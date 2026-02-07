@@ -10,7 +10,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        log("onCreate - registering listener")
+        log("onCreate: registering listener")
         XposedServiceHelper.registerListener(
             object : XposedServiceHelper.OnServiceListener {
                 override fun onServiceBind(svc: XposedService) {
