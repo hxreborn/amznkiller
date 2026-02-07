@@ -5,9 +5,9 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 
-const val FILL_SLOW_TARGET = 0.85f
+const val FILL_SLOW_TARGET = 0.95f
 const val FILL_MIN_TARGET = 0.5f
-const val DRAIN_DELAY_MS = 300L
+const val BUTTON_UNLOCK_THRESHOLD = 0.95f
 
 fun fillSlowSpec() = tween<Float>(6000, easing = LinearOutSlowInEasing)
 

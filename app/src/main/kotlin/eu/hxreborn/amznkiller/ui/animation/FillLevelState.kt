@@ -8,7 +8,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
@@ -68,8 +67,6 @@ fun rememberFillLevelState(
                         animatable.animateTo(0f, fillDrainSpec(drainMs))
                     } else {
                         animatable.animateTo(1f, fillFinishSpec())
-                        delay(DRAIN_DELAY_MS)
-                        animatable.snapTo(0f)
                     }
                 } finally {
                     job.cancelAndJoin()

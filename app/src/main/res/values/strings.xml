@@ -25,30 +25,32 @@
     <string name="rules_search_hint">Search selectors\u2026</string>
     <string name="rules_selectors_count">%d CSS selectors</string>
 
-    <string name="tagline_1">"Jeff won\'t miss the $0.02."</string>
-    <string name="tagline_2">The cart is yours. The data is yours.</string>
-    <string name="tagline_3">Just the product. No side effects.</string>
-    <string name="tagline_4">Ad-free is the new luxury.</string>
-    <string name="tagline_5">Amazon, as it should be.</string>
-    <string name="tagline_6">Window shopping, not window tracking.</string>
-    <string name="tagline_7">Your wallet, your rules.</string>
-    <string name="tagline_8">Sponsored products removed.</string>
-    <string name="tagline_9">Sorry Jeff, not today.</string>
-    <string name="tagline_10">Because ads are annoying.</string>
-    <string name="tagline_11">Keeping it clean.</string>
-    <string name="tagline_12">Focus on the goods.</string>
-    <string name="tagline_13">Jeff has enough yachts. No ads today.</string>
-    <string name="tagline_14">One less dollar for the rocket fund.</string>
-    <string name="tagline_15">Blue Origin can wait. Shop in peace.</string>
-    <string name="tagline_16">"Jeff\'s wallet is full enough."</string>
-    <string name="tagline_17">Unsubscribing from the propaganda.</string>
-    <string name="tagline_18">Bezos blocked. Nice try.</string>
-    <string name="tagline_19">404: Ads Not Found.</string>
-    <string name="tagline_20">"Loading\u2026 just kidding, it\'s instant."</string>
-    <string name="tagline_21">Buying things you actually need.</string>
-    <string name="tagline_22">Look at the product, not the banner.</string>
-    <string name="tagline_23">Silence, Brand</string>
-    <string name="tagline_24">WebView Sanitized</string>
-    <string name="tagline_25">No free revenue today</string>
-    <string name="tagline_26">Amazon, but cleaner</string>
+    <string-array name="taglines">
+        <item>Jeff won\'t miss the $0.02.</item>
+        <item>The cart is yours. The data is yours.</item>
+        <item>Just the product. No side effects.</item>
+        <item>Ad-free is the new luxury.</item>
+        <item>Amazon, as it should be.</item>
+        <item>Window shopping, not window tracking.</item>
+        <item>Your wallet, your rules.</item>
+        <item>Sponsored products removed.</item>
+        <item>Sorry Jeff, not today.</item>
+        <item>Because ads are annoying.</item>
+        <item>Keeping it clean.</item>
+        <item>Focus on the goods.</item>
+        <item>Jeff has enough yachts. No ads today.</item>
+        <item>One less dollar for the rocket fund.</item>
+        <item>Blue Origin can wait. Shop in peace.</item>
+        <item>Jeff\'s wallet is full enough.</item>
+        <item>Unsubscribing from the propaganda.</item>
+        <item>Bezos blocked. Nice try.</item>
+        <item>404: Ads Not Found.</item>
+        <item>Loading\u2026 just kidding, it\'s instant.</item>
+        <item>Buying things you actually need.</item>
+        <item>Look at the product, not the banner.</item>
+        <item>Silence, Brand</item>
+        <item>WebView Sanitized</item>
+        <item>No free revenue today</item>
+        <item>Amazon, but cleaner</item>
+    </string-array>
 </resources>

@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.App
@@ -23,8 +24,9 @@ class MainActivity :
     private lateinit var viewModel: FilterViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        installSplashScreen()
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         val localPrefs = getSharedPreferences(Prefs.GROUP, MODE_PRIVATE)
         val repository = PrefsRepositoryImpl(localPrefs) { remotePrefs }
