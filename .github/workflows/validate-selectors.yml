@@ -5,8 +5,8 @@ on:
     paths:
       - 'lists/**'
       - 'app/src/main/resources/payload/**'
-      - 'tools/update_selectors.py'
-      - 'tools/selector-ci/**'
+      - 'scripts/update_selectors.py'
+      - 'scripts/ci/**'
       - '.github/workflows/update-selectors.yml'
       - '.github/workflows/validate-selectors.yml'
   workflow_dispatch:
@@ -22,19 +22,19 @@ jobs:
           python-version: '3.12'
 
       - name: Python validation (heuristics)
-        run: python tools/update_selectors.py validate
+        run: python scripts/update_selectors.py validate
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
       - name: Install selector validator deps
-        working-directory: tools/selector-ci
+        working-directory: scripts/ci
         run: npm ci --no-audit --no-fund
 
       - name: Chromium validation (insertRule)
         run: |
-          node tools/selector-ci/validate.mjs \
+          node scripts/ci/validate.mjs \
             lists/static.txt \
             lists/generated/merged.txt \
             app/src/main/resources/payload/embedded.css

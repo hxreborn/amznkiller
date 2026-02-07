@@ -19,19 +19,19 @@ jobs:
           python-version: '3.12'
 
       - name: Extract and merge selectors
-        run: python tools/update_selectors.py update
+        run: python scripts/update_selectors.py update
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
       - name: Install selector validator deps
-        working-directory: tools/selector-ci
+        working-directory: scripts/ci
         run: npm ci --no-audit --no-fund
 
       - name: Validate selectors in headless Chromium
         run: |
-          node tools/selector-ci/validate.mjs --strict \
+          node scripts/ci/validate.mjs --strict \
             lists/generated/merged.txt \
             app/src/main/resources/payload/embedded.css
 

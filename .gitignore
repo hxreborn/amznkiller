@@ -67,8 +67,8 @@ release.keystore
 # Local APK artifacts
 installed/
 
-# Generated selector lists (tools/update_selectors.py regenerates)
-lists/generated/*.txt
+# Generated selector lists (scripts/update_selectors.py regenerates)
+lists/generated/*
 !lists/generated/merged.txt
 
 # Exceptions - keep these tracked
