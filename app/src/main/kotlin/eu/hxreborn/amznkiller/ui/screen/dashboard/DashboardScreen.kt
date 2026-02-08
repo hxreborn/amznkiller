@@ -25,10 +25,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.automirrored.outlined.Rule
 import androidx.compose.material.icons.outlined.Android
+import androidx.compose.material.icons.outlined.Construction
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Extension
-import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.PhoneAndroid
+import androidx.compose.material.icons.outlined.Science
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Vaccines
 import androidx.compose.material.icons.rounded.ChevronRight
@@ -609,33 +610,46 @@ private fun SystemEnvironmentCard(
             color = MaterialTheme.colorScheme.outlineVariant,
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            val isZygisk = prefs.frameworkPrivilege == "Zygisk"
             Icon(
-                imageVector = Icons.Outlined.Memory,
+                imageVector = Icons.Outlined.Science,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint =
-                    if (isZygisk) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.width(16.dp))
             Column {
                 Text(
-                    text = stringResource(R.string.env_zygisk),
+                    text = stringResource(R.string.wip_title),
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(
-                    text = prefs.frameworkPrivilege ?: "Unknown",
+                    text = stringResource(R.string.wip_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
-                    color =
-                        if (isZygisk) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 12.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Outlined.Construction,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = stringResource(R.string.wip_title),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = stringResource(R.string.wip_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -853,10 +867,12 @@ private class PreviewAppViewModel : AppViewModel() {
         active: Boolean,
         frameworkVersion: String?,
         frameworkPrivilege: String?,
-    ) {}
+    ) {
+    }
 
     override fun <T : Any> savePref(
         pref: PrefSpec<T>,
         value: T,
-    ) {}
+    ) {
+    }
 }

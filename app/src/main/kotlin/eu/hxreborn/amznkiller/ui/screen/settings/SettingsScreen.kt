@@ -75,14 +75,11 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
 import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterUiState
 import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
-import eu.hxreborn.amznkiller.ui.state.UpdateEvent
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -796,10 +793,12 @@ private class PreviewSettingsViewModel : AppViewModel() {
         active: Boolean,
         frameworkVersion: String?,
         frameworkPrivilege: String?,
-    ) {}
+    ) {
+    }
 
     override fun <T : Any> savePref(
         pref: PrefSpec<T>,
         value: T,
-    ) {}
+    ) {
+    }
 }
