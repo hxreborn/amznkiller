@@ -1,13 +1,14 @@
 package eu.hxreborn.amznkiller.util
 
 import android.util.Log
+import io.github.libxposed.api.XposedModule
 
 object Logger {
     private const val TAG = "AmznKiller"
 
-    private var module: io.github.libxposed.api.XposedModule? = null
+    private var module: XposedModule? = null
 
-    fun init(module: io.github.libxposed.api.XposedModule) {
+    fun init(module: XposedModule) {
         this.module = module
     }
 
