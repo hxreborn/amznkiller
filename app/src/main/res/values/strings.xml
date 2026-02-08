@@ -2,8 +2,7 @@
 <resources>
     <string name="app_name">AmznKiller</string>
     <string name="app_bar_title">AmznKiller</string>
-    <string name="app_desc">Hide ads and sponsored products in Amazon Shopping via CSS injection</string>
-
+    <string name="app_desc">Strip out ads and purge low-quality promotional products from Amazon Shopping</string>Z
     <string name="target_title">Amazon Shopping</string>
 
     <string name="config_active_selectors">Active selectors</string>
