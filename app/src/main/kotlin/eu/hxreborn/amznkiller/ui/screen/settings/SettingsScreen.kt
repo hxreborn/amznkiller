@@ -1,5 +1,10 @@
 package eu.hxreborn.amznkiller.ui.screen.settings
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,22 +15,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.FormatPaint
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,18 +44,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.PrefSpec
 import eu.hxreborn.amznkiller.prefs.Prefs
+import eu.hxreborn.amznkiller.selectors.MergeResult
+import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterUiState
@@ -55,40 +70,21 @@ import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import eu.hxreborn.amznkiller.ui.theme.Tokens
+import eu.hxreborn.amznkiller.ui.util.shapeForPosition
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
 
-private val CORNER_LARGE = 24.dp
-private val CORNER_SMALL = 4.dp
-
-private fun shapeForPosition(
-    count: Int,
-    index: Int,
-): RoundedCornerShape =
-    when {
-        count == 1 -> {
-            RoundedCornerShape(CORNER_LARGE)
-        }
-
-        index == 0 -> {
-            RoundedCornerShape(CORNER_LARGE, CORNER_LARGE, CORNER_SMALL, CORNER_SMALL)
-        }
-
-        index == count - 1 -> {
-            RoundedCornerShape(CORNER_SMALL, CORNER_SMALL, CORNER_LARGE, CORNER_LARGE)
-        }
-
-        else -> {
-            RoundedCornerShape(CORNER_SMALL)
-        }
-    }
+private const val REPO_URL = "https://github.com/hxreborn/amznkiller"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,8 +94,21 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val prefs = (uiState as? FilterUiState.Success)?.prefs ?: return
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showUrlDialog by remember { mutableStateOf(false) }
+
+    if (showUrlDialog) {
+        SelectorUrlDialog(
+            currentUrl = prefs.selectorUrl,
+            onSave = { url ->
+                viewModel.savePref(Prefs.SELECTOR_URL, url)
+                showUrlDialog = false
+            },
+            onDismiss = { showUrlDialog = false },
+        )
+    }
 
     if (showThemeDialog) {
         ThemeDialog(
@@ -214,6 +223,45 @@ fun SettingsScreen(
                 )
 
                 preferenceCategory(
+                    key = "category_lists",
+                    title = { Text(stringResource(R.string.settings_lists)) },
+                )
+
+                val listsShape = shapeForPosition(1, 0)
+                preference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = listsShape)
+                            .clip(listsShape),
+                    key = "filter_list",
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.Language,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_filter_list),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        val isDefault = prefs.selectorUrl == Prefs.SELECTOR_URL.default
+                        Text(
+                            text =
+                                if (isDefault) {
+                                    stringResource(R.string.settings_filter_list_default)
+                                } else {
+                                    stringResource(R.string.settings_filter_list_custom)
+                                },
+                        )
+                    },
+                    onClick = { showUrlDialog = true },
+                )
+
+                preferenceCategory(
                     key = "category_advanced",
                     title = { Text(stringResource(R.string.settings_advanced)) },
                 )
@@ -274,6 +322,113 @@ fun SettingsScreen(
                     },
                     onValueChange = { viewModel.savePref(Prefs.DEBUG_LOGS, it) },
                 )
+
+                preferenceCategory(
+                    key = "category_about",
+                    title = { Text(stringResource(R.string.settings_about)) },
+                )
+
+                val aboutItemCount = 3
+                val versionShape = shapeForPosition(aboutItemCount, 0)
+                preference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = versionShape)
+                            .clip(versionShape),
+                    key = "version",
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_version),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(
+                            text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                        )
+                    },
+                    onClick = {
+                        val clip =
+                            ClipData.newPlainText(
+                                "version",
+                                "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                            )
+                        val clipboard =
+                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(clip)
+                        Toast
+                            .makeText(
+                                context,
+                                context.getString(R.string.settings_version_copied),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                    },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val sourceShape = shapeForPosition(aboutItemCount, 1)
+                preference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = sourceShape)
+                            .clip(sourceShape),
+                    key = "source_code",
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.Code,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_source_code),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    onClick = {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, REPO_URL.toUri()),
+                        )
+                    },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val issueShape = shapeForPosition(aboutItemCount, 2)
+                preference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = issueShape)
+                            .clip(issueShape),
+                    key = "report_issue",
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.BugReport,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_report_issue),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    onClick = {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, "$REPO_URL/issues".toUri()),
+                        )
+                    },
+                )
             }
         }
     }
@@ -332,6 +487,121 @@ private fun ThemeDialog(
     )
 }
 
+@Composable
+private fun SelectorUrlDialog(
+    currentUrl: String,
+    onSave: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var url by remember { mutableStateOf(currentUrl) }
+    var isTesting by remember { mutableStateOf(false) }
+    var testResult by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_selector_url_dialog_title)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = {
+                        url = it
+                        testResult = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+
+                if (isTesting) {
+                    Spacer(Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Spacer(Modifier.padding(start = 8.dp))
+                        Text(
+                            text = stringResource(R.string.settings_selector_url_testing),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+
+                testResult?.let { result ->
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = result,
+                        style = MaterialTheme.typography.bodySmall,
+                        color =
+                            if (result.startsWith("Failed")) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Row {
+                TextButton(
+                    onClick = {
+                        if (url.isNotBlank() && !isTesting) {
+                            isTesting = true
+                            testResult = null
+                            scope.launch {
+                                val result =
+                                    withContext(Dispatchers.IO) {
+                                        runCatching { SelectorUpdater.fetchMerged(url) }
+                                    }
+                                isTesting = false
+                                testResult =
+                                    result.fold(
+                                        onSuccess = { mergeResult ->
+                                            when (mergeResult) {
+                                                is MergeResult.Success -> {
+                                                    "${mergeResult.selectors.size} selectors found"
+                                                }
+
+                                                is MergeResult.Partial -> {
+                                                    "Partial: ${mergeResult.selectors.size} selectors (remote failed)"
+                                                }
+                                            }
+                                        },
+                                        onFailure = { "Failed: ${it.message}" },
+                                    )
+                            }
+                        }
+                    },
+                    enabled = url.isNotBlank() && !isTesting,
+                ) {
+                    Text(stringResource(R.string.settings_selector_url_test))
+                }
+                TextButton(
+                    onClick = {
+                        url = Prefs.SELECTOR_URL.default
+                        testResult = null
+                    },
+                ) {
+                    Text(stringResource(R.string.settings_selector_url_reset))
+                }
+                TextButton(
+                    onClick = { onSave(url) },
+                    enabled = url.isNotBlank(),
+                ) {
+                    Text(stringResource(R.string.settings_selector_url_save))
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.cancel))
+            }
+        },
+    )
+}
+
 private inline fun LazyListScope.switchPreference(
     key: String,
     value: Boolean,
@@ -381,8 +651,6 @@ private class PreviewSettingsViewModel : FilterViewModel() {
             ),
         )
     override val uiState: StateFlow<FilterUiState> = _uiState.asStateFlow()
-    private val _updateEvents = MutableSharedFlow<UpdateEvent>()
-    override val updateEvents: SharedFlow<UpdateEvent> = _updateEvents
 
     override fun refreshAll() {}
 
@@ -391,6 +659,5 @@ private class PreviewSettingsViewModel : FilterViewModel() {
     override fun <T : Any> savePref(
         pref: PrefSpec<T>,
         value: T,
-    ) {
-    }
+    ) {}
 }

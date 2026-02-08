@@ -35,6 +35,7 @@ class PrefsRepositoryImpl(
                     FilterPrefsState(
                         cachedSelectors = selectors,
                         selectorCount = selectors.size,
+                        selectorUrl = Prefs.SELECTOR_URL.read(localPrefs),
                         lastFetched = Prefs.LAST_FETCHED.read(localPrefs),
                         debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
                         injectionEnabled = Prefs.INJECTION_ENABLED.read(localPrefs),

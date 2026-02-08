@@ -4,14 +4,17 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,11 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
@@ -117,13 +121,7 @@ fun RulesBottomSheet(
                         .weight(1f),
             ) {
                 items(filtered, key = { it }) { selector ->
-                    Text(
-                        text = selector,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Monospace,
-                        color = selectorColor(selector),
-                        modifier = Modifier.padding(vertical = 2.dp),
-                    )
+                    SelectorRow(selector)
                 }
             }
         }
@@ -131,13 +129,34 @@ fun RulesBottomSheet(
 }
 
 @Composable
-private fun selectorColor(selector: String): Color =
-    when {
-        selector.startsWith(".") -> MaterialTheme.colorScheme.primary
-        selector.startsWith("#") -> MaterialTheme.colorScheme.tertiary
-        selector.startsWith("[") -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.onSurface
+private fun SelectorRow(selector: String) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .padding(12.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            text = "#",
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = FontFamily.Monospace,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 1.dp),
+        )
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = selector,
+            style = MaterialTheme.typography.bodyMedium,
+            fontFamily = FontFamily.Monospace,
+            color = MaterialTheme.colorScheme.tertiary,
+            lineHeight = 20.sp,
+        )
     }
+}
 
 @PreviewLightDark
 @Composable

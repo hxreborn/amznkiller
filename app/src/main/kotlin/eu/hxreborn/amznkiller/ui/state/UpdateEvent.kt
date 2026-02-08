@@ -12,3 +12,8 @@ sealed interface UpdateEvent {
         val message: String,
     ) : UpdateEvent
 }
+
+data class RefreshOutcome(
+    val event: UpdateEvent,
+    val id: Long = System.nanoTime(),
+)

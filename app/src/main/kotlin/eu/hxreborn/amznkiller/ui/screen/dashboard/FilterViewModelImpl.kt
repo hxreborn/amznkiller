@@ -7,14 +7,12 @@ import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepository
 import eu.hxreborn.amznkiller.selectors.MergeResult
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
+import eu.hxreborn.amznkiller.ui.state.RefreshOutcome
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -26,9 +24,7 @@ class FilterViewModelImpl(
     private val refreshing = MutableStateFlow(false)
     private val lastRefreshFailed = MutableStateFlow(false)
     private val xposedActive = MutableStateFlow(false)
-
-    private val _updateEvents = MutableSharedFlow<UpdateEvent>()
-    override val updateEvents: SharedFlow<UpdateEvent> = _updateEvents.asSharedFlow()
+    private val lastRefreshOutcome = MutableStateFlow<RefreshOutcome?>(null)
 
     override val uiState: StateFlow<FilterUiState> =
         combine(
@@ -36,12 +32,20 @@ class FilterViewModelImpl(
             refreshing,
             xposedActive,
             lastRefreshFailed,
-        ) { prefs, isRefreshing, active, failed ->
+            lastRefreshOutcome,
+        ) { flows ->
+            @Suppress("UNCHECKED_CAST")
+            val prefs = flows[0] as eu.hxreborn.amznkiller.ui.state.FilterPrefsState
+            val isRefreshing = flows[1] as Boolean
+            val active = flows[2] as Boolean
+            val failed = flows[3] as Boolean
+            val outcome = flows[4] as RefreshOutcome?
             FilterUiState.Success(
                 prefs.copy(
                     isXposedActive = active,
                     isRefreshing = isRefreshing,
                     isRefreshFailed = failed,
+                    lastRefreshOutcome = outcome,
                 ),
             )
         }.stateIn(
@@ -61,35 +65,39 @@ class FilterViewModelImpl(
                 val result = SelectorUpdater.fetchMerged(url)
                 if (result.selectors.isEmpty()) {
                     lastRefreshFailed.value = true
-                    _updateEvents.emit(UpdateEvent.Error("No selectors fetched"))
+                    lastRefreshOutcome.value =
+                        RefreshOutcome(UpdateEvent.Error("No selectors fetched"))
                     return@runCatching
                 }
                 when (result) {
                     is MergeResult.Partial -> {
                         lastRefreshFailed.value = true
-                        _updateEvents.emit(
-                            UpdateEvent.Error("Remote fetch failed, using embedded"),
-                        )
+                        lastRefreshOutcome.value =
+                            RefreshOutcome(
+                                UpdateEvent.Error("Remote fetch failed, using embedded"),
+                            )
                     }
 
                     is MergeResult.Success -> {
-                        // TODO: Improve
                         val added = (result.selectors - oldSelectors).size
                         val removed = (oldSelectors - result.selectors).size
                         val merged = result.selectors.sorted().joinToString("\n")
                         repository.save(Prefs.CACHED_SELECTORS, merged)
                         repository.save(Prefs.LAST_FETCHED, System.currentTimeMillis())
-                        if (added == 0 && removed == 0) {
-                            _updateEvents.emit(UpdateEvent.UpToDate)
-                        } else {
-                            _updateEvents.emit(UpdateEvent.Updated(added, removed))
-                        }
+                        lastRefreshOutcome.value =
+                            RefreshOutcome(
+                                if (added == 0 && removed == 0) {
+                                    UpdateEvent.UpToDate
+                                } else {
+                                    UpdateEvent.Updated(added, removed)
+                                },
+                            )
                     }
                 }
             }.onFailure {
                 lastRefreshFailed.value = true
-                // TODO: i18n
-                _updateEvents.emit(UpdateEvent.Error(it.message ?: "Update failed"))
+                lastRefreshOutcome.value =
+                    RefreshOutcome(UpdateEvent.Error(it.message ?: "Update failed"))
             }
             refreshing.value = false
         }

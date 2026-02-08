@@ -4,6 +4,7 @@ object Prefs {
     const val GROUP = "amznkiller"
     const val STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000L
 
+    // TODO: //check if using duration feels ok here
     val SELECTOR_URL =
         StringPref(
             "selector_url",

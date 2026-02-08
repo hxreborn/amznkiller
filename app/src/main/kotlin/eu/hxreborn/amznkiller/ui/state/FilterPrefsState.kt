@@ -6,6 +6,7 @@ import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 data class FilterPrefsState(
     val cachedSelectors: List<String> = emptyList(),
     val selectorCount: Int = 0,
+    val selectorUrl: String = Prefs.SELECTOR_URL.default,
     val lastFetched: Long = 0L,
     val debugLogs: Boolean = Prefs.DEBUG_LOGS.default,
     val injectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default,
@@ -14,4 +15,5 @@ data class FilterPrefsState(
     val isXposedActive: Boolean = false,
     val isRefreshing: Boolean = false,
     val isRefreshFailed: Boolean = false,
+    val lastRefreshOutcome: RefreshOutcome? = null,
 )
