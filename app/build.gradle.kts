@@ -12,7 +12,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = namespace
+        applicationId = "eu.hxreborn.amznkiller"
         minSdk = 28
         targetSdk = 36
 
