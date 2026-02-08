@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.aboutlibraries)
 }
 
 android {
@@ -127,8 +128,18 @@ dependencies {
     implementation(libs.navigation3.ui)
     implementation(libs.compose.preferences)
     implementation(libs.material.motion.compose.core)
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries.compose)
 }
 
+val copyAboutLibraries by tasks.registering(Copy::class) {
+    dependsOn("exportLibraryDefinitions")
+    from("build/generated/aboutLibraries/aboutlibraries.json")
+    into("build/generated/aboutLibrariesRes/raw")
+}
+
+android.sourceSets["main"].res.srcDir("build/generated/aboutLibrariesRes")
+
 tasks.named("preBuild").configure {
-    dependsOn("ktlintCheck")
+    dependsOn("ktlintCheck", copyAboutLibraries)
 }

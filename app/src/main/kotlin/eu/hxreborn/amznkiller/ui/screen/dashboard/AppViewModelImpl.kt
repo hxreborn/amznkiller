@@ -18,12 +18,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class FilterViewModelImpl(
+class AppViewModelImpl(
     private val repository: PrefsRepository,
-) : FilterViewModel() {
+) : AppViewModel() {
     private val refreshing = MutableStateFlow(false)
     private val lastRefreshFailed = MutableStateFlow(false)
     private val xposedActive = MutableStateFlow(false)
+    private val frameworkVersion = MutableStateFlow<String?>(null)
+    private val frameworkPrivilege = MutableStateFlow<String?>(null)
     private val lastRefreshOutcome = MutableStateFlow<RefreshOutcome?>(null)
 
     override val uiState: StateFlow<FilterUiState> =
@@ -33,6 +35,8 @@ class FilterViewModelImpl(
             xposedActive,
             lastRefreshFailed,
             lastRefreshOutcome,
+            frameworkVersion,
+            frameworkPrivilege,
         ) { flows ->
             @Suppress("UNCHECKED_CAST")
             val prefs = flows[0] as eu.hxreborn.amznkiller.ui.state.FilterPrefsState
@@ -40,9 +44,13 @@ class FilterViewModelImpl(
             val active = flows[2] as Boolean
             val failed = flows[3] as Boolean
             val outcome = flows[4] as RefreshOutcome?
+            val fwVersion = flows[5] as String?
+            val fwPrivilege = flows[6] as String?
             FilterUiState.Success(
                 prefs.copy(
                     isXposedActive = active,
+                    frameworkVersion = fwVersion,
+                    frameworkPrivilege = fwPrivilege,
                     isRefreshing = isRefreshing,
                     isRefreshFailed = failed,
                     lastRefreshOutcome = outcome,
@@ -103,8 +111,14 @@ class FilterViewModelImpl(
         }
     }
 
-    override fun setXposedActive(active: Boolean) {
+    override fun setXposedActive(
+        active: Boolean,
+        frameworkVersion: String?,
+        frameworkPrivilege: String?,
+    ) {
         xposedActive.value = active
+        this.frameworkVersion.value = frameworkVersion
+        this.frameworkPrivilege.value = frameworkPrivilege
     }
 
     override fun <T : Any> savePref(
@@ -115,9 +129,9 @@ class FilterViewModelImpl(
     }
 }
 
-class FilterViewModelFactory(
+class AppViewModelFactory(
     private val repository: PrefsRepository,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T = FilterViewModelImpl(repository) as T
+    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T = AppViewModelImpl(repository) as T
 }

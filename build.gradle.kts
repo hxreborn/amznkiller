@@ -6,6 +6,7 @@ import org.gradle.api.tasks.Exec
 plugins {
     base
     alias(libs.plugins.versions)
+    alias(libs.plugins.aboutlibraries) apply false
 }
 
 fun isStable(version: String): Boolean {

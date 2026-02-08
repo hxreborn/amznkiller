@@ -1,9 +1,12 @@
 package eu.hxreborn.amznkiller.ui.screen.dashboard
 
 import android.content.Intent
+import android.os.Build
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,23 +19,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.automirrored.outlined.Rule
-import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Android
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Extension
+import androidx.compose.material.icons.outlined.Memory
+import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.Vaccines
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.CloudDone
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -75,16 +82,13 @@ import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import me.zhanghai.compose.preference.Preference
-import me.zhanghai.compose.preference.PreferenceCategory
-import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 private const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    viewModel: FilterViewModel,
+    viewModel: AppViewModel,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -103,8 +107,13 @@ fun DashboardScreen(
             runCatching {
                 val pm = context.packageManager
                 val info = pm.getPackageInfo(AMAZON_PACKAGE, 0)
-                val icon = pm.getApplicationIcon(AMAZON_PACKAGE).toBitmap(128, 128).asImageBitmap()
-                val label = pm.getApplicationLabel(info.applicationInfo!!).toString()
+                val icon =
+                    pm
+                        .getApplicationIcon(AMAZON_PACKAGE)
+                        .toBitmap(128, 128)
+                        .asImageBitmap()
+                val label =
+                    pm.getApplicationLabel(info.applicationInfo!!).toString()
                 Triple(icon, label, info.versionName)
             }.getOrNull()
         }
@@ -112,17 +121,24 @@ fun DashboardScreen(
     val webViewInfo =
         remember {
             runCatching {
-                val pkg = WebView.getCurrentWebViewPackage() ?: return@runCatching null
+                val pkg =
+                    WebView.getCurrentWebViewPackage()
+                        ?: return@runCatching null
                 val pm = context.packageManager
                 val appInfo = pm.getApplicationInfo(pkg.packageName, 0)
-                val icon = pm.getApplicationIcon(appInfo).toBitmap(128, 128).asImageBitmap()
+                val icon =
+                    pm
+                        .getApplicationIcon(appInfo)
+                        .toBitmap(128, 128)
+                        .asImageBitmap()
                 val label = pm.getApplicationLabel(appInfo).toString()
                 Triple(icon, label, pkg.versionName)
             }.getOrNull()
         }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier =
+            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             LargeTopAppBar(
@@ -135,21 +151,34 @@ fun DashboardScreen(
                             text = stringResource(R.string.app_bar_title),
                             style =
                                 if (isExpandedSlot) {
-                                    MaterialTheme.typography.headlineLarge.copy(
-                                        lineHeight = Tokens.ExpandedTitleLineHeight,
-                                    )
+                                    MaterialTheme.typography.headlineLarge
+                                        .copy(
+                                            lineHeight =
+                                                Tokens
+                                                    .ExpandedTitleLineHeight,
+                                        )
                                 } else {
                                     LocalTextStyle.current
                                 },
-                            maxLines = if (isExpandedSlot) Tokens.ExpandedTitleMaxLines else 1,
+                            maxLines =
+                                if (isExpandedSlot) {
+                                    Tokens.ExpandedTitleMaxLines
+                                } else {
+                                    1
+                                },
                         )
                         Text(
                             text = tagline,
                             style = MaterialTheme.typography.bodySmall,
                             color =
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                    alpha = 1f - scrollBehavior.state.collapsedFraction,
-                                ),
+                                MaterialTheme.colorScheme
+                                    .onSurfaceVariant
+                                    .copy(
+                                        alpha =
+                                            1f -
+                                                scrollBehavior.state
+                                                    .collapsedFraction,
+                                    ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -178,33 +207,48 @@ fun DashboardScreen(
 
                 val outcome = prefs.lastRefreshOutcome
                 LaunchedEffect(outcome?.id) {
-                    if (outcome != null && outcome.id != lastHandledOutcomeId) {
+                    if (
+                        outcome != null &&
+                        outcome.id != lastHandledOutcomeId
+                    ) {
                         lastHandledOutcomeId = outcome.id
-                        val message = formatUpdateEventMessage(context, outcome.event)
+                        val message =
+                            formatUpdateEventMessage(
+                                context,
+                                outcome.event,
+                            )
                         snackbarHostState.showSnackbar(message)
                     }
                 }
 
                 val surface = MaterialTheme.colorScheme.surfaceVariant
 
-                ProvidePreferenceLocals {
-                    Column(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState())
-                                .padding(
-                                    top = innerPadding.calculateTopPadding(),
-                                    bottom = contentPadding.calculateBottomPadding() + 16.dp,
-                                    start = 8.dp,
-                                    end = 8.dp,
-                                ),
-                    ) {
-                        // Target
-                        PreferenceCategory(
-                            title = { Text(stringResource(R.string.dashboard_target)) },
+                LazyColumn(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp),
+                    contentPadding =
+                        PaddingValues(
+                            top =
+                                innerPadding
+                                    .calculateTopPadding() + 8.dp,
+                            bottom =
+                                contentPadding
+                                    .calculateBottomPadding() + 16.dp,
+                        ),
+                ) {
+                    item {
+                        UpdatesCard(
+                            prefs = prefs,
+                            surface = surface,
+                            onRefresh = { viewModel.refreshAll() },
                         )
+                    }
 
+                    item { Spacer(Modifier.height(16.dp)) }
+
+                    item {
                         val targetShape = shapeForPosition(1, 0)
                         Column(
                             modifier =
@@ -219,257 +263,67 @@ fun DashboardScreen(
                         ) {
                             TargetRow(amazonInfo) {
                                 if (amazonInfo != null) {
-                                    FilledTonalButton(
+                                    IconButton(
                                         onClick = {
                                             context.packageManager
-                                                .getLaunchIntentForPackage(AMAZON_PACKAGE)
-                                                ?.let {
-                                                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                    context.startActivity(it)
+                                                .getLaunchIntentForPackage(
+                                                    AMAZON_PACKAGE,
+                                                )?.let {
+                                                    it.addFlags(
+                                                        Intent
+                                                            .FLAG_ACTIVITY_NEW_TASK,
+                                                    )
+                                                    context.startActivity(
+                                                        it,
+                                                    )
                                                 }
                                         },
-                                        contentPadding = COMPACT_BUTTON_PADDING,
-                                        modifier = Modifier.height(COMPACT_BUTTON_HEIGHT),
                                     ) {
-                                        Text(
-                                            stringResource(R.string.dashboard_launch),
-                                            style = MaterialTheme.typography.labelLarge,
+                                        Icon(
+                                            imageVector =
+                                                Icons.AutoMirrored
+                                                    .Outlined
+                                                    .OpenInNew,
+                                            contentDescription =
+                                                stringResource(
+                                                    R.string
+                                                        .dashboard_launch,
+                                                ),
+                                            tint =
+                                                MaterialTheme.colorScheme
+                                                    .onSurfaceVariant,
                                         )
                                     }
                                 }
                             }
                             HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 12.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant,
+                                modifier =
+                                    Modifier.padding(vertical = 12.dp),
+                                color =
+                                    MaterialTheme.colorScheme
+                                        .outlineVariant,
                             )
                             TargetRow(webViewInfo, isGrayscale = true)
                         }
+                    }
 
-                        // Injection Status
-                        PreferenceCategory(
-                            title = { Text(stringResource(R.string.dashboard_status)) },
+                    item { Spacer(Modifier.height(16.dp)) }
+
+                    item {
+                        MetricsGrid(
+                            prefs = prefs,
+                            surface = surface,
+                            onShowRules = { showRulesSheet = true },
                         )
+                    }
 
-                        val statusCount = 3
-                        val xposedShape = shapeForPosition(statusCount, 0)
-                        Preference(
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .background(color = surface, shape = xposedShape)
-                                    .clip(xposedShape),
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Outlined.Extension,
-                                    contentDescription = null,
-                                )
-                            },
-                            title = {
-                                Text(
-                                    text = stringResource(R.string.env_xposed),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                            },
-                            summary = {
-                                Text(
-                                    text =
-                                        if (prefs.isXposedActive) {
-                                            stringResource(R.string.env_xposed_connected)
-                                        } else {
-                                            stringResource(R.string.env_xposed_disconnected)
-                                        },
-                                    color =
-                                        if (prefs.isXposedActive) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.error
-                                        },
-                                )
-                            },
+                    item { Spacer(Modifier.height(16.dp)) }
+
+                    item {
+                        SystemEnvironmentCard(
+                            prefs = prefs,
+                            surface = surface,
                         )
-
-                        Spacer(Modifier.height(2.dp))
-
-                        val methodShape = shapeForPosition(statusCount, 1)
-                        Preference(
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .background(color = surface, shape = methodShape)
-                                    .clip(methodShape),
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Outlined.Vaccines,
-                                    contentDescription = null,
-                                )
-                            },
-                            title = {
-                                Text(
-                                    text = stringResource(R.string.dashboard_method),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                            },
-                            summary = {
-                                Text(
-                                    text = stringResource(R.string.dashboard_css_injection),
-                                )
-                            },
-                        )
-
-                        Spacer(Modifier.height(2.dp))
-
-                        val selectorsShape = shapeForPosition(statusCount, 2)
-                        Preference(
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .background(color = surface, shape = selectorsShape)
-                                    .clip(selectorsShape),
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.Rule,
-                                    contentDescription = null,
-                                )
-                            },
-                            title = {
-                                Text(
-                                    text = stringResource(R.string.config_active_selectors),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                            },
-                            summary = {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            R.string.dashboard_selectors_applied,
-                                            prefs.selectorCount,
-                                        ),
-                                )
-                            },
-                            widgetContainer = {
-                                Icon(
-                                    imageVector = Icons.Rounded.ChevronRight,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(end = 8.dp),
-                                )
-                            },
-                            onClick = { showRulesSheet = true },
-                        )
-
-                        // Updates
-                        PreferenceCategory(
-                            title = { Text(stringResource(R.string.dashboard_updates)) },
-                        )
-
-                        val outcomeEvent = prefs.lastRefreshOutcome?.event
-                        val updatesShape = shapeForPosition(1, 0)
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp)
-                                    .background(
-                                        color = surface,
-                                        shape = updatesShape,
-                                    ).clip(updatesShape)
-                                    .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(
-                                modifier = Modifier.size(24.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                when {
-                                    prefs.isRefreshing -> {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(24.dp),
-                                            strokeWidth = 2.dp,
-                                        )
-                                    }
-
-                                    outcomeEvent is UpdateEvent.UpToDate ||
-                                        outcomeEvent is UpdateEvent.Updated -> {
-                                        Icon(
-                                            imageVector = Icons.Outlined.CheckCircle,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                        )
-                                    }
-
-                                    outcomeEvent is UpdateEvent.Error -> {
-                                        Icon(
-                                            imageVector = Icons.Outlined.ErrorOutline,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.error,
-                                        )
-                                    }
-
-                                    else -> {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Sync,
-                                            contentDescription = null,
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(Modifier.width(16.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.dashboard_rule_definitions),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                                Text(
-                                    text =
-                                        when {
-                                            prefs.isRefreshing -> {
-                                                stringResource(R.string.dashboard_checking)
-                                            }
-
-                                            outcomeEvent is UpdateEvent.UpToDate -> {
-                                                stringResource(R.string.dashboard_up_to_date)
-                                            }
-
-                                            outcomeEvent is UpdateEvent.Updated -> {
-                                                stringResource(
-                                                    R.string.dashboard_rules_updated,
-                                                    outcomeEvent.added + outcomeEvent.removed,
-                                                )
-                                            }
-
-                                            outcomeEvent is UpdateEvent.Error -> {
-                                                outcomeEvent.message
-                                            }
-
-                                            else -> {
-                                                relativeTime(prefs.lastFetched)
-                                            }
-                                        },
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color =
-                                        when (outcomeEvent) {
-                                            is UpdateEvent.Error -> {
-                                                MaterialTheme.colorScheme.error
-                                            }
-
-                                            else -> {
-                                                MaterialTheme.colorScheme.onSurfaceVariant
-                                            }
-                                        },
-                                )
-                            }
-                            FilledTonalButton(
-                                onClick = { viewModel.refreshAll() },
-                                enabled = !prefs.isRefreshing,
-                                contentPadding = COMPACT_BUTTON_PADDING,
-                                modifier = Modifier.height(COMPACT_BUTTON_HEIGHT),
-                            ) {
-                                Text(
-                                    stringResource(R.string.dashboard_check),
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-                            }
-                        }
                     }
                 }
 
@@ -484,9 +338,405 @@ fun DashboardScreen(
     }
 }
 
-private val COMPACT_BUTTON_HEIGHT = 32.dp
-private val COMPACT_BUTTON_PADDING = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
-private val GRAYSCALE = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
+@Composable
+private fun UpdatesCard(
+    prefs: FilterPrefsState,
+    surface: androidx.compose.ui.graphics.Color,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val outcomeEvent = prefs.lastRefreshOutcome?.event
+    val isError = outcomeEvent is UpdateEvent.Error
+    val isUpToDate = !prefs.isStale && !isError && prefs.lastFetched > 0L
+
+    val shape = shapeForPosition(1, 0)
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .background(color = surface, shape = shape)
+                .clip(shape)
+                .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(24.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            when {
+                prefs.isRefreshing -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                    )
+                }
+
+                isError -> {
+                    Icon(
+                        imageVector = Icons.Outlined.ErrorOutline,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
+
+                isUpToDate -> {
+                    Icon(
+                        imageVector = Icons.Rounded.CloudDone,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+
+                else -> {
+                    Icon(
+                        imageVector = Icons.Rounded.SystemUpdate,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text =
+                    when {
+                        prefs.isRefreshing -> {
+                            stringResource(R.string.hero_checking_title)
+                        }
+
+                        isError -> {
+                            stringResource(R.string.hero_error_title)
+                        }
+
+                        isUpToDate -> {
+                            stringResource(
+                                R.string.hero_operational_title,
+                            )
+                        }
+
+                        else -> {
+                            stringResource(R.string.hero_stale_title)
+                        }
+                    },
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                text =
+                    when {
+                        prefs.isRefreshing -> {
+                            stringResource(
+                                R.string.hero_checking_subtitle,
+                            )
+                        }
+
+                        isError -> {
+                            outcomeEvent.message
+                        }
+
+                        isUpToDate -> {
+                            buildString {
+                                append(
+                                    stringResource(
+                                        R.string
+                                            .hero_operational_subtitle,
+                                    ),
+                                )
+                                append("\n")
+                                append(
+                                    stringResource(
+                                        R.string.dashboard_last_checked,
+                                        relativeTime(prefs.lastFetched),
+                                    ),
+                                )
+                            }
+                        }
+
+                        else -> {
+                            buildString {
+                                append(
+                                    stringResource(
+                                        R.string.hero_stale_subtitle,
+                                    ),
+                                )
+                                if (prefs.lastFetched > 0L) {
+                                    append("\n")
+                                    append(
+                                        stringResource(
+                                            R.string
+                                                .dashboard_last_checked,
+                                            relativeTime(
+                                                prefs.lastFetched,
+                                            ),
+                                        ),
+                                    )
+                                }
+                            }
+                        }
+                    },
+                style = MaterialTheme.typography.bodyMedium,
+                color =
+                    if (isError) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+            )
+        }
+        IconButton(
+            onClick = onRefresh,
+            enabled = !prefs.isRefreshing,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Refresh,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SystemEnvironmentCard(
+    prefs: FilterPrefsState,
+    surface: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier,
+) {
+    val shape = shapeForPosition(1, 0)
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .background(color = surface, shape = shape)
+                .clip(shape)
+                .padding(16.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Outlined.Extension,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint =
+                    if (prefs.isXposedActive) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = stringResource(R.string.env_xposed),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text =
+                        if (prefs.isXposedActive && prefs.frameworkVersion != null) {
+                            stringResource(
+                                R.string.env_xposed_active,
+                                prefs.frameworkVersion,
+                            )
+                        } else if (prefs.isXposedActive) {
+                            stringResource(
+                                R.string.env_xposed_active,
+                                "Unknown",
+                            )
+                        } else {
+                            stringResource(R.string.env_xposed_inactive)
+                        },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color =
+                        if (prefs.isXposedActive) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                )
+            }
+        }
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 12.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Outlined.PhoneAndroid,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = Build.MODEL,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = "${Build.MANUFACTURER} · ${Build.DEVICE}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 12.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Outlined.Android,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "Android ${Build.VERSION.RELEASE}",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = "API ${Build.VERSION.SDK_INT}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 12.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val isZygisk = prefs.frameworkPrivilege == "Zygisk"
+            Icon(
+                imageVector = Icons.Outlined.Memory,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint =
+                    if (isZygisk) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = stringResource(R.string.env_zygisk),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = prefs.frameworkPrivilege ?: "Unknown",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color =
+                        if (isZygisk) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MetricsGrid(
+    prefs: FilterPrefsState,
+    surface: androidx.compose.ui.graphics.Color,
+    onShowRules: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = shapeForPosition(1, 0)
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .background(color = surface, shape = shape)
+                    .clip(shape)
+                    .padding(16.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Vaccines,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.dashboard_method),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(R.string.dashboard_css_injection),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .background(color = surface, shape = shape)
+                    .clip(shape)
+                    .clickable(onClick = onShowRules)
+                    .padding(16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector =
+                        Icons.AutoMirrored.Outlined.Rule,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint =
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.weight(1f))
+                Icon(
+                    imageVector = Icons.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint =
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text =
+                    stringResource(
+                        R.string.config_active_selectors,
+                    ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text =
+                    stringResource(
+                        R.string.dashboard_rules_count,
+                        prefs.selectorCount,
+                    ),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+    }
+}
+
+private val GRAYSCALE =
+    ColorFilter.colorMatrix(
+        ColorMatrix().apply { setToSaturation(0f) },
+    )
 
 @Composable
 private fun TargetRow(
@@ -565,21 +815,25 @@ private fun formatUpdateEventMessage(
 @Composable
 private fun DashboardScreenPreview() {
     PreviewWrapper {
-        DashboardScreen(viewModel = PreviewFilterViewModel())
+        DashboardScreen(viewModel = PreviewAppViewModel())
     }
 }
 
-private class PreviewFilterViewModel : FilterViewModel() {
+private class PreviewAppViewModel : AppViewModel() {
     private val _uiState =
         MutableStateFlow(
             FilterUiState.Success(
                 prefs =
                     FilterPrefsState(
                         isXposedActive = true,
+                        frameworkVersion = "LSPosed v1.11.0",
+                        frameworkPrivilege = "Zygisk",
                         isRefreshing = false,
                         isRefreshFailed = false,
+                        isStale = false,
                         selectorCount = 42,
-                        lastFetched = System.currentTimeMillis() - 3_600_000,
+                        lastFetched =
+                            System.currentTimeMillis() - 3_600_000,
                         cachedSelectors =
                             listOf(
                                 ".s-sponsored-label",
@@ -590,11 +844,16 @@ private class PreviewFilterViewModel : FilterViewModel() {
                     ),
             ),
         )
-    override val uiState: StateFlow<FilterUiState> = _uiState.asStateFlow()
+    override val uiState: StateFlow<FilterUiState> =
+        _uiState.asStateFlow()
 
     override fun refreshAll() {}
 
-    override fun setXposedActive(active: Boolean) {}
+    override fun setXposedActive(
+        active: Boolean,
+        frameworkVersion: String?,
+        frameworkPrivilege: String?,
+    ) {}
 
     override fun <T : Any> savePref(
         pref: PrefSpec<T>,

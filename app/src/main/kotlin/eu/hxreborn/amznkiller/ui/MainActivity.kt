@@ -11,9 +11,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepositoryImpl
+import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
+import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModelFactory
 import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterUiState
-import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterViewModel
-import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterViewModelFactory
 import eu.hxreborn.amznkiller.ui.theme.AppTheme
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import io.github.libxposed.service.XposedService
@@ -24,8 +24,8 @@ class MainActivity :
     XposedServiceHelper.OnServiceListener {
     private var remotePrefs: SharedPreferences? = null
 
-    private val viewModel: FilterViewModel by viewModels {
-        FilterViewModelFactory(
+    private val viewModel: AppViewModel by viewModels {
+        AppViewModelFactory(
             PrefsRepositoryImpl(
                 localPrefs = getSharedPreferences(Prefs.GROUP, MODE_PRIVATE),
                 remotePrefsProvider = { remotePrefs },
@@ -55,7 +55,24 @@ class MainActivity :
 
     override fun onServiceBind(service: XposedService) {
         remotePrefs = service.getRemotePreferences(Prefs.GROUP)
-        viewModel.setXposedActive(true)
+        val privilege = service.frameworkPrivilege
+        viewModel.setXposedActive(
+            active = true,
+            frameworkVersion = "${service.frameworkName} v${service.frameworkVersion}",
+            frameworkPrivilege =
+                when (privilege) {
+                    XposedService.Privilege.FRAMEWORK_PRIVILEGE_ROOT -> {
+                        "Zygisk"
+                    }
+
+                    else -> {
+                        privilege.name
+                            .removePrefix("FRAMEWORK_PRIVILEGE_")
+                            .lowercase()
+                            .replaceFirstChar { it.uppercase() }
+                    }
+                },
+        )
     }
 
     override fun onServiceDied(service: XposedService) {

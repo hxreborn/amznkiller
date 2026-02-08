@@ -14,6 +14,9 @@ object Prefs {
     val LAST_FETCHED = LongPref("last_fetched", 0L)
     val DEBUG_LOGS = BoolPref("debug_logs", false)
     val INJECTION_ENABLED = BoolPref("injection_enabled", true)
+    val WEBVIEW_DEBUGGING = BoolPref("webview_debugging", false)
+
+    val AUTO_UPDATE = BoolPref("auto_update", true)
 
     val DARK_THEME_CONFIG = StringPref("dark_theme_config", "follow_system")
     val USE_DYNAMIC_COLOR = BoolPref("use_dynamic_color", true)
@@ -25,6 +28,8 @@ object Prefs {
             LAST_FETCHED,
             DEBUG_LOGS,
             INJECTION_ENABLED,
+            WEBVIEW_DEBUGGING,
+            AUTO_UPDATE,
             DARK_THEME_CONFIG,
             USE_DYNAMIC_COLOR,
         )

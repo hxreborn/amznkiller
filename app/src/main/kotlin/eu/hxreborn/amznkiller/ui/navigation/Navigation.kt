@@ -30,8 +30,9 @@ import androidx.navigation3.ui.NavDisplay
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
 import eu.hxreborn.amznkiller.ui.screen.dashboard.DashboardScreen
-import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterViewModel
+import eu.hxreborn.amznkiller.ui.screen.settings.LicensesScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.SettingsScreen
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import kotlinx.serialization.Serializable
@@ -44,6 +45,9 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object Settings : Screen
+
+    @Serializable
+    data object Licenses : Screen
 }
 
 data class BottomNavItem(
@@ -74,7 +78,7 @@ private val SLIDE_DISTANCE = 96.dp
 @Composable
 fun MainNavDisplay(
     backStack: NavBackStack<NavKey>,
-    viewModel: FilterViewModel,
+    viewModel: AppViewModel,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
@@ -108,7 +112,11 @@ fun MainNavDisplay(
                     SettingsScreen(
                         viewModel = viewModel,
                         contentPadding = contentPadding,
+                        onNavigateToLicenses = { backStack.add(Screen.Licenses) },
                     )
+                }
+                entry<Screen.Licenses> {
+                    LicensesScreen(onBack = { backStack.removeLastOrNull() })
                 }
             },
     )

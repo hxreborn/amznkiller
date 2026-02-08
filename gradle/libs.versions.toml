@@ -13,6 +13,7 @@ material3 = "1.5.0-alpha13"
 navigation3 = "1.1.0-alpha03"
 composePreferences = "2.1.1"
 materialMotionComposeCore = "2.0.1"
+aboutlibraries = "11.6.3"
 
 [libraries]
 libxposed-api = { group = "io.github.libxposed", name = "api", version.ref = "xposed" }
@@ -33,6 +34,8 @@ navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runt
 navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 compose-preferences = { group = "me.zhanghai.compose.preference", name = "preference", version.ref = "composePreferences" }
 material-motion-compose-core = { group = "io.github.fornewid", name = "material-motion-compose-core", version.ref = "materialMotionComposeCore" }
+aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version = "13.2.1" }
+aboutlibraries-compose = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version = "13.2.1" }
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -41,3 +44,4 @@ ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
