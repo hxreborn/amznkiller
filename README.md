@@ -1,6 +1,6 @@
 # AmznKiller
 
-Xposed module that hides ads and sponsored content in Amazon Shopping via CSS injection.
+Xposed module built on the modern LSPosed API that hides ads and sponsored content inside the Amazon Android app.
 
 ![Update Selectors](https://github.com/hxreborn/amznkiller/actions/workflows/update-selectors.yml/badge.svg)
 ![Validate Selectors](https://github.com/hxreborn/amznkiller/actions/workflows/validate-selectors.yml/badge.svg)
@@ -9,13 +9,12 @@ Xposed module that hides ads and sponsored content in Amazon Shopping via CSS in
 
 ## Features
 
-- **Hides intrusive ads**: Removes sponsored product cards, autoplay video carousels, similar items widgets, and promotional banners from the Amazon Android app
-- **Bundled filters**: Works out of the box. Fetches updated lists remotely when needed
-- **Custom selector lists**: Point to your own selector list URL
-- **Input sanitization**: Validates CSS to prevent code injection vulnerabilities
-- **Material 3 companion app**: Dashboard with real-time status, manual refresh, selector count, and quick toggles
-- **Complementary blocking**: Works alongside Private DNS, hosts files, and network-level blockers without conflict
-- **FOSS**
+- Remove sponsored cards, video carousels, and other promotional UI in the Amazon app
+- Maintained built-in selector list with remote updates. Optionally use your own self-hosted selector list via custom URL.
+- Selector sanitization blocks common CSS injection patterns
+- Material 3 companion app
+- Recommended alongside Private DNS and hosts-based blocking
+- Free and open source (FOSS)
 
 ## Requirements
 
@@ -33,7 +32,7 @@ Xposed module that hides ads and sponsored content in Amazon Shopping via CSS in
 2. Enable the module in LSPosed and scope it to `com.amazon.mShop.android.shopping`
 3. Open the AmznKiller companion app to verify the module is active and optionally fetch updated
    lists (built-in filters work out of the box)
-4. Launch Amazon Shopping and browse ad-free
+4. Force-stop the Amazon app and relaunch it. A toast confirms the module is active.
 
 ## Screenshots
 
@@ -120,41 +119,28 @@ Amazon Shopping if changes don't appear immediately.
 git clone --recurse-submodules https://github.com/hxreborn/amznkiller.git
 cd amznkiller
 
-# Build libxposed (publishes to mavenLocal; required for the app to resolve io.github.libxposed deps)
+# Build libxposed and publish to local Maven repo
 ./gradlew buildLibxposed
-
-# Build APKs
-./gradlew :app:assembleDebug
-./gradlew :app:assembleRelease
+./gradlew :app:assembleDebug          # or assembleRelease (requires signing config)
 ```
 
-Requirements:
-
-- JDK 21 (set Android Studio "Gradle JDK" to 21, or export `JAVA_HOME` to a JDK 21 install)
-- Android SDK installed (this project uses `compileSdk = 36`)
-
-Configure `local.properties`:
+Requires JDK 21 and Android SDK. Configure `local.properties`:
 
 ```properties
 sdk.dir=/path/to/android/sdk
+
+# Optional: release signing for reproducible builds
+RELEASE_STORE_FILE=<path/to/keystore.jks>
+RELEASE_STORE_PASSWORD=<store_password>
+RELEASE_KEY_ALIAS=<key_alias>
+RELEASE_KEY_PASSWORD=<key_password>
 ```
-
-Outputs are written to `app/build/outputs/apk/` and named like `amznkiller-v<version>-<variant>.apk`.
-
-### Signed release (optional)
-
-Release signing is enabled only when `RELEASE_STORE_FILE` is provided (Gradle property or environment
-variable). Supported variables/properties:
-
-- `RELEASE_STORE_FILE`
-- `RELEASE_STORE_PASSWORD`
-- `RELEASE_KEY_ALIAS`
-- `RELEASE_KEY_PASSWORD`
-- `RELEASE_STORE_TYPE` (defaults to `PKCS12`)
 
 ## Contributing
 
-Pull requests are welcome. For bugs or feature requests, [open an issue](https://github.com/hxreborn/amznkiller/issues/new/choose).
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines on pull requests, code style, and commit conventions.
+
+For bugs or feature requests, [open an issue](https://github.com/hxreborn/amznkiller/issues/new/choose).
 
 ## License
 
