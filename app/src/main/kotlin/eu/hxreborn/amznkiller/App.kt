@@ -37,8 +37,7 @@ class App : Application() {
         var service: XposedService? = null
             private set
 
-        private val listeners =
-            CopyOnWriteArrayList<XposedServiceHelper.OnServiceListener>()
+        private val listeners = CopyOnWriteArrayList<XposedServiceHelper.OnServiceListener>()
 
         private fun log(msg: String) {
             if (BuildConfig.DEBUG) Log.d(TAG, msg)

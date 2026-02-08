@@ -68,10 +68,7 @@ fun RulesBottomSheet(
         sheetState = sheetState,
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -84,8 +81,7 @@ fun RulesBottomSheet(
                 )
                 IconButton(
                     onClick = {
-                        val clipboard =
-                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(
                             ClipData.newPlainText("selectors", selectors.joinToString("\n")),
                         )
@@ -115,10 +111,7 @@ fun RulesBottomSheet(
             Spacer(Modifier.height(8.dp))
 
             LazyColumn(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f),
             ) {
                 items(filtered, key = { it }) { selector ->
                     SelectorRow(selector)

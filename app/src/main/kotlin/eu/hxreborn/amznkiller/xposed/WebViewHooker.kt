@@ -20,10 +20,9 @@ object WebViewHooker {
                 -> {
                     runCatching {
                         module.hook(method, PageHooker::class.java)
-                    }.onSuccess { Logger.log("Hooked ${method.name}") }
-                        .onFailure {
-                            Logger.log("Failed to hook ${method.name}", it)
-                        }
+                    }.onSuccess { Logger.log("Hooked ${method.name}") }.onFailure {
+                        Logger.log("Failed to hook ${method.name}", it)
+                    }
                 }
             }
         }
@@ -41,8 +40,9 @@ class PageHooker : XposedInterface.Hooker {
             if (!url.contains("amazon.")) return
             if (WebViewHooker.debuggingEnabled.compareAndSet(false, true)) {
                 runCatching { WebView.setWebContentsDebuggingEnabled(true) }
-                    .onSuccess { Logger.log("WebView debugging enabled") }
-                    .onFailure { Logger.log("WebView debugging failed", it) }
+                    .onSuccess {
+                        Logger.log("WebView debugging enabled")
+                    }.onFailure { Logger.log("WebView debugging failed", it) }
             }
             StyleInjector.inject(webView, url)
         }

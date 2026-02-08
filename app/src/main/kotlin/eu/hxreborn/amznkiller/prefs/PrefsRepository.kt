@@ -44,8 +44,7 @@ class PrefsRepositoryImpl(
                         autoUpdate = Prefs.AUTO_UPDATE.read(localPrefs),
                         isStale =
                             lastFetched == 0L ||
-                                System.currentTimeMillis() - lastFetched
-                                > Prefs.STALE_THRESHOLD_MS,
+                                System.currentTimeMillis() - lastFetched > Prefs.STALE_THRESHOLD_MS,
                         darkThemeConfig =
                             runCatching {
                                 DarkThemeConfig.valueOf(
@@ -58,8 +57,7 @@ class PrefsRepositoryImpl(
             }
 
             emit()
-            val listener =
-                SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> emit() }
+            val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> emit() }
             localPrefs.registerOnSharedPreferenceChangeListener(listener)
             awaitClose { localPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
         }

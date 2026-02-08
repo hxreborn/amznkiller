@@ -90,15 +90,24 @@ fun MainNavDisplay(
         modifier = modifier,
         transitionSpec = {
             materialSharedAxisXIn(forward = true, slideDistance = slideInDistance) togetherWith
-                materialSharedAxisXOut(forward = true, slideDistance = slideInDistance)
+                materialSharedAxisXOut(
+                    forward = true,
+                    slideDistance = slideInDistance,
+                )
         },
         popTransitionSpec = {
             materialSharedAxisXIn(forward = false, slideDistance = slideInDistance) togetherWith
-                materialSharedAxisXOut(forward = false, slideDistance = slideInDistance)
+                materialSharedAxisXOut(
+                    forward = false,
+                    slideDistance = slideInDistance,
+                )
         },
         predictivePopTransitionSpec = {
             materialSharedAxisXIn(forward = false, slideDistance = slideInDistance) togetherWith
-                materialSharedAxisXOut(forward = false, slideDistance = slideInDistance)
+                materialSharedAxisXOut(
+                    forward = false,
+                    slideDistance = slideInDistance,
+                )
         },
         entryProvider =
             entryProvider {
@@ -163,8 +172,7 @@ fun BottomNav(
                         label = "iconCrossfade",
                     ) { isSelected ->
                         Icon(
-                            imageVector =
-                                if (isSelected) item.selectedIcon else item.unselectedIcon,
+                            imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
                             contentDescription = stringResource(item.titleRes),
                         )
                     }

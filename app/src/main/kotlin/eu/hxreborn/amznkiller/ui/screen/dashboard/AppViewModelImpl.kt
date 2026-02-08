@@ -73,8 +73,7 @@ class AppViewModelImpl(
                 val result = SelectorUpdater.fetchMerged(url)
                 if (result.selectors.isEmpty()) {
                     lastRefreshFailed.value = true
-                    lastRefreshOutcome.value =
-                        RefreshOutcome(UpdateEvent.Error("No selectors fetched"))
+                    lastRefreshOutcome.value = RefreshOutcome(UpdateEvent.Error("No selectors fetched"))
                     return@runCatching
                 }
                 when (result) {
@@ -104,8 +103,7 @@ class AppViewModelImpl(
                 }
             }.onFailure {
                 lastRefreshFailed.value = true
-                lastRefreshOutcome.value =
-                    RefreshOutcome(UpdateEvent.Error(it.message ?: "Update failed"))
+                lastRefreshOutcome.value = RefreshOutcome(UpdateEvent.Error(it.message ?: "Update failed"))
             }
             refreshing.value = false
         }

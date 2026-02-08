@@ -108,13 +108,8 @@ fun DashboardScreen(
             runCatching {
                 val pm = context.packageManager
                 val info = pm.getPackageInfo(AMAZON_PACKAGE, 0)
-                val icon =
-                    pm
-                        .getApplicationIcon(AMAZON_PACKAGE)
-                        .toBitmap(128, 128)
-                        .asImageBitmap()
-                val label =
-                    pm.getApplicationLabel(info.applicationInfo!!).toString()
+                val icon = pm.getApplicationIcon(AMAZON_PACKAGE).toBitmap(128, 128).asImageBitmap()
+                val label = pm.getApplicationLabel(info.applicationInfo!!).toString()
                 Triple(icon, label, info.versionName)
             }.getOrNull()
         }
@@ -122,42 +117,30 @@ fun DashboardScreen(
     val webViewInfo =
         remember {
             runCatching {
-                val pkg =
-                    WebView.getCurrentWebViewPackage()
-                        ?: return@runCatching null
+                val pkg = WebView.getCurrentWebViewPackage() ?: return@runCatching null
                 val pm = context.packageManager
                 val appInfo = pm.getApplicationInfo(pkg.packageName, 0)
-                val icon =
-                    pm
-                        .getApplicationIcon(appInfo)
-                        .toBitmap(128, 128)
-                        .asImageBitmap()
+                val icon = pm.getApplicationIcon(appInfo).toBitmap(128, 128).asImageBitmap()
                 val label = pm.getApplicationLabel(appInfo).toString()
                 Triple(icon, label, pkg.versionName)
             }.getOrNull()
         }
 
     Scaffold(
-        modifier =
-            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             LargeTopAppBar(
                 title = {
-                    val isExpandedSlot =
-                        LocalTextStyle.current.fontSize >=
-                            MaterialTheme.typography.headlineMedium.fontSize
+                    val isExpandedSlot = LocalTextStyle.current.fontSize >= MaterialTheme.typography.headlineMedium.fontSize
                     Column {
                         Text(
                             text = stringResource(R.string.app_bar_title),
                             style =
                                 if (isExpandedSlot) {
-                                    MaterialTheme.typography.headlineLarge
-                                        .copy(
-                                            lineHeight =
-                                                Tokens
-                                                    .ExpandedTitleLineHeight,
-                                        )
+                                    MaterialTheme.typography.headlineLarge.copy(
+                                        lineHeight = Tokens.ExpandedTitleLineHeight,
+                                    )
                                 } else {
                                     LocalTextStyle.current
                                 },
@@ -172,14 +155,9 @@ fun DashboardScreen(
                             text = tagline,
                             style = MaterialTheme.typography.bodySmall,
                             color =
-                                MaterialTheme.colorScheme
-                                    .onSurfaceVariant
-                                    .copy(
-                                        alpha =
-                                            1f -
-                                                scrollBehavior.state
-                                                    .collapsedFraction,
-                                    ),
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                    alpha = 1f - scrollBehavior.state.collapsedFraction,
+                                ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -193,10 +171,7 @@ fun DashboardScreen(
         when (val state = uiState) {
             is FilterUiState.Loading -> {
                 Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
@@ -208,10 +183,7 @@ fun DashboardScreen(
 
                 val outcome = prefs.lastRefreshOutcome
                 LaunchedEffect(outcome?.id) {
-                    if (
-                        outcome != null &&
-                        outcome.id != lastHandledOutcomeId
-                    ) {
+                    if (outcome != null && outcome.id != lastHandledOutcomeId) {
                         lastHandledOutcomeId = outcome.id
                         val message =
                             formatUpdateEventMessage(
@@ -225,18 +197,11 @@ fun DashboardScreen(
                 val surface = MaterialTheme.colorScheme.surfaceVariant
 
                 LazyColumn(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
                     contentPadding =
                         PaddingValues(
-                            top =
-                                innerPadding
-                                    .calculateTopPadding() + 8.dp,
-                            bottom =
-                                contentPadding
-                                    .calculateBottomPadding() + 16.dp,
+                            top = innerPadding.calculateTopPadding() + 8.dp,
+                            bottom = contentPadding.calculateBottomPadding() + 16.dp,
                         ),
                 ) {
                     item {
@@ -271,8 +236,7 @@ fun DashboardScreen(
                                                     AMAZON_PACKAGE,
                                                 )?.let {
                                                     it.addFlags(
-                                                        Intent
-                                                            .FLAG_ACTIVITY_NEW_TASK,
+                                                        Intent.FLAG_ACTIVITY_NEW_TASK,
                                                     )
                                                     context.startActivity(
                                                         it,
@@ -281,28 +245,19 @@ fun DashboardScreen(
                                         },
                                     ) {
                                         Icon(
-                                            imageVector =
-                                                Icons.AutoMirrored
-                                                    .Outlined
-                                                    .OpenInNew,
+                                            imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
                                             contentDescription =
                                                 stringResource(
-                                                    R.string
-                                                        .dashboard_launch,
+                                                    R.string.dashboard_launch,
                                                 ),
-                                            tint =
-                                                MaterialTheme.colorScheme
-                                                    .onSurfaceVariant,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     }
                                 }
                             }
                             HorizontalDivider(
-                                modifier =
-                                    Modifier.padding(vertical = 12.dp),
-                                color =
-                                    MaterialTheme.colorScheme
-                                        .outlineVariant,
+                                modifier = Modifier.padding(vertical = 12.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant,
                             )
                             TargetRow(webViewInfo, isGrayscale = true)
                         }
@@ -440,8 +395,7 @@ private fun UpdatesCard(
                             buildString {
                                 append(
                                     stringResource(
-                                        R.string
-                                            .hero_operational_subtitle,
+                                        R.string.hero_operational_subtitle,
                                     ),
                                 )
                                 append("\n")
@@ -465,8 +419,7 @@ private fun UpdatesCard(
                                     append("\n")
                                     append(
                                         stringResource(
-                                            R.string
-                                                .dashboard_last_checked,
+                                            R.string.dashboard_last_checked,
                                             relativeTime(
                                                 prefs.lastFetched,
                                             ),
@@ -665,10 +618,7 @@ private fun MetricsGrid(
 ) {
     val shape = shapeForPosition(1, 0)
     Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Column(
@@ -711,19 +661,16 @@ private fun MetricsGrid(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector =
-                        Icons.AutoMirrored.Outlined.Rule,
+                    imageVector = Icons.AutoMirrored.Outlined.Rule,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint =
-                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.weight(1f))
                 Icon(
                     imageVector = Icons.Rounded.ChevronRight,
                     contentDescription = null,
-                    tint =
-                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Spacer(Modifier.height(12.dp))
@@ -764,10 +711,7 @@ private fun TargetRow(
                 bitmap = info.first,
                 contentDescription = null,
                 colorFilter = if (isGrayscale) GRAYSCALE else null,
-                modifier =
-                    Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(6.dp)),
+                modifier = Modifier.size(32.dp).clip(RoundedCornerShape(6.dp)),
             )
         } else {
             Icon(
@@ -780,9 +724,7 @@ private fun TargetRow(
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text =
-                    info?.second
-                        ?: stringResource(R.string.target_title),
+                text = info?.second ?: stringResource(R.string.target_title),
                 style = MaterialTheme.typography.bodyLarge,
             )
             Text(
@@ -846,8 +788,7 @@ private class PreviewAppViewModel : AppViewModel() {
                         isRefreshFailed = false,
                         isStale = false,
                         selectorCount = 42,
-                        lastFetched =
-                            System.currentTimeMillis() - 3_600_000,
+                        lastFetched = System.currentTimeMillis() - 3_600_000,
                         cachedSelectors =
                             listOf(
                                 ".s-sponsored-label",
@@ -858,8 +799,7 @@ private class PreviewAppViewModel : AppViewModel() {
                     ),
             ),
         )
-    override val uiState: StateFlow<FilterUiState> =
-        _uiState.asStateFlow()
+    override val uiState: StateFlow<FilterUiState> = _uiState.asStateFlow()
 
     override fun refreshAll() {}
 

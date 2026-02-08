@@ -1,6 +1,6 @@
 name: False Positive
 description: Selector hiding legitimate Amazon content
-labels: ["false-positive"]
+labels: [ "false-positive" ]
 body:
   - type: textarea
     id: what_hidden
