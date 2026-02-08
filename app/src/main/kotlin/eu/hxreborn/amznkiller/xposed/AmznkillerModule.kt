@@ -33,8 +33,7 @@ class AmznkillerModule(
 
     override fun onPackageLoaded(param: PackageLoadedParam) {
         Logger.log(
-            "onPackageLoaded: ${param.packageName} " +
-                "isFirst=${param.isFirstPackage}",
+            "onPackageLoaded: ${param.packageName} " + "isFirst=${param.isFirstPackage}",
         )
         if (param.packageName != AMAZON_PACKAGE || !param.isFirstPackage) return
 
@@ -82,9 +81,8 @@ class AmznkillerModule(
     private fun showToast(classLoader: ClassLoader) {
         runCatching {
             val proc =
-                Application::class.java
-                    .getMethod("getProcessName")
-                    .invoke(null) as? String ?: return
+                Application::class.java.getMethod("getProcessName").invoke(null) as? String
+                    ?: return
             if (!proc.contains("amazon")) return
             Handler(Looper.getMainLooper()).postDelayed(
                 {
@@ -96,9 +94,7 @@ class AmznkillerModule(
                                 classLoader,
                             )
                         val ctx =
-                            actThread
-                                .getMethod("currentApplication")
-                                .invoke(null) as? Application
+                            actThread.getMethod("currentApplication").invoke(null) as? Application
                                 ?: return@postDelayed
                         Toast
                             .makeText(

@@ -133,9 +133,7 @@ fun SettingsScreen(
         topBar = {
             LargeTopAppBar(
                 title = {
-                    val isExpandedSlot =
-                        LocalTextStyle.current.fontSize >=
-                            MaterialTheme.typography.headlineMedium.fontSize
+                    val isExpandedSlot = LocalTextStyle.current.fontSize >= MaterialTheme.typography.headlineMedium.fontSize
                     Text(
                         text = stringResource(R.string.tab_settings),
                         style =
@@ -157,10 +155,7 @@ fun SettingsScreen(
 
         ProvidePreferenceLocals {
             LazyColumn(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
                 contentPadding =
                     PaddingValues(
                         top = innerPadding.calculateTopPadding(),
@@ -175,11 +170,7 @@ fun SettingsScreen(
                 val appearanceItemCount = 2
                 val themeShape = shapeForPosition(appearanceItemCount, 0)
                 preference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = themeShape)
-                            .clip(themeShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = themeShape).clip(themeShape),
                     key = "theme",
                     icon = {
                         Icon(
@@ -269,11 +260,7 @@ fun SettingsScreen(
 
                 val syncShape = shapeForPosition(ruleItemCount, 1)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = syncShape)
-                            .clip(syncShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = syncShape).clip(syncShape),
                     key = "auto_update",
                     value = prefs.autoUpdate,
                     icon = { _ ->
@@ -307,11 +294,7 @@ fun SettingsScreen(
                 val advancedItemCount = 3
                 val injectionShape = shapeForPosition(advancedItemCount, 0)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = injectionShape)
-                            .clip(injectionShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = injectionShape).clip(injectionShape),
                     key = "css_injection",
                     value = prefs.injectionEnabled,
                     icon = {
@@ -374,11 +357,7 @@ fun SettingsScreen(
 
                 val debugShape = shapeForPosition(advancedItemCount, 2)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = debugShape)
-                            .clip(debugShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = debugShape).clip(debugShape),
                     key = "debug_logs",
                     value = prefs.debugLogs,
                     icon = {
@@ -407,11 +386,7 @@ fun SettingsScreen(
                 val aboutItemCount = 4
                 val gitRepoShape = shapeForPosition(aboutItemCount, 0)
                 preference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = gitRepoShape)
-                            .clip(gitRepoShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = gitRepoShape).clip(gitRepoShape),
                     key = "git_repo",
                     icon = {
                         Icon(
@@ -439,11 +414,7 @@ fun SettingsScreen(
 
                 val licensesShape = shapeForPosition(aboutItemCount, 1)
                 preference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = licensesShape)
-                            .clip(licensesShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = licensesShape).clip(licensesShape),
                     key = "licenses",
                     icon = {
                         Icon(
@@ -467,11 +438,7 @@ fun SettingsScreen(
 
                 val versionShape = shapeForPosition(aboutItemCount, 2)
                 preference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = versionShape)
-                            .clip(versionShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = versionShape).clip(versionShape),
                     key = "app_version",
                     icon = {
                         Icon(
@@ -496,8 +463,7 @@ fun SettingsScreen(
                                 "version",
                                 "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                             )
-                        val clipboard =
-                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(clip)
                         Toast
                             .makeText(
@@ -512,11 +478,7 @@ fun SettingsScreen(
 
                 val issueShape = shapeForPosition(aboutItemCount, 3)
                 preference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = issueShape)
-                            .clip(issueShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = issueShape).clip(issueShape),
                     key = "report_issue",
                     icon = {
                         Icon(
@@ -729,10 +691,7 @@ fun LicensesScreen(onBack: () -> Unit = {}) {
         contentWindowInsets = WindowInsets(0),
     ) { innerPadding ->
         LibrariesContainer(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
         )
     }
 }

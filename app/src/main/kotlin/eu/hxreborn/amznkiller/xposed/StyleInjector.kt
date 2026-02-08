@@ -44,12 +44,8 @@ object StyleInjector {
         val scripts = cached
         if (scripts == null || scripts.hash != hash) {
             // Minify rules to reduce escaping/JS payload size.
-            val cssRules =
-                selectors.joinToString(separator = "") { "$it{display:none!important;}" }
-            val escaped =
-                cssRules
-                    .replace("\\", "\\\\")
-                    .replace("'", "\\'")
+            val cssRules = selectors.joinToString(separator = "") { "$it{display:none!important;}" }
+            val escaped = cssRules.replace("\\", "\\\\").replace("'", "\\'")
 
             val expectedRules = selectors.size
             cached =

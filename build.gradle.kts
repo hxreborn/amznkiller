@@ -1,7 +1,4 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import org.gradle.api.plugins.BasePlugin
-import org.gradle.api.tasks.Delete
-import org.gradle.api.tasks.Exec
 
 plugins {
     base

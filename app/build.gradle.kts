@@ -27,10 +27,7 @@ android {
     signingConfigs {
         create("release") {
             fun secret(name: String): String? =
-                providers
-                    .gradleProperty(name)
-                    .orElse(providers.environmentVariable(name))
-                    .orNull
+                providers.gradleProperty(name).orElse(providers.environmentVariable(name)).orNull
 
             val storeFilePath = secret("RELEASE_STORE_FILE")
             if (!storeFilePath.isNullOrBlank()) {

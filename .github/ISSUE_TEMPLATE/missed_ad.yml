@@ -1,6 +1,6 @@
 name: Missed Ad
 description: Ad element not blocked, needs new selector
-labels: ["missed-ad"]
+labels: [ "missed-ad" ]
 body:
   - type: dropdown
     id: location

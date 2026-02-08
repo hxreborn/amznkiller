@@ -2,10 +2,7 @@ package eu.hxreborn.amznkiller.selectors
 
 object SelectorSanitizer {
     fun sanitize(lines: Sequence<String>): List<String> =
-        lines
-            .map { it.trim() }
-            .filter(::isSafe)
-            .toList()
+        lines.map { it.trim() }.filter(::isSafe).toList()
 
     private fun isSafe(s: String): Boolean {
         if (s.isEmpty()) return false

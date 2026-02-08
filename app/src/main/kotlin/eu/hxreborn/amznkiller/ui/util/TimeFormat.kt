@@ -24,9 +24,7 @@ internal fun relativeTime(millis: Long): String {
         }
 
         else -> {
-            DateFormat
-                .getDateInstance(DateFormat.SHORT)
-                .format(Date(millis))
+            DateFormat.getDateInstance(DateFormat.SHORT).format(Date(millis))
         }
     }
 }
