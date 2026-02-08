@@ -117,11 +117,9 @@ class AmznkillerModule(
                 "Happy ad-free shopping",
                 "No ads attached. Have fun",
                 "CSS injected. You're welcome",
-                "Go forth, unsponsored",
                 "Jeff won't see you coming",
                 "Cleaner than he deserves",
-                "Ad-free mode: engaged",
-                "Godspeed, clean shopper",
+                "Ad-free mode: enabled",
             )
     }
 }

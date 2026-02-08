@@ -9,13 +9,13 @@ Xposed module that hides ads and sponsored content in Amazon Shopping via CSS in
 
 ## Features
 
-- Hides sponsored cards, video carousels, and promotional components inside Amazon WebViews
-- Remote selector lists with embedded fallback. Custom URL support for self-maintained lists
-- Selector sanitizer rejects unsafe input (CSS injection primitives, adblock syntax)
-- Companion app with dashboard status, manual refresh, and settings
-- Works alongside Private DNS, hosts files, and network-level blockers
-- Cosmetic only for now. No network-level blocking
-- It's FOSS
+- **Hides intrusive ads**: Removes sponsored product cards, autoplay video carousels, similar items widgets, and promotional banners from the Amazon Android app
+- **Bundled filters**: Works out of the box. Fetches updated lists remotely when needed
+- **Custom selector lists**: Point to your own selector list URL
+- **Input sanitization**: Validates CSS to prevent code injection vulnerabilities
+- **Material 3 companion app**: Dashboard with real-time status, manual refresh, selector count, and quick toggles
+- **Complementary blocking**: Works alongside Private DNS, hosts files, and network-level blockers without conflict
+- **FOSS**
 
 ## Requirements
 
@@ -27,66 +27,83 @@ Xposed module that hides ads and sponsored content in Amazon Shopping via CSS in
 
 1. Download the APK:
 
-   <a href="../../releases"><img src=".github/assets/badge_github.png" height="60" alt="Get it on GitHub" /></a>
-   <a href="http://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22eu.hxreborn.amznkiller%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fhxreborn%2Famznkiller%22%2C%22author%22%3A%22rafareborn%22%2C%22name%22%3A%22AmznKiller%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%7D%22%7D"><img src=".github/assets/badge_obtainium.png" height="60" alt="Get it on Obtainium" /></a>
+    <a href="../../releases"><img src="https://github.com/user-attachments/assets/d18f850c-e4d2-4e00-8b03-3b0e87e90954" height="60" alt="Get it on GitHub" /></a>
+    <a href="http://apps.obtainium.imranr.dev/redirect.html?r=obtainium://app/%7B%22id%22%3A%22eu.hxreborn.amznkiller%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fhxreborn%2Famznkiller%22%2C%22author%22%3A%22rafareborn%22%2C%22name%22%3A%22AmznKiller%22%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%7D%22%7D"><img src="https://github.com/user-attachments/assets/dffe8fb9-c0d1-470b-8d69-6d5b38a8aa2d" height="60" alt="Get it on Obtainium" /></a>
 
-2. Enable the module in LSPosed and scope it to **Amazon Shopping**
+2. Enable the module in LSPosed and scope it to `com.amazon.mShop.android.shopping`
 3. Open the AmznKiller companion app to verify the module is active and optionally fetch updated
    lists (built-in filters work out of the box)
 4. Launch Amazon Shopping and browse ad-free
 
 ## Screenshots
 
-<details>
-<summary>Before vs after (placeholders)</summary>
+Search query: *macbook air m1 16gb 512*. Stock app shows just 2 real laptops. The rest are ads.
 
-<p>
-  <img src="docs/screenshots/compare_before.svg" width="360" alt="Before (placeholder)" />
-  <img src="docs/screenshots/compare_after.svg" width="360" alt="After (placeholder)" />
-</p>
+<table>
+<tr><th>Stock</th><th>Patched</th></tr>
+<tr>
+  <td><img src="https://github.com/user-attachments/assets/4c2fb092-0e63-4a34-b9ba-afe1a4028b09" width="280" alt="Stock Amazon app" /></td>
+  <td><img src="https://github.com/user-attachments/assets/135e1fec-b0e9-4dc1-9d58-49fabd825262" width="280" alt="Patched Amazon app" /></td>
+</tr>
+</table>
 
-</details>
+**Settings app**
 
-<details>
-<summary>Companion app (placeholders)</summary>
-
-<p>
-  <img src="docs/screenshots/app_dashboard.svg" width="360" alt="Dashboard (placeholder)" />
-  <img src="docs/screenshots/app_settings.svg" width="360" alt="Settings (placeholder)" />
-</p>
-
-</details>
+<table>
+<tr>
+  <td><img src="https://github.com/user-attachments/assets/d875c580-d81c-4be7-a857-98bc13656432" width="280" alt="Dashboard" /></td>
+  <td><img src="https://github.com/user-attachments/assets/cb69012d-94a0-4ca9-b6d7-9cd97cd5c580" width="280" alt="Settings" /></td>
+</tr>
+<tr>
+  <td><img src="https://github.com/user-attachments/assets/a374ccec-9dce-4538-bdad-e89c15e24307" width="280" alt="Settings (advanced)" /></td>
+  <td></td>
+</tr>
+</table>
 
 ## FAQ
 
-**Nothing changes in Amazon**
+<details>
+<summary>Nothing changes in Amazon</summary>
 
-See [Troubleshooting](#troubleshooting).
+See [Troubleshooting](#troubleshooting). Most common causes: module not scoped correctly,
+missing force stop on Amazon Shopping, or LSPosed not activated.
+</details>
 
-**Some products or sections are missing (blank lists, missing tiles)**
+<details>
+<summary>Some products or sections are missing (blank lists, missing tiles)</summary>
 
 1. Disable CSS injection in AmznKiller settings to confirm selectors are the cause.
 2. Update selectors from the dashboard (tap refresh).
 3. If it persists, open an issue with: AmznKiller version, Amazon app version, WebView version,
    selector count.
+</details>
 
-**Sync says "remote failed" or "embedded only"**
+<details>
+<summary>Sync says "remote failed" or "embedded only"</summary>
 
 Embedded selectors are still applied. Check connectivity, reset the selector URL in settings,
 and refresh again.
+</details>
 
-**Does this block network requests or just hide elements?**
+<details>
+<summary>Does this block network requests or just hide elements?</summary>
 
 Cosmetic only. It injects CSS to hide ad elements. Network requests still happen.
 Works alongside DNS-based blockers (AdGuard, NextDNS, Private DNS, hosts files).
+</details>
 
-**Does this work on Amazon Lite or other Amazon apps?**
+<details>
+<summary>Does this work on Amazon Lite or other Amazon apps?</summary>
 
 No. The module is scoped to `com.amazon.mShop.android.shopping` only for now.
+</details>
 
-**Do I need to reboot after updating selectors?**
+<details>
+<summary>Do I need to reboot after updating selectors?</summary>
 
-No. Updated selectors apply on the next page load inside Amazon Shopping.
+No. Updated selectors apply on the next page load inside Amazon Shopping. Force stop
+Amazon Shopping if changes don't appear immediately.
+</details>
 
 ## Troubleshooting
 
@@ -117,7 +134,7 @@ Pull requests are welcome. For bugs or feature requests, [open an issue](https:/
 
 ## License
 
-<a href="LICENSE"><img src=".github/assets/gplv3.svg" height="90" alt="GPLv3"></a>
+<a href="LICENSE"><img src="https://github.com/user-attachments/assets/b211cf0d-e255-421c-9213-6b6258676013" height="90" alt="GPLv3"></a>
 
 This project is licensed under the GNU General Public License v3.0 – see the [LICENSE](LICENSE) file
 for details.
