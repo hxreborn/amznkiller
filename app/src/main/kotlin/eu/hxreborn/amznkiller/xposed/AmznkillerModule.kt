@@ -103,7 +103,7 @@ class AmznkillerModule(
                         Toast
                             .makeText(
                                 ctx,
-                                "amznkiller active",
+                                TOAST_MESSAGES.random(),
                                 Toast.LENGTH_SHORT,
                             ).show()
                     }
@@ -117,5 +117,17 @@ class AmznkillerModule(
         const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
         private const val TOAST_DELAY_MS = 1500L
         val executor: ExecutorService = Executors.newSingleThreadExecutor()
+
+        private val TOAST_MESSAGES =
+            arrayOf(
+                "Happy ad-free shopping",
+                "No ads attached. Have fun",
+                "CSS injected. You're welcome",
+                "Go forth, unsponsored",
+                "Jeff won't see you coming",
+                "Cleaner than he deserves",
+                "Ad-free mode: engaged",
+                "Godspeed, clean shopper",
+            )
     }
 }
