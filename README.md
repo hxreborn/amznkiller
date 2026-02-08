@@ -1,8 +1,6 @@
 # AmznKiller
 
-AmznKiller is an Xposed module built on the modern LSPosed API. It currently does cosmetic ad blocking
-via CSS injection: it hides ads, "Sponsored" products, video carousels, and other promotional junk
-inside the Amazon Android app.
+Xposed module that hides ads and sponsored content in Amazon Shopping via CSS injection.
 
 ![Update Selectors](https://github.com/hxreborn/amznkiller/actions/workflows/update-selectors.yml/badge.svg)
 ![Validate Selectors](https://github.com/hxreborn/amznkiller/actions/workflows/validate-selectors.yml/badge.svg)
@@ -11,15 +9,13 @@ inside the Amazon Android app.
 
 ## Features
 
-- Cosmetic ad blocking inside Amazon Shopping, CSS injection into WebViews
-- Hides sponsored cards, carousels, promo components
-- De-prioritizes paid placements, cleaner search relevance
-- Selector sources, remote list support, embedded fallback, custom selector URL, supports your own maintained lists
-- Selector sanitizer, rejects unsafe selector input
-- Companion app, status and configuration, manual refresh
-- Compatible with Private DNS and hosts-based blocking, complements network blockers
-- FOSS
-- No network-level blocking, for now
+- Hides sponsored cards, video carousels, and promotional components inside Amazon WebViews
+- Remote selector lists with embedded fallback. Custom URL support for self-maintained lists
+- Selector sanitizer rejects unsafe input (CSS injection primitives, adblock syntax)
+- Companion app with dashboard status, manual refresh, and settings
+- Works alongside Private DNS, hosts files, and network-level blockers
+- Cosmetic only for now. No network-level blocking
+- It's FOSS
 
 ## Requirements
 
@@ -63,33 +59,43 @@ inside the Amazon Android app.
 
 ## FAQ
 
-- **Nothing changes in Amazon**
-  Try: confirm the module is enabled in LSPosed and scoped to `com.amazon.mShop.android.shopping`; force stop
-  Amazon Shopping and open it again (sometimes a reboot is needed); open AmznKiller and check the dashboard
-  shows Xposed as active and a selector count above 0.
+**Nothing changes in Amazon**
 
-- **Some products or sections do not appear (blank lists, missing tiles)**
-  Try: disable `CSS injection` in AmznKiller settings to confirm it is rule-related; update selectors from the
-  dashboard (tap refresh); if it still happens, open an issue and include AmznKiller version, Amazon app version,
-  WebView version, and selector count.
+See [Troubleshooting](#troubleshooting).
 
-- **Updater says remote failed / embedded only**
-  The embedded rules are still applied. Check connectivity, then reset the selector URL in settings and refresh again.
+**Some products or sections are missing (blank lists, missing tiles)**
 
-- **Does this block ads at the network level?**
-  No. For now it is cosmetic only: it hides elements inside Amazon WebViews by injecting CSS.
+1. Disable CSS injection in AmznKiller settings to confirm selectors are the cause.
+2. Update selectors from the dashboard (tap refresh).
+3. If it persists, open an issue with: AmznKiller version, Amazon app version, WebView version,
+   selector count.
 
-- **Compatible with Private DNS / hosts files / AdGuard / NextDNS?**
-  Yes. AmznKiller is cosmetic (CSS injection) and doesn’t replace network-level blocking. Using both is fine and recommended.
-  If Amazon pages fail to load with a DNS/hosts setup, that’s a network-blocking issue: allowlist the required domains.
+**Sync says "remote failed" or "embedded only"**
+
+Embedded selectors are still applied. Check connectivity, reset the selector URL in settings,
+and refresh again.
+
+**Does this block network requests or just hide elements?**
+
+Cosmetic only. It injects CSS to hide ad elements. Network requests still happen.
+Works alongside DNS-based blockers (AdGuard, NextDNS, Private DNS, hosts files).
+
+**Does this work on Amazon Lite or other Amazon apps?**
+
+No. The module is scoped to `com.amazon.mShop.android.shopping` only for now.
+
+**Do I need to reboot after updating selectors?**
+
+No. Updated selectors apply on the next page load inside Amazon Shopping.
 
 ## Troubleshooting
 
-1. LSPosed: module enabled, scoped to Amazon Shopping.
-2. Restart: force stop Amazon Shopping, then reopen (or reboot).
-3. Sanity check (AmznKiller dashboard): Xposed active; selectors > 0.
-4. Refresh rules: tap refresh on the dashboard; if needed, reset the selector URL in settings and refresh again.
-5. If pages look broken: temporarily disable `CSS injection`, reopen Amazon Shopping, then re-enable after updating rules.
+1. Confirm the module is enabled in LSPosed and scoped to Amazon Shopping.
+2. Force stop Amazon Shopping, then reopen (or reboot).
+3. Open AmznKiller. Verify Xposed is active and selector count is above 0.
+4. Tap refresh on the dashboard. If it fails, reset the selector URL in settings and retry.
+5. If pages look broken, disable CSS injection temporarily, reopen Amazon Shopping, update
+   selectors, then re-enable.
 
 ## Build
 
@@ -104,6 +110,10 @@ Requires JDK 21. Configure `local.properties`:
 ```properties
 sdk.dir=/path/to/android/sdk
 ```
+
+## Contributing
+
+Pull requests are welcome. For bugs or feature requests, [open an issue](https://github.com/hxreborn/amznkiller/issues/new/choose).
 
 ## License
 

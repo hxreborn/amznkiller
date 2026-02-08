@@ -22,14 +22,14 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.FormatPaint
+import androidx.compose.material.icons.outlined.Gavel
+import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.DataObject
-import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
@@ -58,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -235,7 +236,7 @@ fun SettingsScreen(
                     key = "filter_sources",
                     icon = {
                         Icon(
-                            imageVector = Icons.Outlined.FilterList,
+                            imageVector = Icons.Outlined.Link,
                             contentDescription = null,
                         )
                     },
@@ -265,7 +266,7 @@ fun SettingsScreen(
                     value = prefs.autoUpdate,
                     icon = {
                         Icon(
-                            imageVector = Icons.Outlined.Sync,
+                            imageVector = Icons.Outlined.CloudSync,
                             contentDescription = null,
                         )
                     },
@@ -384,59 +385,7 @@ fun SettingsScreen(
                 )
 
                 val aboutItemCount = 4
-                val gitRepoShape = shapeForPosition(aboutItemCount, 0)
-                preference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = gitRepoShape).clip(gitRepoShape),
-                    key = "git_repo",
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.DataObject,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_git_repo),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_git_repo_summary))
-                    },
-                    onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, REPO_URL.toUri()),
-                        )
-                    },
-                )
-
-                item { Spacer(Modifier.height(2.dp)) }
-
-                val licensesShape = shapeForPosition(aboutItemCount, 1)
-                preference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = licensesShape).clip(licensesShape),
-                    key = "licenses",
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Description,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_licenses),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_licenses_summary))
-                    },
-                    onClick = onNavigateToLicenses,
-                )
-
-                item { Spacer(Modifier.height(2.dp)) }
-
-                val versionShape = shapeForPosition(aboutItemCount, 2)
+                val versionShape = shapeForPosition(aboutItemCount, 0)
                 preference(
                     modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = versionShape).clip(versionShape),
                     key = "app_version",
@@ -476,13 +425,65 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(2.dp)) }
 
+                val gitRepoShape = shapeForPosition(aboutItemCount, 1)
+                preference(
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = gitRepoShape).clip(gitRepoShape),
+                    key = "git_repo",
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_github_24),
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_git_repo),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(text = stringResource(R.string.settings_git_repo_summary))
+                    },
+                    onClick = {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, REPO_URL.toUri()),
+                        )
+                    },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val licensesShape = shapeForPosition(aboutItemCount, 2)
+                preference(
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = licensesShape).clip(licensesShape),
+                    key = "licenses",
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.Gavel,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_licenses),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(text = stringResource(R.string.settings_licenses_summary))
+                    },
+                    onClick = onNavigateToLicenses,
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
                 val issueShape = shapeForPosition(aboutItemCount, 3)
                 preference(
                     modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = issueShape).clip(issueShape),
                     key = "report_issue",
                     icon = {
                         Icon(
-                            imageVector = Icons.Rounded.BugReport,
+                            imageVector = Icons.Outlined.ErrorOutline,
                             contentDescription = null,
                         )
                     },
@@ -492,9 +493,12 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
+                    summary = {
+                        Text(text = stringResource(R.string.settings_report_issue_summary))
+                    },
                     onClick = {
                         context.startActivity(
-                            Intent(Intent.ACTION_VIEW, "$REPO_URL/issues".toUri()),
+                            Intent(Intent.ACTION_VIEW, "$REPO_URL/issues/new/choose".toUri()),
                         )
                     },
                 )

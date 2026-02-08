@@ -2,11 +2,11 @@
 <resources>
     <string name="app_name">AmznKiller</string>
     <string name="app_bar_title">AmznKiller</string>
-    <string name="app_desc">Strip out ads and purge low-quality promotional products from Amazon Shopping</string>
+    <string name="app_desc">Hide ads and sponsored products in Amazon Shopping via CSS injection</string>
 
     <string name="target_title">Amazon Shopping</string>
 
-    <string name="config_active_selectors">Active Selectors</string>
+    <string name="config_active_selectors">Active selectors</string>
 
     <string name="env_xposed">Xposed Framework</string>
     <string name="env_xposed_active">Active (%s)</string>
@@ -22,20 +22,20 @@
     <string name="dashboard_launch">Launch</string>
     <string name="dashboard_method">Method</string>
     <string name="dashboard_css_injection">CSS Injection</string>
-    <string name="dashboard_rules_count">%d Rules</string>
+    <string name="dashboard_rules_count">%d rules</string>
     <string name="dashboard_rules_updated">Updated %d rules</string>
-    <string name="dashboard_last_checked">Last checked %s ago</string>
+    <string name="dashboard_last_checked">Last checked %s</string>
 
     <string name="hero_operational_title">Up to date</string>
-    <string name="hero_operational_subtitle">Definitions match the source</string>
-    <string name="hero_stale_title">Update Available</string>
-    <string name="hero_stale_subtitle">Definitions may be outdated</string>
+    <string name="hero_operational_subtitle">Selectors are up to date</string>
+    <string name="hero_stale_title">Update available</string>
+    <string name="hero_stale_subtitle">Selectors may be outdated. Tap refresh to sync</string>
     <string name="hero_checking_title">Checking for Updates</string>
-    <string name="hero_checking_subtitle">Fetching latest definitions\u2026</string>
-    <string name="hero_error_title">Check Failed</string>
+    <string name="hero_checking_subtitle">Fetching latest selectors\u2026</string>
+    <string name="hero_error_title">Sync failed</string>
 
     <string name="snackbar_up_to_date">Already up to date</string>
-    <string name="snackbar_updated">Updated (%s rules)</string>
+    <string name="snackbar_updated">Synced %s rules</string>
     <string name="snackbar_amazon_not_installed">Amazon Shopping not installed</string>
 
     <string name="rules_copied">Copied to clipboard</string>
@@ -55,18 +55,18 @@
     <string name="settings_debug_logs">Debug logs</string>
     <string name="settings_theme_summary">Choose light, dark, or system default</string>
     <string name="settings_dynamic_color_summary">Use Material You colors from wallpaper</string>
-    <string name="settings_css_injection_summary">Inject custom styles into Amazon WebViews</string>
+    <string name="settings_css_injection_summary">Inject CSS rules into Amazon app to hide ads and sponsored junk</string>
     <string name="settings_webview_debugging">WebView debugging</string>
     <string name="settings_webview_debugging_summary">Attach DevTools to Amazon WebViews. Enable only when needed</string>
-    <string name="settings_debug_logs_summary">Log detailed module activity for troubleshooting</string>
+    <string name="settings_debug_logs_summary">Write verbose hook and injection logs. Disable when not debugging</string>
 
     <string name="settings_rule_management">Rule Management</string>
-    <string name="settings_filter_sources">Filter sources</string>
-    <string name="settings_filter_sources_summary">Configure where definitions are fetched from</string>
+    <string name="settings_filter_sources">Selector sources</string>
+    <string name="settings_filter_sources_summary">Set the remote URL for selector lists</string>
     <string name="settings_filter_list_default">Default</string>
-    <string name="settings_filter_list_custom">Custom</string>
-    <string name="settings_background_sync">Background sync</string>
-    <string name="settings_background_sync_summary">Periodically check for updated definitions on app launch</string>
+    <string name="settings_filter_list_custom">Custom URL</string>
+    <string name="settings_background_sync">Auto-sync</string>
+    <string name="settings_background_sync_summary">Fetch updated selectors daily when the app opens</string>
     <string name="settings_selector_url_dialog_title">Selector URL</string>
     <string name="settings_selector_url_reset">Reset</string>
     <string name="settings_selector_url_save">Save</string>
@@ -78,11 +78,12 @@
     <string name="settings_about">About</string>
     <string name="settings_app_version">App version</string>
     <string name="settings_version_copied">Version copied</string>
-    <string name="settings_git_repo">Git repository</string>
-    <string name="settings_git_repo_summary">Track changes and view source code</string>
+    <string name="settings_git_repo">Source code</string>
+    <string name="settings_git_repo_summary">Browse the project on GitHub</string>
     <string name="settings_licenses">Open source licenses</string>
-    <string name="settings_licenses_summary">License details for open source software</string>
-    <string name="settings_report_issue">Report issue</string>
+    <string name="settings_licenses_summary">Third-party libraries and their licenses</string>
+    <string name="settings_report_issue">Report an issue</string>
+    <string name="settings_report_issue_summary">Report a bug or suggest a feature on GitHub</string>
 
     <string-array name="taglines">
         <item>Jeff won\'t miss the $0.02</item>
