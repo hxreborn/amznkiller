@@ -1,0 +1,9 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_splash_vector">
+    <target
+        android:name="base"
+        android:animation="@animator/splash_base_scale" />
+    <target
+        android:name="sticker"
+        android:animation="@animator/splash_sticker_bounce" />
+</animated-vector>

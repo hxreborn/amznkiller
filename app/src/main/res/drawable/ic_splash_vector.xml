@@ -1,0 +1,97 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="256dp"
+    android:height="256dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Base: official Amazon Shopping icon, padded 15u for circle mask -->
+    <group
+        android:name="base"
+        android:pivotX="45"
+        android:pivotY="45"
+        android:scaleX="0.85"
+        android:scaleY="0.85"
+        android:translateX="15"
+        android:translateY="15">
+
+        <!-- Beige rounded rectangle -->
+        <path
+            android:fillColor="#D2AF76"
+            android:pathData="M 68.85,90 h -47.7 C 9.469,90 0,80.531 0,68.85 v -47.7 C 0,9.469 9.469,0 21.15,0 h 47.7 C 80.531,0 90,9.469 90,21.15 v 47.7 C 90,80.531 80.531,90 68.85,90 z" />
+
+        <!-- Amazon smile curve + arrow tip -->
+        <path
+            android:fillColor="#020101"
+            android:pathData="M 76.92,48.315 c -8.644,6.384 -21.202,9.773 -32,9.773 c -15.133,0 -28.768,-5.596 -39.067,-14.897 c -0.814,-0.736 -0.079,-1.734 0.893,-1.156 c 11.14,6.463 24.88,10.378 39.094,10.378 c 9.589,0 20.125,-1.997 29.819,-6.095 C 77.104,45.661 78.339,47.264 76.92,48.315 z M 80.52,44.216 c -1.103,-1.419 -7.304,-0.683 -10.115,-0.342 c -0.841,0.105 -0.972,-0.631 -0.21,-1.182 c 4.939,-3.468 13.057,-2.47 14.003,-1.314 c 0.946,1.182 -0.263,9.3 -4.887,13.189 c -0.709,0.604 -1.392,0.289 -1.077,-0.499 C 79.285,51.468 81.623,45.609 80.52,44.216 z" />
+
+        <!-- Blue zigzag ribbon fill -->
+        <path
+            android:fillColor="#38A5DE"
+            android:pathData="M 31.8,17.94 L 36.1,22.25 L 36.29,22.25 L 40.6,17.94 L 44.9,22.25 L 45.1,22.25 L 49.4,17.94 L 53.71,22.25 L 53.9,22.25 L 58.2,17.94 L 62.01,21.74 L 62.01,0 L 27.99,0 L 27.99,21.74 Z" />
+
+        <!-- Blue zigzag ribbon border -->
+        <path
+            android:fillColor="#4A95AA"
+            android:pathData="M 62.51,22.95 L 58.2,18.65 L 54.1,22.75 L 53.5,22.75 L 49.4,18.65 L 45.3,22.75 L 44.7,22.75 L 40.6,18.65 L 36.5,22.75 L 35.9,22.75 L 31.8,18.65 L 27.49,22.95 L 27.49,0 L 28.49,0 L 28.49,20.54 L 31.8,17.24 L 36.2,21.64 L 40.6,17.24 L 45,21.64 L 49.4,17.24 L 53.8,21.64 L 58.2,17.24 L 61.51,20.54 L 61.51,0 L 62.51,0 Z" />
+
+        <!-- Card border outline -->
+        <path
+            android:fillColor="#BB9B6D"
+            android:pathData="M 68.588,90 H 21.412 C 9.605,90 0,80.395 0,68.588 V 21.412 C 0,9.605 9.605,0 21.412,0 h 47.176 C 80.395,0 90,9.605 90,21.412 v 47.176 C 90,80.395 80.395,90 68.588,90 z M 21.412,0.989 c -11.261,0 -20.423,9.162 -20.423,20.423 v 47.176 c 0,11.262 9.162,20.423 20.423,20.423 h 47.176 c 11.262,0 20.423,-9.162 20.423,-20.423 V 21.412 c 0,-11.261 -9.162,-20.423 -20.423,-20.423 H 21.412 z" />
+    </group>
+
+    <!-- Sticker: "No ADS" prohibition badge -->
+    <group
+        android:name="sticker"
+        android:pivotX="60"
+        android:pivotY="54"
+        android:scaleX="0"
+        android:scaleY="0">
+
+        <!-- White oval background -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M 60,54 m -22,0 a 22,14 0 1,0 44,0 a 22,14 0 1,0 -44,0" />
+
+        <!-- Letter A -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#333333"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 48,59 L 51,49 L 54,59 M 49.2,55.5 L 52.8,55.5" />
+
+        <!-- Letter D -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#333333"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 56.5,49 L 56.5,59 M 56.5,49 L 60,49 C 64,49 64,59 60,59 L 56.5,59" />
+
+        <!-- Letter S -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#333333"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:pathData="M 70.5,51.5 C 70.5,48 65,48 65,51.5 C 65,54.5 70.5,54.5 70.5,57.5 C 70.5,61 65,61 65,57.5" />
+
+        <!-- Red prohibition circle -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#E53935"
+            android:strokeWidth="3"
+            android:pathData="M 60,54 m -22,0 a 22,22 0 1,0 44,0 a 22,22 0 1,0 -44,0" />
+
+        <!-- Red prohibition diagonal line -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#E53935"
+            android:strokeWidth="3"
+            android:strokeLineCap="round"
+            android:pathData="M 44.4,38.4 L 75.6,69.6" />
+    </group>
+</vector>
