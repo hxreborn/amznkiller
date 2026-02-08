@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = namespace
-        minSdk = 31
+        minSdk = 28
         targetSdk = 36
 
         versionName = project.property("version.name").toString()
