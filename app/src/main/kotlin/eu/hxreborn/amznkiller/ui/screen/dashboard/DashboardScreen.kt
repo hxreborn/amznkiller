@@ -79,7 +79,6 @@ import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.relativeTime
-import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -215,7 +214,7 @@ fun DashboardScreen(
                     item { Spacer(Modifier.height(16.dp)) }
 
                     item {
-                        val targetShape = shapeForPosition(1, 0)
+                        val shape = Tokens.CardShape
                         Column(
                             modifier =
                                 Modifier
@@ -223,8 +222,8 @@ fun DashboardScreen(
                                     .padding(horizontal = 8.dp)
                                     .background(
                                         color = surface,
-                                        shape = targetShape,
-                                    ).clip(targetShape)
+                                        shape = shape,
+                                    ).clip(shape)
                                     .padding(16.dp),
                         ) {
                             TargetRow(amazonInfo) {
@@ -305,7 +304,7 @@ private fun UpdatesCard(
     val isError = outcomeEvent is UpdateEvent.Error
     val isUpToDate = !prefs.isStale && !isError && prefs.lastFetched > 0L
 
-    val shape = shapeForPosition(1, 0)
+    val shape = Tokens.CardShape
     Row(
         modifier =
             modifier
@@ -457,7 +456,7 @@ private fun SystemEnvironmentCard(
     surface: androidx.compose.ui.graphics.Color,
     modifier: Modifier = Modifier,
 ) {
-    val shape = shapeForPosition(1, 0)
+    val shape = Tokens.CardShape
     Column(
         modifier =
             modifier
@@ -616,7 +615,7 @@ private fun MetricsGrid(
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val shape = shapeForPosition(1, 0)
+    val shape = Tokens.CardShape
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
