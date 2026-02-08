@@ -6,17 +6,17 @@ import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedInterface.AfterHookCallback
 import io.github.libxposed.api.annotations.AfterInvocation
 import io.github.libxposed.api.annotations.XposedHooker
+import java.util.concurrent.atomic.AtomicBoolean
 
 object WebViewHooker {
-    @Volatile
-    internal var debuggingEnabled = false
+    internal val debuggingEnabled = AtomicBoolean(false)
 
     fun hook() {
         val clientClass = android.webkit.WebViewClient::class.java
         for (method in clientClass.declaredMethods) {
             when (method.name) {
-                "onPageStarted",
                 "onPageFinished",
+                "onPageCommitVisible",
                 -> {
                     runCatching {
                         module.hook(method, PageHooker::class.java)
@@ -39,13 +39,12 @@ class PageHooker : XposedInterface.Hooker {
             val webView = callback.args[0] as? WebView ?: return
             val url = callback.args[1] as? String ?: return
             if (!url.contains("amazon.")) return
-            if (!WebViewHooker.debuggingEnabled) {
-                WebViewHooker.debuggingEnabled = true
+            if (WebViewHooker.debuggingEnabled.compareAndSet(false, true)) {
                 runCatching { WebView.setWebContentsDebuggingEnabled(true) }
                     .onSuccess { Logger.log("WebView debugging enabled") }
                     .onFailure { Logger.log("WebView debugging failed", it) }
             }
-            StyleInjector.inject(webView)
+            StyleInjector.inject(webView, url)
         }
     }
 }

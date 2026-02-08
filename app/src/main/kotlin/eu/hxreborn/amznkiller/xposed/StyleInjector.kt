@@ -4,6 +4,7 @@ import android.webkit.WebView
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.util.Logger
+import java.util.WeakHashMap
 
 object StyleInjector {
     private data class CachedScripts(
@@ -12,10 +13,22 @@ object StyleInjector {
         val hash: Int,
     )
 
+    private data class LastInjection(
+        val url: String,
+        val hash: Int,
+    )
+
     private var cached: CachedScripts? = null
     private var validatedHash: Int = 0
 
-    fun inject(webView: WebView) {
+    // Tracks the last successful enqueue for a given WebView to avoid repeated evaluateJavascript
+    // across multiple callbacks (e.g. onPageCommitVisible + onPageFinished).
+    private val lastInjectionByWebView = WeakHashMap<WebView, LastInjection>()
+
+    fun inject(
+        webView: WebView,
+        url: String,
+    ) {
         if (!PrefsManager.injectionEnabled) return
         val selectors = PrefsManager.selectors
         if (selectors.isEmpty()) {
@@ -24,15 +37,19 @@ object StyleInjector {
         }
 
         val hash = selectors.hashCode()
+        lastInjectionByWebView[webView]?.let { last ->
+            if (last.url == url && last.hash == hash) return
+        }
+
         val scripts = cached
         if (scripts == null || scripts.hash != hash) {
+            // Minify rules to reduce escaping/JS payload size.
             val cssRules =
-                selectors.joinToString("\n") { "$it { display: none !important; }" }
+                selectors.joinToString(separator = "") { "$it{display:none!important;}" }
             val escaped =
                 cssRules
                     .replace("\\", "\\\\")
                     .replace("'", "\\'")
-                    .replace("\n", "\\n")
 
             val expectedRules = selectors.size
             cached =
@@ -65,23 +82,31 @@ object StyleInjector {
 
         val script = if (shouldValidate) current.injectAndValidate else current.inject
 
-        runCatching {
-            webView.post {
-                runCatching {
-                    webView.evaluateJavascript(script) { result ->
-                        if (!shouldValidate) return@evaluateJavascript
-                        if (result == null || result == "null") {
-                            Logger.log("CSS validation returned null")
-                            return@evaluateJavascript
-                        }
-
-                        if (!result.contains("\"ok\":true")) {
-                            Logger.log("CSS validation failed: $result")
-                        }
+        fun eval() {
+            runCatching {
+                webView.evaluateJavascript(script) { result ->
+                    if (!shouldValidate) return@evaluateJavascript
+                    if (result == null || result == "null") {
+                        Logger.log("CSS validation returned null")
+                        return@evaluateJavascript
                     }
-                }.onFailure { Logger.log("Failed to evaluate JS injection", it) }
+
+                    if (!result.contains("\"ok\":true")) {
+                        Logger.log("CSS validation failed: $result")
+                    }
+                }
+            }.onFailure { Logger.log("Failed to evaluate JS injection", it) }
+        }
+
+        // Mark before enqueue to dedupe across callbacks for the same navigation.
+        lastInjectionByWebView[webView] = LastInjection(url = url, hash = hash)
+        runCatching {
+            if (webView.handler?.looper == android.os.Looper.getMainLooper()) {
+                eval()
+            } else {
+                webView.post { eval() }
             }
-        }.onFailure { Logger.log("Failed to post JS injection", it) }
+        }.onFailure { Logger.log("Failed to enqueue JS injection", it) }
     }
 
     private fun buildInjectScript(
