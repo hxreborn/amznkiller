@@ -119,14 +119,38 @@ Amazon Shopping if changes don't appear immediately.
 ```bash
 git clone --recurse-submodules https://github.com/hxreborn/amznkiller.git
 cd amznkiller
+
+# Build libxposed (publishes to mavenLocal; required for the app to resolve io.github.libxposed deps)
+./gradlew buildLibxposed
+
+# Build APKs
+./gradlew :app:assembleDebug
 ./gradlew :app:assembleRelease
 ```
 
-Requires JDK 21. Configure `local.properties`:
+Requirements:
+
+- JDK 21 (set Android Studio "Gradle JDK" to 21, or export `JAVA_HOME` to a JDK 21 install)
+- Android SDK installed (this project uses `compileSdk = 36`)
+
+Configure `local.properties`:
 
 ```properties
 sdk.dir=/path/to/android/sdk
 ```
+
+Outputs are written to `app/build/outputs/apk/` and named like `amznkiller-v<version>-<variant>.apk`.
+
+### Signed release (optional)
+
+Release signing is enabled only when `RELEASE_STORE_FILE` is provided (Gradle property or environment
+variable). Supported variables/properties:
+
+- `RELEASE_STORE_FILE`
+- `RELEASE_STORE_PASSWORD`
+- `RELEASE_KEY_ALIAS`
+- `RELEASE_KEY_PASSWORD`
+- `RELEASE_STORE_TYPE` (defaults to `PKCS12`)
 
 ## Contributing
 
