@@ -31,14 +31,21 @@ class PrefsRepositoryImpl(
             fun emit() {
                 val raw = Prefs.CACHED_SELECTORS.read(localPrefs)
                 val selectors = Prefs.parseSelectors(raw)
+                val lastFetched = Prefs.LAST_FETCHED.read(localPrefs)
                 trySend(
                     FilterPrefsState(
                         cachedSelectors = selectors,
                         selectorCount = selectors.size,
                         selectorUrl = Prefs.SELECTOR_URL.read(localPrefs),
-                        lastFetched = Prefs.LAST_FETCHED.read(localPrefs),
+                        lastFetched = lastFetched,
                         debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
                         injectionEnabled = Prefs.INJECTION_ENABLED.read(localPrefs),
+                        webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(localPrefs),
+                        autoUpdate = Prefs.AUTO_UPDATE.read(localPrefs),
+                        isStale =
+                            lastFetched == 0L ||
+                                System.currentTimeMillis() - lastFetched
+                                > Prefs.STALE_THRESHOLD_MS,
                         darkThemeConfig =
                             runCatching {
                                 DarkThemeConfig.valueOf(

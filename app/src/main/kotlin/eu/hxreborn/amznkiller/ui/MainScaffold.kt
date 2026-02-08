@@ -6,10 +6,10 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import eu.hxreborn.amznkiller.ui.navigation.BottomNav
 import eu.hxreborn.amznkiller.ui.navigation.MainNavDisplay
 import eu.hxreborn.amznkiller.ui.navigation.Screen
-import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterViewModel
+import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
 
 @Composable
-fun MainScaffold(viewModel: FilterViewModel) {
+fun MainScaffold(viewModel: AppViewModel) {
     val backStack = rememberNavBackStack(Screen.Dashboard)
     val currentKey = backStack.lastOrNull() as? Screen
 

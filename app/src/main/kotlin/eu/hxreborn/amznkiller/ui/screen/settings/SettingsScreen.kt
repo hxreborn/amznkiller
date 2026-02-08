@@ -21,16 +21,22 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.FormatPaint
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Sync
+import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.DataObject
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.DeveloperMode
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +45,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,6 +63,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.PrefSpec
@@ -64,8 +72,8 @@ import eu.hxreborn.amznkiller.selectors.MergeResult
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
 import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterUiState
-import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterViewModel
 import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
 import eu.hxreborn.amznkiller.ui.state.UpdateEvent
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
@@ -89,8 +97,9 @@ private const val REPO_URL = "https://github.com/hxreborn/amznkiller"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    viewModel: FilterViewModel,
+    viewModel: AppViewModel,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    onNavigateToLicenses: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val prefs = (uiState as? FilterUiState.Success)?.prefs ?: return
@@ -223,42 +232,74 @@ fun SettingsScreen(
                 )
 
                 preferenceCategory(
-                    key = "category_lists",
-                    title = { Text(stringResource(R.string.settings_lists)) },
+                    key = "category_rule_management",
+                    title = { Text(stringResource(R.string.settings_rule_management)) },
                 )
 
-                val listsShape = shapeForPosition(1, 0)
+                val ruleItemCount = 2
+                val filterSourcesShape = shapeForPosition(ruleItemCount, 0)
                 preference(
                     modifier =
                         Modifier
                             .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = listsShape)
-                            .clip(listsShape),
-                    key = "filter_list",
+                            .background(color = surface, shape = filterSourcesShape)
+                            .clip(filterSourcesShape),
+                    key = "filter_sources",
                     icon = {
                         Icon(
-                            imageVector = Icons.Outlined.Language,
+                            imageVector = Icons.Outlined.FilterList,
                             contentDescription = null,
                         )
                     },
                     title = {
                         Text(
-                            text = stringResource(R.string.settings_filter_list),
+                            text = stringResource(R.string.settings_filter_sources),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
                     summary = {
-                        val isDefault = prefs.selectorUrl == Prefs.SELECTOR_URL.default
                         Text(
                             text =
-                                if (isDefault) {
-                                    stringResource(R.string.settings_filter_list_default)
-                                } else {
-                                    stringResource(R.string.settings_filter_list_custom)
-                                },
+                                stringResource(
+                                    R.string.settings_filter_sources_summary,
+                                ),
                         )
                     },
                     onClick = { showUrlDialog = true },
+                )
+
+                item(key = "spacer_rule_1") { Spacer(Modifier.height(2.dp)) }
+
+                val syncShape = shapeForPosition(ruleItemCount, 1)
+                switchPreference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = syncShape)
+                            .clip(syncShape),
+                    key = "auto_update",
+                    value = prefs.autoUpdate,
+                    icon = { _ ->
+                        Icon(
+                            imageVector = Icons.Outlined.Sync,
+                            contentDescription = null,
+                        )
+                    },
+                    title = { _ ->
+                        Text(
+                            text = stringResource(R.string.settings_background_sync),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = { _ ->
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.settings_background_sync_summary,
+                                ),
+                        )
+                    },
+                    onValueChange = { viewModel.savePref(Prefs.AUTO_UPDATE, it) },
                 )
 
                 preferenceCategory(
@@ -266,7 +307,7 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_advanced)) },
                 )
 
-                val advancedItemCount = 2
+                val advancedItemCount = 3
                 val injectionShape = shapeForPosition(advancedItemCount, 0)
                 switchPreference(
                     modifier =
@@ -296,7 +337,45 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(2.dp)) }
 
-                val debugShape = shapeForPosition(advancedItemCount, 1)
+                val webviewDebugShape = shapeForPosition(advancedItemCount, 1)
+                switchPreference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(
+                                color = surface,
+                                shape = webviewDebugShape,
+                            ).clip(webviewDebugShape),
+                    key = "webview_debugging",
+                    value = prefs.webviewDebugging,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.DeveloperMode,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_webview_debugging),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.settings_webview_debugging_summary,
+                                ),
+                        )
+                    },
+                    onValueChange = {
+                        viewModel.savePref(Prefs.WEBVIEW_DEBUGGING, it)
+                    },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val debugShape = shapeForPosition(advancedItemCount, 2)
                 switchPreference(
                     modifier =
                         Modifier
@@ -307,7 +386,7 @@ fun SettingsScreen(
                     value = prefs.debugLogs,
                     icon = {
                         Icon(
-                            imageVector = Icons.Outlined.BugReport,
+                            imageVector = Icons.Rounded.BugReport,
                             contentDescription = null,
                         )
                     },
@@ -328,24 +407,84 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_about)) },
                 )
 
-                val aboutItemCount = 3
-                val versionShape = shapeForPosition(aboutItemCount, 0)
+                val aboutItemCount = 4
+                val gitRepoShape = shapeForPosition(aboutItemCount, 0)
+                preference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = gitRepoShape)
+                            .clip(gitRepoShape),
+                    key = "git_repo",
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.DataObject,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_git_repo),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(text = stringResource(R.string.settings_git_repo_summary))
+                    },
+                    onClick = {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, REPO_URL.toUri()),
+                        )
+                    },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val licensesShape = shapeForPosition(aboutItemCount, 1)
+                preference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = licensesShape)
+                            .clip(licensesShape),
+                    key = "licenses",
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Description,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_licenses),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(text = stringResource(R.string.settings_licenses_summary))
+                    },
+                    onClick = onNavigateToLicenses,
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val versionShape = shapeForPosition(aboutItemCount, 2)
                 preference(
                     modifier =
                         Modifier
                             .padding(horizontal = 8.dp)
                             .background(color = surface, shape = versionShape)
                             .clip(versionShape),
-                    key = "version",
+                    key = "app_version",
                     icon = {
                         Icon(
-                            imageVector = Icons.Outlined.Info,
+                            imageVector = Icons.Rounded.Info,
                             contentDescription = null,
                         )
                     },
                     title = {
                         Text(
-                            text = stringResource(R.string.settings_version),
+                            text = stringResource(R.string.settings_app_version),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
@@ -374,36 +513,7 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(2.dp)) }
 
-                val sourceShape = shapeForPosition(aboutItemCount, 1)
-                preference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = sourceShape)
-                            .clip(sourceShape),
-                    key = "source_code",
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Code,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_source_code),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, REPO_URL.toUri()),
-                        )
-                    },
-                )
-
-                item { Spacer(Modifier.height(2.dp)) }
-
-                val issueShape = shapeForPosition(aboutItemCount, 2)
+                val issueShape = shapeForPosition(aboutItemCount, 3)
                 preference(
                     modifier =
                         Modifier
@@ -413,7 +523,7 @@ fun SettingsScreen(
                     key = "report_issue",
                     icon = {
                         Icon(
-                            imageVector = Icons.Outlined.BugReport,
+                            imageVector = Icons.Rounded.BugReport,
                             contentDescription = null,
                         )
                     },
@@ -602,6 +712,34 @@ private fun SelectorUrlDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LicensesScreen(onBack: () -> Unit = {}) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.settings_licenses)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = null,
+                        )
+                    }
+                },
+            )
+        },
+        contentWindowInsets = WindowInsets(0),
+    ) { innerPadding ->
+        LibrariesContainer(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+        )
+    }
+}
+
 private inline fun LazyListScope.switchPreference(
     key: String,
     value: Boolean,
@@ -634,7 +772,7 @@ private fun SettingsScreenPreview() {
     }
 }
 
-private class PreviewSettingsViewModel : FilterViewModel() {
+private class PreviewSettingsViewModel : AppViewModel() {
     private val _uiState =
         MutableStateFlow(
             FilterUiState.Success(
@@ -654,7 +792,11 @@ private class PreviewSettingsViewModel : FilterViewModel() {
 
     override fun refreshAll() {}
 
-    override fun setXposedActive(active: Boolean) {}
+    override fun setXposedActive(
+        active: Boolean,
+        frameworkVersion: String?,
+        frameworkPrivilege: String?,
+    ) {}
 
     override fun <T : Any> savePref(
         pref: PrefSpec<T>,
