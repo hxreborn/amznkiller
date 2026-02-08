@@ -72,9 +72,9 @@ import eu.hxreborn.amznkiller.selectors.MergeResult
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.screen.dashboard.AppUiState
 import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
-import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterUiState
-import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
+import eu.hxreborn.amznkiller.ui.state.AppPrefsState
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
@@ -99,7 +99,7 @@ fun SettingsScreen(
     onNavigateToLicenses: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val prefs = (uiState as? FilterUiState.Success)?.prefs ?: return
+    val prefs = (uiState as? AppUiState.Success)?.prefs ?: return
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var showThemeDialog by remember { mutableStateOf(false) }
@@ -263,19 +263,19 @@ fun SettingsScreen(
                     modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = syncShape).clip(syncShape),
                     key = "auto_update",
                     value = prefs.autoUpdate,
-                    icon = { _ ->
+                    icon = {
                         Icon(
                             imageVector = Icons.Outlined.Sync,
                             contentDescription = null,
                         )
                     },
-                    title = { _ ->
+                    title = {
                         Text(
                             text = stringResource(R.string.settings_background_sync),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
-                    summary = { _ ->
+                    summary = {
                         Text(
                             text =
                                 stringResource(
@@ -731,9 +731,9 @@ private fun SettingsScreenPreview() {
 private class PreviewSettingsViewModel : AppViewModel() {
     private val _uiState =
         MutableStateFlow(
-            FilterUiState.Success(
+            AppUiState.Success(
                 prefs =
-                    FilterPrefsState(
+                    AppPrefsState(
                         darkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
                         useDynamicColor = true,
                         debugLogs = false,
@@ -744,7 +744,7 @@ private class PreviewSettingsViewModel : AppViewModel() {
                     ),
             ),
         )
-    override val uiState: StateFlow<FilterUiState> = _uiState.asStateFlow()
+    override val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
 
     override fun refreshAll() {}
 

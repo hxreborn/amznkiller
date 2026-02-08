@@ -3,7 +3,7 @@ package eu.hxreborn.amznkiller.ui.state
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 
-data class FilterPrefsState(
+data class AppPrefsState(
     val cachedSelectors: List<String> = emptyList(),
     val selectorCount: Int = 0,
     val selectorUrl: String = Prefs.SELECTOR_URL.default,
@@ -20,5 +20,5 @@ data class FilterPrefsState(
     val frameworkPrivilege: String? = null,
     val isRefreshing: Boolean = false,
     val isRefreshFailed: Boolean = false,
-    val lastRefreshOutcome: RefreshOutcome? = null,
+    val lastRefreshOutcome: SelectorSyncOutcome? = null,
 )

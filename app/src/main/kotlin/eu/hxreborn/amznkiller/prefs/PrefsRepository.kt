@@ -1,14 +1,14 @@
 package eu.hxreborn.amznkiller.prefs
 
 import android.content.SharedPreferences
-import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
+import eu.hxreborn.amznkiller.ui.state.AppPrefsState
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 interface PrefsRepository {
-    val state: Flow<FilterPrefsState>
+    val state: Flow<AppPrefsState>
 
     fun <T : Any> save(
         pref: PrefSpec<T>,
@@ -26,14 +26,14 @@ class PrefsRepositoryImpl(
     private val localPrefs: SharedPreferences,
     private val remotePrefsProvider: () -> SharedPreferences?,
 ) : PrefsRepository {
-    override val state: Flow<FilterPrefsState> =
+    override val state: Flow<AppPrefsState> =
         callbackFlow {
-            fun emit() {
+            fun sendState() {
                 val raw = Prefs.CACHED_SELECTORS.read(localPrefs)
                 val selectors = Prefs.parseSelectors(raw)
                 val lastFetched = Prefs.LAST_FETCHED.read(localPrefs)
                 trySend(
-                    FilterPrefsState(
+                    AppPrefsState(
                         cachedSelectors = selectors,
                         selectorCount = selectors.size,
                         selectorUrl = Prefs.SELECTOR_URL.read(localPrefs),
@@ -56,8 +56,14 @@ class PrefsRepositoryImpl(
                 )
             }
 
-            emit()
-            val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> emit() }
+            sendState()
+            val listener =
+                SharedPreferences.OnSharedPreferenceChangeListener {
+                    _,
+                    _,
+                    ->
+                    sendState()
+                }
             localPrefs.registerOnSharedPreferenceChangeListener(listener)
             awaitClose { localPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
         }

@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
@@ -75,8 +76,8 @@ import eu.hxreborn.amznkiller.prefs.PrefSpec
 import eu.hxreborn.amznkiller.ui.component.RulesBottomSheet
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
-import eu.hxreborn.amznkiller.ui.state.FilterPrefsState
-import eu.hxreborn.amznkiller.ui.state.UpdateEvent
+import eu.hxreborn.amznkiller.ui.state.AppPrefsState
+import eu.hxreborn.amznkiller.ui.state.SelectorSyncEvent
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.relativeTime
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -168,7 +169,7 @@ fun DashboardScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         when (val state = uiState) {
-            is FilterUiState.Loading -> {
+            is AppUiState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
                     contentAlignment = Alignment.Center,
@@ -177,7 +178,7 @@ fun DashboardScreen(
                 }
             }
 
-            is FilterUiState.Success -> {
+            is AppUiState.Success -> {
                 val prefs = state.prefs
 
                 val outcome = prefs.lastRefreshOutcome
@@ -295,13 +296,13 @@ fun DashboardScreen(
 
 @Composable
 private fun UpdatesCard(
-    prefs: FilterPrefsState,
-    surface: androidx.compose.ui.graphics.Color,
+    prefs: AppPrefsState,
+    surface: Color,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val outcomeEvent = prefs.lastRefreshOutcome?.event
-    val isError = outcomeEvent is UpdateEvent.Error
+    val isError = outcomeEvent is SelectorSyncEvent.Error
     val isUpToDate = !prefs.isStale && !isError && prefs.lastFetched > 0L
 
     val shape = Tokens.CardShape
@@ -452,8 +453,8 @@ private fun UpdatesCard(
 
 @Composable
 private fun SystemEnvironmentCard(
-    prefs: FilterPrefsState,
-    surface: androidx.compose.ui.graphics.Color,
+    prefs: AppPrefsState,
+    surface: Color,
     modifier: Modifier = Modifier,
 ) {
     val shape = Tokens.CardShape
@@ -610,8 +611,8 @@ private fun SystemEnvironmentCard(
 
 @Composable
 private fun MetricsGrid(
-    prefs: FilterPrefsState,
-    surface: androidx.compose.ui.graphics.Color,
+    prefs: AppPrefsState,
+    surface: Color,
     onShowRules: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -748,19 +749,19 @@ private fun TargetRow(
 
 private fun formatUpdateEventMessage(
     context: android.content.Context,
-    event: UpdateEvent,
+    event: SelectorSyncEvent,
 ): String =
     when (event) {
-        is UpdateEvent.Updated -> {
+        is SelectorSyncEvent.Updated -> {
             val total = event.added + event.removed
-            context.getString(R.string.snackbar_updated, total.toString())
+            context.getString(R.string.snackbar_updated, total)
         }
 
-        is UpdateEvent.UpToDate -> {
+        is SelectorSyncEvent.UpToDate -> {
             context.getString(R.string.snackbar_up_to_date)
         }
 
-        is UpdateEvent.Error -> {
+        is SelectorSyncEvent.Error -> {
             event.message
         }
     }
@@ -777,9 +778,9 @@ private fun DashboardScreenPreview() {
 private class PreviewAppViewModel : AppViewModel() {
     private val _uiState =
         MutableStateFlow(
-            FilterUiState.Success(
+            AppUiState.Success(
                 prefs =
-                    FilterPrefsState(
+                    AppPrefsState(
                         isXposedActive = true,
                         frameworkVersion = "LSPosed v1.11.0",
                         frameworkPrivilege = "Zygisk",
@@ -798,7 +799,7 @@ private class PreviewAppViewModel : AppViewModel() {
                     ),
             ),
         )
-    override val uiState: StateFlow<FilterUiState> = _uiState.asStateFlow()
+    override val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
 
     override fun refreshAll() {}
 

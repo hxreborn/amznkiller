@@ -1,6 +1,7 @@
 package eu.hxreborn.amznkiller.xposed
 
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedInterface.AfterHookCallback
@@ -12,7 +13,7 @@ object WebViewHooker {
     internal val debuggingEnabled = AtomicBoolean(false)
 
     fun hook() {
-        val clientClass = android.webkit.WebViewClient::class.java
+        val clientClass = WebViewClient::class.java
         for (method in clientClass.declaredMethods) {
             when (method.name) {
                 "onPageFinished",

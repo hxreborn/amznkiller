@@ -5,7 +5,7 @@ import eu.hxreborn.amznkiller.prefs.PrefSpec
 import kotlinx.coroutines.flow.StateFlow
 
 abstract class AppViewModel : ViewModel() {
-    abstract val uiState: StateFlow<FilterUiState>
+    abstract val uiState: StateFlow<AppUiState>
 
     abstract fun refreshAll()
 

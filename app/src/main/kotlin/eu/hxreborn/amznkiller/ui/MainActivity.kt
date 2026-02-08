@@ -11,9 +11,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepositoryImpl
+import eu.hxreborn.amznkiller.ui.screen.dashboard.AppUiState
 import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModel
 import eu.hxreborn.amznkiller.ui.screen.dashboard.AppViewModelFactory
-import eu.hxreborn.amznkiller.ui.screen.dashboard.FilterUiState
 import eu.hxreborn.amznkiller.ui.theme.AppTheme
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import io.github.libxposed.service.XposedService
@@ -42,7 +42,7 @@ class MainActivity :
 
         setContent {
             val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-            val prefs = (uiState.value as? FilterUiState.Success)?.prefs
+            val prefs = (uiState.value as? AppUiState.Success)?.prefs
 
             AppTheme(
                 darkThemeConfig = prefs?.darkThemeConfig ?: DarkThemeConfig.FOLLOW_SYSTEM,

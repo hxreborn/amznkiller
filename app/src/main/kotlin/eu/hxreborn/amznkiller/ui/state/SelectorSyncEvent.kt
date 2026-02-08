@@ -1,19 +1,19 @@
 package eu.hxreborn.amznkiller.ui.state
 
-sealed interface UpdateEvent {
+sealed interface SelectorSyncEvent {
     data class Updated(
         val added: Int,
         val removed: Int,
-    ) : UpdateEvent
+    ) : SelectorSyncEvent
 
-    data object UpToDate : UpdateEvent
+    data object UpToDate : SelectorSyncEvent
 
     data class Error(
         val message: String,
-    ) : UpdateEvent
+    ) : SelectorSyncEvent
 }
 
-data class RefreshOutcome(
-    val event: UpdateEvent,
+data class SelectorSyncOutcome(
+    val event: SelectorSyncEvent,
     val id: Long = System.nanoTime(),
 )

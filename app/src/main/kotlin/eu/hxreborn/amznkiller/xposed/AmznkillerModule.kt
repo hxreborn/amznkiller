@@ -26,14 +26,13 @@ class AmznkillerModule(
         module = this
         Logger.init(this)
         Logger.log(
-            "Module v${BuildConfig.VERSION_NAME} on " +
-                "${base.frameworkName} ${base.frameworkVersion}",
+            "Module v${BuildConfig.VERSION_NAME} on ${base.frameworkName} ${base.frameworkVersion}",
         )
     }
 
     override fun onPackageLoaded(param: PackageLoadedParam) {
         Logger.log(
-            "onPackageLoaded: ${param.packageName} " + "isFirst=${param.isFirstPackage}",
+            "onPackageLoaded: ${param.packageName} isFirst=${param.isFirstPackage}",
         )
         if (param.packageName != AMAZON_PACKAGE || !param.isFirstPackage) return
 
@@ -42,8 +41,7 @@ class AmznkillerModule(
             PrefsManager.init(this)
             Logger.log(
                 "PrefsManager: ${PrefsManager.selectors.size} cached selectors, " +
-                    "stale=${PrefsManager.isStale()}, " +
-                    "remotePrefs=${PrefsManager.remotePrefs != null}",
+                    "stale=${PrefsManager.isStale()}, remotePrefs=${PrefsManager.remotePrefs != null}",
             )
 
             if (PrefsManager.selectors.isEmpty()) {

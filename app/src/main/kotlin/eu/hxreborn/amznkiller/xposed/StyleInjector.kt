@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.xposed
 
+import android.os.Looper
 import android.webkit.WebView
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.prefs.PrefsManager
@@ -97,7 +98,7 @@ object StyleInjector {
         // Mark before enqueue to dedupe across callbacks for the same navigation.
         lastInjectionByWebView[webView] = LastInjection(url = url, hash = hash)
         runCatching {
-            if (webView.handler?.looper == android.os.Looper.getMainLooper()) {
+            if (webView.handler?.looper == Looper.getMainLooper()) {
                 eval()
             } else {
                 webView.post { eval() }
