@@ -65,8 +65,8 @@
     <string name="settings_filter_sources_summary">Set the remote URL for selector lists</string>
     <string name="settings_filter_list_default">Default</string>
     <string name="settings_filter_list_custom">Custom URL</string>
-    <string name="settings_background_sync">Auto-sync</string>
-    <string name="settings_background_sync_summary">Fetch updated selectors daily when the app opens</string>
+    <string name="settings_background_sync">Fetch rules automatically</string>
+    <string name="settings_background_sync_summary">Check for updated selectors once a day on app launch</string>
     <string name="settings_selector_url_dialog_title">Selector URL</string>
     <string name="settings_selector_url_reset">Reset</string>
     <string name="settings_selector_url_save">Save</string>
