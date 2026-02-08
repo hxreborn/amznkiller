@@ -37,10 +37,10 @@ Xposed module that hides ads and sponsored content in Amazon Shopping via CSS in
 
 ## Screenshots
 
-Search query: *macbook air m1 16gb 512*. Stock app shows just 2 real laptops. The rest are ads.
+Search query: *"macbook air m1 16gb 512"*
 
 <table>
-<tr><th>Stock</th><th>Patched</th></tr>
+<tr><th>Stock (2 real results, rest are ads)</th><th>Patched</th></tr>
 <tr>
   <td><img src="https://github.com/user-attachments/assets/4c2fb092-0e63-4a34-b9ba-afe1a4028b09" width="280" alt="Stock Amazon app" /></td>
   <td><img src="https://github.com/user-attachments/assets/135e1fec-b0e9-4dc1-9d58-49fabd825262" width="280" alt="Patched Amazon app" /></td>
@@ -52,11 +52,11 @@ Search query: *macbook air m1 16gb 512*. Stock app shows just 2 real laptops. Th
 <table>
 <tr>
   <td><img src="https://github.com/user-attachments/assets/d875c580-d81c-4be7-a857-98bc13656432" width="280" alt="Dashboard" /></td>
-  <td><img src="https://github.com/user-attachments/assets/cb69012d-94a0-4ca9-b6d7-9cd97cd5c580" width="280" alt="Settings" /></td>
+  <td><img src="https://github.com/user-attachments/assets/88a5aeee-8184-41c6-bf0a-e4d1fb3c1b13" width="280" alt="Selectors" /></td>
 </tr>
 <tr>
-  <td><img src="https://github.com/user-attachments/assets/a374ccec-9dce-4538-bdad-e89c15e24307" width="280" alt="Settings (advanced)" /></td>
-  <td></td>
+  <td><img src="https://github.com/user-attachments/assets/cb69012d-94a0-4ca9-b6d7-9cd97cd5c580" width="280" alt="Settings" /></td>
+  <td><img src="https://github.com/user-attachments/assets/a374ccec-9dce-4538-bdad-e89c15e24307" width="280" alt="Settings (bottom)" /></td>
 </tr>
 </table>
 
