@@ -11,7 +11,8 @@
     <string name="env_xposed">Xposed Framework</string>
     <string name="env_xposed_active">Active (%s)</string>
     <string name="env_xposed_inactive">Inactive</string>
-    <string name="env_zygisk">Zygisk</string>
+    <string name="wip_title">TBD</string>
+    <string name="wip_subtitle">Placeholder</string>
 
     <string name="control_css_injection">CSS injection</string>
 
