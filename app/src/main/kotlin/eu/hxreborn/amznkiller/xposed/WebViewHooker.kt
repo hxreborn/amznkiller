@@ -20,9 +20,14 @@ object WebViewHooker {
                 "onPageFinished",
                 "onPageCommitVisible",
                 -> {
-                    runCatching {
-                        module.hook(method, PageHooker::class.java)
-                    }.onSuccess { Logger.log("Hooked ${method.name}") }.onFailure {
+                    val hookResult =
+                        runCatching {
+                            module.hook(method, PageHooker::class.java)
+                        }
+                    hookResult.onSuccess {
+                        Logger.log("Hooked ${method.name}")
+                    }
+                    hookResult.onFailure {
                         Logger.log("Failed to hook ${method.name}", it)
                     }
                 }
@@ -41,12 +46,21 @@ class PageHooker : XposedInterface.Hooker {
             val url = callback.args[1] as? String ?: return
             if (!url.contains("amazon.")) return
             if (PrefsManager.webviewDebugging &&
-                WebViewHooker.debuggingEnabled.compareAndSet(false, true)
+                WebViewHooker.debuggingEnabled.compareAndSet(
+                    false,
+                    true,
+                )
             ) {
-                runCatching { WebView.setWebContentsDebuggingEnabled(true) }
-                    .onSuccess {
-                        Logger.log("WebView debugging enabled")
-                    }.onFailure { Logger.log("WebView debugging failed", it) }
+                val debuggingResult =
+                    runCatching {
+                        WebView.setWebContentsDebuggingEnabled(true)
+                    }
+                debuggingResult.onSuccess {
+                    Logger.log("WebView debugging enabled")
+                }
+                debuggingResult.onFailure {
+                    Logger.log("WebView debugging failed", it)
+                }
             }
             StyleInjector.inject(webView, url)
         }
