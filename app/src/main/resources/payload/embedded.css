@@ -18,8 +18,10 @@
 .p13n-sc-unified-ad-label
 .s-result-item.AdHolder
 .s-result-item:has(.puis-sponsored-label-text)
+.s-result-item:has(.s-messaging-widget-results-header)
 .s-result-item:has([data-ad-feedback-label-id])
 .s-result-item:has([data-ad-feedback])
+.s-result-item:has(div[cel_widget_id^="MAIN-FEATURED_ASINS_LIST-"])
 .s-result-list > .a-section:has(.sbv-ad-content-container)
 .sbv-video-single-product
 .sponsored-products-detail-mobile
