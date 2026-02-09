@@ -11,20 +11,19 @@ object StyleInjector {
     private data class CachedScripts(
         val inject: String,
         val injectAndValidate: String,
-        val hash: Int,
+        val selectorsHash: Int,
     )
 
-    private data class LastInjection(
+    private data class InjectionKey(
         val url: String,
-        val hash: Int,
+        val selectorsHash: Int,
     )
 
     private var cached: CachedScripts? = null
-    private var validatedHash: Int = 0
+    private var lastValidatedHash: Int = 0
 
-    // Tracks the last successful enqueue for a given WebView to avoid repeated evaluateJavascript
-    // across multiple callbacks (e.g. onPageCommitVisible + onPageFinished).
-    private val lastInjectionByWebView = WeakHashMap<WebView, LastInjection>()
+    // Tracks last injection per WebView to skip duplicate callbacks (onPageCommitVisible + onPageFinished)
+    private val lastInjectionByWebView = WeakHashMap<WebView, InjectionKey>()
 
     fun inject(
         webView: WebView,
@@ -37,79 +36,83 @@ object StyleInjector {
             return
         }
 
-        val hash = selectors.hashCode()
+        val selectorsHash = selectors.hashCode()
         lastInjectionByWebView[webView]?.let { last ->
-            if (last.url == url && last.hash == hash) return
+            if (last.url == url && last.selectorsHash == selectorsHash) return
         }
 
+        val script = getOrBuildScript(selectors, selectorsHash)
+        lastInjectionByWebView[webView] = InjectionKey(url = url, selectorsHash = selectorsHash)
+        evaluateScript(webView, script)
+    }
+
+    // Caches bare inject and inject-with-validation scripts, validation runs once per hash change in debug only
+    private fun getOrBuildScript(
+        selectors: List<String>,
+        selectorsHash: Int,
+    ): String {
         val scripts = cached
-        if (scripts == null || scripts.hash != hash) {
-            // Minify rules to reduce escaping/JS payload size.
+        if (scripts == null || scripts.selectorsHash != selectorsHash) {
             val cssRules = selectors.joinToString(separator = "") { "$it{display:none!important;}" }
             val escaped = cssRules.replace("\\", "\\\\").replace("'", "\\'")
-
             val expectedRules = selectors.size
             cached =
                 CachedScripts(
                     inject =
-                        buildInjectScript(
+                        buildStyleScript(
                             escapedCssRules = escaped,
                             expectedRules = expectedRules,
-                            hash = hash,
+                            selectorsHash = selectorsHash,
                             validate = false,
                         ),
                     injectAndValidate =
-                        buildInjectScript(
+                        buildStyleScript(
                             escapedCssRules = escaped,
                             expectedRules = expectedRules,
-                            hash = hash,
+                            selectorsHash = selectorsHash,
                             validate = true,
                         ),
-                    hash = hash,
+                    selectorsHash = selectorsHash,
                 )
-            validatedHash = 0
+            lastValidatedHash = 0
             Logger.logDebug("Built CSS script: ${selectors.size} selectors")
         }
 
-        val current = cached ?: return
-        val shouldValidate = BuildConfig.DEBUG && validatedHash != hash
-        if (shouldValidate) {
-            validatedHash = hash
-        }
+        val current = cached!!
+        val shouldValidate = BuildConfig.DEBUG && lastValidatedHash != selectorsHash
+        if (shouldValidate) lastValidatedHash = selectorsHash
+        return if (shouldValidate) current.injectAndValidate else current.inject
+    }
 
-        val script = if (shouldValidate) current.injectAndValidate else current.inject
-
-        fun eval() {
+    // evaluateJavascript needs the WebView's looper, post defensively since Xposed can alter dispatch
+    private fun evaluateScript(
+        webView: WebView,
+        script: String,
+    ) {
+        fun run() {
             runCatching {
                 webView.evaluateJavascript(script) { result ->
-                    if (!shouldValidate) return@evaluateJavascript
-                    if (result == null || result == "null") {
-                        Logger.logDebug("CSS validation returned null")
+                    if (result == null || result == "null" || result.contains("\"ok\":true")) {
                         return@evaluateJavascript
                     }
-
-                    if (!result.contains("\"ok\":true")) {
-                        Logger.logDebug("CSS validation failed: $result")
-                    }
+                    Logger.logDebug("CSS validation failed: $result")
                 }
             }.onFailure { Logger.logDebug("Failed to evaluate JS injection", it) }
         }
 
-        // Mark before enqueue to dedupe across callbacks for the same navigation.
-        lastInjectionByWebView[webView] = LastInjection(url = url, hash = hash)
         runCatching {
             if (webView.handler?.looper == Looper.getMainLooper()) {
-                eval()
+                run()
             } else {
-                webView.post { eval() }
+                webView.post { run() }
             }
-        }.onFailure { Logger.logDebug("Failed to enqueue JS injection", it) }
+        }.onFailure { Logger.logDebug("Failed to post JS injection", it) }
     }
 
-    private fun buildInjectScript(
+    private fun buildStyleScript(
         escapedCssRules: String,
         expectedRules: Int,
-        hash: Int,
+        selectorsHash: Int,
         validate: Boolean,
     ): String {
         val validateJs =
@@ -132,10 +135,11 @@ object StyleInjector {
                 """.trimIndent()
             }
 
+        // DOM-side hash check so re-hooking the same page (eg SPA navigation) skips textContent replacement when selectors haven't changed
         return """
             (function() {
               var expected = $expectedRules;
-              var hash = String($hash);
+              var hash = String($selectorsHash);
               var s = document.getElementById('amznkiller');
               if (!s) {
                 s = document.createElement('style');
