@@ -55,6 +55,7 @@ class AmznkillerModule(
             Logger.log("Registering WebView hooks...")
             WebViewHooker.hook()
 
+            // Fallback refresh if the user hasn't opened the companion app recently
             if (PrefsManager.isStale()) {
                 Logger.log("Selectors stale, submitting background refresh...")
                 executor.submit {
@@ -75,37 +76,26 @@ class AmznkillerModule(
         }.onFailure { Logger.log("onPackageLoaded failed", it) }
     }
 
-    @Suppress("DiscouragedPrivateApi")
+    // Runs on main thread after a short delay so the app has time to create an Application instance
     private fun showToast(classLoader: ClassLoader) {
-        runCatching {
-            val proc =
-                Application::class.java.getMethod("getProcessName").invoke(null) as? String
-                    ?: return
-            if (!proc.contains("amazon")) return
-            Handler(Looper.getMainLooper()).postDelayed(
-                {
-                    runCatching {
-                        val actThread =
-                            Class.forName(
-                                "android.app.ActivityThread",
-                                false,
-                                classLoader,
-                            )
-                        val ctx =
-                            actThread.getMethod("currentApplication").invoke(null) as? Application
-                                ?: return@postDelayed
-                        Toast
-                            .makeText(
-                                ctx,
-                                TOAST_MESSAGES.random(),
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                    }
-                },
-                TOAST_DELAY_MS,
-            )
-        }
+        Handler(Looper.getMainLooper()).postDelayed(
+            {
+                runCatching {
+                    val ctx = getApplicationContext(classLoader) ?: return@postDelayed
+                    Toast.makeText(ctx, TOAST_MESSAGES.random(), Toast.LENGTH_SHORT).show()
+                }
+            },
+            TOAST_DELAY_MS,
+        )
     }
+
+    private fun getApplicationContext(classLoader: ClassLoader): Application? =
+        runCatching {
+            Class
+                .forName("android.app.ActivityThread", false, classLoader)
+                .getMethod("currentApplication")
+                .invoke(null) as? Application
+        }.getOrNull()
 
     companion object {
         const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
