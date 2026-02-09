@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.xposed
 
+import android.app.ActivityManager
 import android.app.Application
 import android.os.Handler
 import android.os.Looper
@@ -76,12 +77,16 @@ class AmznkillerModule(
         }.onFailure { Logger.log("onPackageLoaded failed", it) }
     }
 
-    // Runs on main thread after a short delay so the app has time to create an Application instance
     private fun showToast(classLoader: ClassLoader) {
         Handler(Looper.getMainLooper()).postDelayed(
             {
                 runCatching {
                     val ctx = getApplicationContext(classLoader) ?: return@postDelayed
+                    // show only on fg
+                    val info = ActivityManager.RunningAppProcessInfo()
+                    ActivityManager.getMyMemoryState(info)
+                    val fg = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+                    if (info.importance != fg) return@postDelayed
                     Toast.makeText(ctx, TOAST_MESSAGES.random(), Toast.LENGTH_SHORT).show()
                 }
             },
