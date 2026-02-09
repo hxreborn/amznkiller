@@ -14,10 +14,18 @@ compute_version_code() {
 [[ "${1:-}" == "--source-only" ]] && return 0 2>/dev/null || true
 if [[ "${1:-}" == "--source-only" ]]; then exit 0; fi
 
-VERSION_INPUT=${1:-}
+VERSION_INPUT=""
+ALLOW_DIRTY=false
+for arg in "$@"; do
+	case "$arg" in
+		--allow-dirty) ALLOW_DIRTY=true ;;
+		--source-only) ;;
+		*) VERSION_INPUT="$arg" ;;
+	esac
+done
 
-if [[ -z "$VERSION_INPUT" ]]; then
-	echo "Usage: .github/release.sh <version>"
+if [[ -z "${VERSION_INPUT:-}" ]]; then
+	echo "Usage: .github/release.sh <version> [--allow-dirty]"
 	echo "Example: .github/release.sh 0.2.0"
 	echo "Example: .github/release.sh v0.2.0"
 	exit 1
@@ -39,8 +47,8 @@ fi
 
 TAG="v$VERSION"
 
-if [[ -n "$(git status --porcelain)" ]]; then
-	echo "Error: working tree not clean"
+if [[ "$ALLOW_DIRTY" == false ]] && [[ -n "$(git status --porcelain)" ]]; then
+	echo "Error: working tree not clean (use --allow-dirty to skip)"
 	exit 1
 fi
 

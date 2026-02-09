@@ -121,7 +121,7 @@ cd amznkiller
 
 # Build libxposed and publish to local Maven repo
 ./gradlew buildLibxposed
-./gradlew :app:assembleDebug          # or assembleRelease (requires signing config)
+./gradlew :app:assembleDebug
 ```
 
 Requires JDK 21 and Android SDK. Configure `local.properties`:
