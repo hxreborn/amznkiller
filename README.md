@@ -5,20 +5,22 @@ Xposed module built on the modern LSPosed API that hides ads and sponsored conte
 ![Update Selectors](https://github.com/hxreborn/amznkiller/actions/workflows/update-selectors.yml/badge.svg)
 ![Validate Selectors](https://github.com/hxreborn/amznkiller/actions/workflows/validate-selectors.yml/badge.svg)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?style=flat&logo=kotlin&logoColor=white)
-![Android](https://img.shields.io/badge/API-28%2B-3DDC84?logo=android&logoColor=white)
+![Android](https://img.shields.io/badge/API-29%2B-3DDC84?logo=android&logoColor=white)
 
 ## Features
 
 - Remove sponsored cards, video carousels, and other promotional UI in the Amazon app
 - Maintained built-in selector list with remote updates. Optionally use your own self-hosted selector list via custom URL.
 - Selector sanitization blocks common CSS injection patterns
-- Material 3 Expressive settings UI with Jetpack Compose
+- Price history charts on product pages via Keepa and CamelCamelCamel (US, UK, DE, FR, JP, CA, IT, ES, IN, MX, BR, AU)
+- [Force Dark](#how-does-force-dark-work) (experimental) uses the native force dark algorithm with supplementary CSS fixes to darken Amazon pages
 - Recommended alongside Private DNS and hosts-based blocking
+- Material 3 Expressive settings UI with Jetpack Compose
 - Free and open source (FOSS)
 
 ## Requirements
 
-- Android 9 (API 28) or higher
+- Android 10 (API 29) or higher
 - [LSPosed](https://github.com/JingMatrix/LSPosed) (JingMatrix fork recommended)
 - Amazon Shopping app (`com.amazon.mShop.android.shopping`)
 
@@ -36,7 +38,7 @@ Xposed module built on the modern LSPosed API that hides ads and sponsored conte
 
 ## Screenshots
 
-Search query: *"macbook air m1 16gb 512"*
+Search query: _"macbook air m1 16gb 512"_
 
 <table>
 <tr><th>Stock (2 real results, rest are ads)</th><th>Patched</th></tr>
@@ -66,6 +68,7 @@ Search query: *"macbook air m1 16gb 512"*
 
 See [Troubleshooting](#troubleshooting). Most common causes: module not scoped correctly,
 missing force stop on Amazon Shopping, or LSPosed not activated.
+
 </details>
 
 <details>
@@ -74,14 +77,16 @@ missing force stop on Amazon Shopping, or LSPosed not activated.
 1. Disable CSS injection in AmznKiller settings to confirm selectors are the cause.
 2. Update selectors from the dashboard (tap refresh).
 3. If it persists, open an issue with: AmznKiller version, Amazon app version, WebView version,
-   selector count.
-</details>
+selector count.
+
+ </details>
 
 <details>
 <summary>Sync says "remote failed" or "bundled only"</summary>
 
 Bundled selectors are still applied. Check connectivity, reset the selector URL in settings,
 and refresh again.
+
 </details>
 
 <details>
@@ -89,12 +94,14 @@ and refresh again.
 
 Cosmetic only. It injects CSS to hide ad elements. Network requests still happen.
 Works alongside DNS-based blockers (AdGuard, NextDNS, Private DNS, hosts files).
+
 </details>
 
 <details>
 <summary>Does this work on Amazon Lite or other Amazon apps?</summary>
 
 No. The module is scoped to `com.amazon.mShop.android.shopping` only for now.
+
 </details>
 
 <details>
@@ -102,6 +109,21 @@ No. The module is scoped to `com.amazon.mShop.android.shopping` only for now.
 
 No. Updated selectors apply on the next page load inside Amazon Shopping. Force stop
 Amazon Shopping if changes don't appear immediately.
+
+</details>
+
+<details>
+<summary>How does Force Dark work?</summary>
+
+Force Dark hooks Android's framework-level darkening APIs (API 29+) to override Amazon's
+`android:forceDarkAllowed="false"` opt-out. Chromium's auto dark algorithm then darkens WebView
+content per-element. Supplementary CSS fixes shipped with the module correct contrast issues the
+algorithm introduces on buy buttons and product images.
+
+This feature is experimental and defaults to off. Some elements may still have contrast issues.
+If you find one, open an issue with a screenshot and the DOM structure (enable WebView debugging,
+connect via `chrome://inspect`, and copy the relevant HTML).
+
 </details>
 
 ## Troubleshooting
