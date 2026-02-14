@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "eu.hxreborn.amznkiller"
-        minSdk = 28
+        minSdk = 29
         targetSdk = 36
 
         versionName = project.property("version.name").toString()

@@ -67,6 +67,12 @@ release.keystore
 # Local APK artifacts
 installed/
 
+# DOM dumps for analysis
+dom/
+
+# Local MCP scripts
+scripts/grep_app_mcp.py
+
 # Generated selector lists (scripts/update_selectors.py regenerates)
 lists/generated/*
 !lists/generated/merged.txt

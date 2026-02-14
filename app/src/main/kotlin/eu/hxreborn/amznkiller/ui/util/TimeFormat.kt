@@ -8,7 +8,6 @@ internal fun relativeTime(millis: Long): String {
 
     val now = System.currentTimeMillis()
     val diff = now - millis
-    diff / 1000
 
     return when {
         diff < 5_000 -> "just now"
