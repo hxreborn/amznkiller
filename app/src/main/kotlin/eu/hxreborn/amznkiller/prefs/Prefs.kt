@@ -1,10 +1,12 @@
 package eu.hxreborn.amznkiller.prefs
 
+import kotlin.time.Duration.Companion.hours
+
 object Prefs {
     const val GROUP = "amznkiller"
-    const val STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000L
+    private val STALE_THRESHOLD = 24.hours
+    val STALE_THRESHOLD_MS = STALE_THRESHOLD.inWholeMilliseconds
 
-    // TODO: //check if using duration feels ok here
     val SELECTOR_URL =
         StringPref(
             "selector_url",

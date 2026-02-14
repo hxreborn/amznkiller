@@ -33,8 +33,11 @@ object ForceDarkHooker {
                     Bundle::class.java,
                 )
             xposed.hook(method, ActivityOnCreateHooker::class.java)
-        }.onSuccess { Logger.log("Hooked Activity.onCreate") }
-            .onFailure { Logger.log("Failed to hook Activity.onCreate", it) }
+        }.onSuccess {
+            Logger.log("Hooked Activity.onCreate")
+        }.onFailure {
+            Logger.log("Failed to hook Activity.onCreate", it)
+        }
     }
 
     private fun hookSetForceDarkAllowed(xposed: XposedInterface) {
@@ -45,8 +48,11 @@ object ForceDarkHooker {
                     Boolean::class.javaPrimitiveType,
                 )
             xposed.hook(method, ForceDarkOverrideHooker::class.java)
-        }.onSuccess { Logger.log("Hooked View.setForceDarkAllowed") }
-            .onFailure { Logger.log("Failed to hook View.setForceDarkAllowed", it) }
+        }.onSuccess {
+            Logger.log("Hooked View.setForceDarkAllowed")
+        }.onFailure {
+            Logger.log("Failed to hook View.setForceDarkAllowed", it)
+        }
     }
 
     // Amazon sets android:forceDarkAllowed=false in AmazonTheme (values-v29/styles.xml)
@@ -57,8 +63,11 @@ object ForceDarkHooker {
             val clazz = Class.forName("android.view.ViewRootImpl")
             val method = clazz.getDeclaredMethod("determineForceDarkType")
             xposed.hook(method, ForceDarkTypeHooker::class.java)
-        }.onSuccess { Logger.log("Hooked ViewRootImpl.determineForceDarkType") }
-            .onFailure { Logger.log("Failed to hook determineForceDarkType", it) }
+        }.onSuccess {
+            Logger.log("Hooked ViewRootImpl.determineForceDarkType")
+        }.onFailure {
+            Logger.log("Failed to hook determineForceDarkType", it)
+        }
     }
 
     // Fallback for older Android versions where determineForceDarkType doesn't exist
@@ -97,8 +106,11 @@ object ForceDarkHooker {
         for (ctor in WebView::class.java.declaredConstructors) {
             runCatching {
                 xposed.hook(ctor, WebViewCtorDarkHooker::class.java)
-            }.onSuccess { Logger.log("Hooked WebView.<init>(${ctor.parameterCount} params)") }
-                .onFailure { Logger.log("Failed to hook WebView.<init>", it) }
+            }.onSuccess {
+                Logger.log("Hooked WebView.<init>(${ctor.parameterCount} params)")
+            }.onFailure {
+                Logger.log("Failed to hook WebView.<init>", it)
+            }
         }
 
         runCatching {
@@ -108,8 +120,11 @@ object ForceDarkHooker {
                     Int::class.javaPrimitiveType,
                 )
             xposed.hook(method, BackgroundColorInterceptor::class.java)
-        }.onSuccess { Logger.log("Hooked View.setBackgroundColor") }
-            .onFailure { Logger.log("Failed to hook View.setBackgroundColor", it) }
+        }.onSuccess {
+            Logger.log("Hooked View.setBackgroundColor")
+        }.onFailure {
+            Logger.log("Failed to hook View.setBackgroundColor", it)
+        }
     }
 }
 

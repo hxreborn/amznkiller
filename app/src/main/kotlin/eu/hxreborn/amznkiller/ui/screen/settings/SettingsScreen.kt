@@ -2,7 +2,6 @@ package eu.hxreborn.amznkiller.ui.screen.settings
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -73,6 +72,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
@@ -241,11 +241,7 @@ fun SettingsScreen(
                 val adBlockItemCount = 3
                 val filteringShape = shapeForPosition(adBlockItemCount, 0)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = filteringShape)
-                            .clip(filteringShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = filteringShape).clip(filteringShape),
                     key = "css_injection",
                     value = prefs.injectionEnabled,
                     icon = {
@@ -275,11 +271,7 @@ fun SettingsScreen(
 
                 val syncShape = shapeForPosition(adBlockItemCount, 1)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = syncShape)
-                            .clip(syncShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = syncShape).clip(syncShape),
                     key = "auto_update",
                     value = prefs.autoUpdate,
                     icon = {
@@ -348,11 +340,7 @@ fun SettingsScreen(
                 val displayItemCount = 2
                 val chartsShape = shapeForPosition(displayItemCount, 0)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = chartsShape)
-                            .clip(chartsShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = chartsShape).clip(chartsShape),
                     key = "price_charts",
                     value = prefs.priceChartsEnabled,
                     icon = {
@@ -382,11 +370,7 @@ fun SettingsScreen(
 
                 val darkModeShape = shapeForPosition(displayItemCount, 1)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = darkModeShape)
-                            .clip(darkModeShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = darkModeShape).clip(darkModeShape),
                     key = "force_dark_webview",
                     value = prefs.forceDarkWebview,
                     icon = {
@@ -403,8 +387,7 @@ fun SettingsScreen(
                     },
                     summary = {
                         Text(
-                            text =
-                                stringResource(R.string.settings_dark_mode_summary),
+                            text = stringResource(R.string.settings_dark_mode_summary),
                         )
                     },
                     onValueChange = { viewModel.savePref(Prefs.FORCE_DARK_WEBVIEW, it) },
@@ -454,11 +437,7 @@ fun SettingsScreen(
 
                 val debugShape = shapeForPosition(advancedItemCount, 1)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = debugShape)
-                            .clip(debugShape),
+                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = debugShape).clip(debugShape),
                     key = "debug_logs",
                     value = prefs.debugLogs,
                     icon = {
@@ -512,7 +491,7 @@ fun SettingsScreen(
                                 "version",
                                 "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                             )
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard = requireNotNull(context.getSystemService<ClipboardManager>())
                         clipboard.setPrimaryClip(clip)
                         Toast
                             .makeText(

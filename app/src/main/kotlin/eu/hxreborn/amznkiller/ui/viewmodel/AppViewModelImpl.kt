@@ -58,9 +58,9 @@ class AppViewModelImpl(
             refreshing.value = true
             try {
                 repository.save(Prefs.LAST_REFRESH_FAILED, false)
-                val oldSelectors = repository.getCurrentSelectors().toSet()
+                val oldSelectors = repository.currentSelectors.toSet()
                 runCatching {
-                    val url = repository.getSelectorUrl()
+                    val url = repository.selectorUrl
                     val result = SelectorUpdater.fetchMerged(url)
                     if (result.selectors.isEmpty()) {
                         emitFailure(R.string.snackbar_no_selectors)

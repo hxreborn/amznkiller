@@ -2,7 +2,6 @@ package eu.hxreborn.amznkiller.ui.component
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -39,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.getSystemService
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
@@ -81,7 +81,7 @@ fun RulesBottomSheet(
                 )
                 IconButton(
                     onClick = {
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard = requireNotNull(context.getSystemService<ClipboardManager>())
                         clipboard.setPrimaryClip(
                             ClipData.newPlainText("selectors", selectors.joinToString("\n")),
                         )

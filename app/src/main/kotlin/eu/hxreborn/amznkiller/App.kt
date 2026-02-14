@@ -13,16 +13,16 @@ class App : Application() {
         log("onCreate: registering listener")
         XposedServiceHelper.registerListener(
             object : XposedServiceHelper.OnServiceListener {
-                override fun onServiceBind(svc: XposedService) {
-                    log("onServiceBind: $svc")
-                    service = svc
-                    listeners.forEach { it.onServiceBind(svc) }
+                override fun onServiceBind(service: XposedService) {
+                    log("onServiceBind: $service")
+                    App.service = service
+                    listeners.forEach { it.onServiceBind(service) }
                 }
 
-                override fun onServiceDied(svc: XposedService) {
+                override fun onServiceDied(service: XposedService) {
                     log("onServiceDied")
-                    service = null
-                    listeners.forEach { it.onServiceDied(svc) }
+                    App.service = null
+                    listeners.forEach { it.onServiceDied(service) }
                 }
             },
         )

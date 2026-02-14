@@ -61,8 +61,7 @@ object PriceChartsInjector {
                 put("dark", prefs.forceDarkWebview)
             }
         val script =
-            ScriptRepository.get(ScriptId.CHARTS) + "\n" +
-                "window.AmznKiller.injectCharts($args);"
+            ScriptRepository.get(ScriptId.CHARTS) + "\n" + "window.AmznKiller.injectCharts($args);"
         WebViewJsExecutor.evaluate(webView, script, "PriceChartsInjector") {
             Logger.logDebug("PriceChartsInjector result: $it")
         }

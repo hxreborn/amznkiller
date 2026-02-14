@@ -3,12 +3,6 @@ package eu.hxreborn.amznkiller.ui.screen.dashboard
 import android.content.Intent
 import android.os.Build
 import android.webkit.WebView
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.automirrored.outlined.Rule
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.outlined.Android
 import androidx.compose.material.icons.outlined.Construction
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -68,16 +61,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -100,7 +88,6 @@ import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.math.sin
 
 private const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
 
@@ -124,10 +111,14 @@ fun DashboardScreen(
     val amazonInfo =
         remember {
             runCatching {
-                val pm = context.packageManager
-                val info = pm.getPackageInfo(AMAZON_PACKAGE, 0)
-                val icon = pm.getApplicationIcon(AMAZON_PACKAGE).toBitmap(128, 128).asImageBitmap()
-                val label = pm.getApplicationLabel(info.applicationInfo!!).toString()
+                val packageManager = context.packageManager
+                val info = packageManager.getPackageInfo(AMAZON_PACKAGE, 0)
+                val icon = packageManager.getApplicationIcon(AMAZON_PACKAGE).toBitmap(128, 128).asImageBitmap()
+                val label =
+                    info.applicationInfo
+                        ?.let(packageManager::getApplicationLabel)
+                        ?.toString()
+                        .orEmpty()
                 Triple(icon, label, info.versionName)
             }.getOrNull()
         }
@@ -135,12 +126,12 @@ fun DashboardScreen(
     val webViewInfo =
         remember {
             runCatching {
-                val pkg = WebView.getCurrentWebViewPackage() ?: return@runCatching null
-                val pm = context.packageManager
-                val appInfo = pm.getApplicationInfo(pkg.packageName, 0)
-                val icon = pm.getApplicationIcon(appInfo).toBitmap(128, 128).asImageBitmap()
-                val label = pm.getApplicationLabel(appInfo).toString()
-                Triple(icon, label, pkg.versionName)
+                val webViewPackage = WebView.getCurrentWebViewPackage() ?: return@runCatching null
+                val packageManager = context.packageManager
+                val appInfo = packageManager.getApplicationInfo(webViewPackage.packageName, 0)
+                val icon = packageManager.getApplicationIcon(appInfo).toBitmap(128, 128).asImageBitmap()
+                val label = packageManager.getApplicationLabel(appInfo).toString()
+                Triple(icon, label, webViewPackage.versionName)
             }.getOrNull()
         }
 

@@ -16,7 +16,6 @@ import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
 import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class AmznkillerModule(
@@ -83,13 +82,13 @@ class AmznkillerModule(
         Handler(Looper.getMainLooper()).postDelayed(
             {
                 runCatching {
-                    val ctx = getApplicationContext(classLoader) ?: return@postDelayed
-                    // show only on fg
+                    val appContext = getApplicationContext(classLoader) ?: return@postDelayed
                     val info = ActivityManager.RunningAppProcessInfo()
                     ActivityManager.getMyMemoryState(info)
-                    val fg = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-                    if (info.importance != fg) return@postDelayed
-                    Toast.makeText(ctx, TOAST_MESSAGES.random(), Toast.LENGTH_SHORT).show()
+                    val foregroundImportance =
+                        ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+                    if (info.importance != foregroundImportance) return@postDelayed
+                    Toast.makeText(appContext, TOAST_MESSAGES.random(), Toast.LENGTH_SHORT).show()
                 }
             },
             TOAST_DELAY_MS,
@@ -107,7 +106,7 @@ class AmznkillerModule(
     companion object {
         const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
         private const val TOAST_DELAY_MS = 1500L
-        val executor: ExecutorService = Executors.newSingleThreadExecutor()
+        private val executor = Executors.newSingleThreadExecutor()
 
         private val TOAST_MESSAGES =
             arrayOf(

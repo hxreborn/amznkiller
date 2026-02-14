@@ -13,7 +13,8 @@ object HttpClient {
     private const val BUFFER_SIZE = 8192
 
     fun fetch(url: String): String {
-        val conn = URI(url).toURL().openConnection() as HttpURLConnection
+        val conn =
+            (URI(url).toURL().openConnection() as? HttpURLConnection) ?: error("Non-HTTP URL: $url")
         try {
             conn.connectTimeout = CONNECT_TIMEOUT_MS
             conn.readTimeout = READ_TIMEOUT_MS
@@ -33,16 +34,16 @@ object HttpClient {
 
     private fun readLimited(stream: InputStream): String =
         stream.use {
-            val buf = ByteArrayOutputStream()
+            val baos = ByteArrayOutputStream()
             val chunk = ByteArray(BUFFER_SIZE)
             var total = 0L
             while (true) {
-                val n = it.read(chunk)
-                if (n < 0) break
-                total += n
+                val bytesRead = it.read(chunk)
+                if (bytesRead < 0) break
+                total += bytesRead
                 if (total > MAX_BYTES) throw IOException("Response exceeded $MAX_BYTES bytes")
-                buf.write(chunk, 0, n)
+                baos.write(chunk, 0, bytesRead)
             }
-            buf.toString(Charsets.UTF_8.name())
+            baos.toString(Charsets.UTF_8.name())
         }
 }

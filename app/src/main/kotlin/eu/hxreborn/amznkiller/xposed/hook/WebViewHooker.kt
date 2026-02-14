@@ -16,20 +16,23 @@ object WebViewHooker {
                 "onPageStarted" -> {
                     runCatching {
                         xposed.hook(method, PageStartedHooker::class.java)
-                    }.onSuccess { Logger.log("Hooked ${method.name}") }
-                        .onFailure {
-                            Logger.log("Failed to hook ${method.name}", it)
-                        }
+                    }.onSuccess {
+                        Logger.log("Hooked ${method.name}")
+                    }.onFailure {
+                        Logger.log("Failed to hook ${method.name}", it)
+                    }
                 }
 
                 "onPageFinished",
                 "onPageCommitVisible",
                 -> {
-                    runCatching { xposed.hook(method, PageHooker::class.java) }
-                        .onSuccess { Logger.log("Hooked ${method.name}") }
-                        .onFailure {
-                            Logger.log("Failed to hook ${method.name}", it)
-                        }
+                    runCatching {
+                        xposed.hook(method, PageHooker::class.java)
+                    }.onSuccess {
+                        Logger.log("Hooked ${method.name}")
+                    }.onFailure {
+                        Logger.log("Failed to hook ${method.name}", it)
+                    }
                 }
             }
         }

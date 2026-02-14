@@ -10,15 +10,13 @@ import kotlinx.coroutines.flow.callbackFlow
 
 interface PrefsRepository {
     val state: Flow<AppPrefsState>
+    val currentSelectors: List<String>
+    val selectorUrl: String
 
     fun <T : Any> save(
         pref: PrefSpec<T>,
         value: T,
     )
-
-    fun getCurrentSelectors(): List<String>
-
-    fun getSelectorUrl(): String
 
     fun syncLocalToRemote()
 }
@@ -80,10 +78,11 @@ class PrefsRepositoryImpl(
         remotePrefsProvider()?.edit()?.also { pref.write(it, value) }?.apply()
     }
 
-    override fun getCurrentSelectors(): List<String> =
-        Prefs.parseSelectors(Prefs.CACHED_SELECTORS.read(localPrefs))
+    override val currentSelectors: List<String>
+        get() = Prefs.parseSelectors(Prefs.CACHED_SELECTORS.read(localPrefs))
 
-    override fun getSelectorUrl(): String = Prefs.SELECTOR_URL.read(localPrefs)
+    override val selectorUrl: String
+        get() = Prefs.SELECTOR_URL.read(localPrefs)
 
     override fun syncLocalToRemote() {
         val remote = remotePrefsProvider() ?: return

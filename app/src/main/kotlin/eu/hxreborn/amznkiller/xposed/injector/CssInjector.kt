@@ -49,15 +49,15 @@ object CssInjector {
                 put("validate", shouldValidate)
                 put("expectedRules", selectors.size)
             }
-        val script =
-            ScriptRepository.get(ScriptId.AD_BLOCK) + "\n" +
-                "window.AmznKiller.blockAds($args);"
+        val script = "${
+            ScriptRepository.get(
+                ScriptId.AD_BLOCK,
+            )
+        }\nwindow.AmznKiller.blockAds($args);"
         lastInjectionByWebView[webView] = InjectionKey(url, hash)
 
         WebViewJsExecutor.evaluate(webView, script, "CssInjector") { result ->
-            if (result == null || result == "null" ||
-                result.contains("\"ok\":true")
-            ) {
+            if (result == null || result == "null" || result.contains("\"ok\":true")) {
                 return@evaluate
             }
             Logger.logDebug("CSS validation: $result")
@@ -68,15 +68,15 @@ object CssInjector {
         selectors: List<String>,
         hash: Int,
     ): String {
-        if (cachedHash == hash && cachedCss != null) return cachedCss!!
-        val hideRules =
-            selectors.joinToString("") { "$it{display:none!important;}" }
+        if (cachedHash == hash) cachedCss?.let { return it }
+        val hideRules = selectors.joinToString("") { "$it{display:none!important;}" }
         val whitelist =
             "#amznkiller-charts,#amznkiller-charts *" +
                 "{display:block!important;visibility:visible!important;" +
                 "opacity:1!important;}"
-        cachedCss = hideRules + whitelist
-        cachedHash = hash
-        return cachedCss!!
+        return (hideRules + whitelist).also {
+            cachedCss = it
+            cachedHash = hash
+        }
     }
 }

@@ -11,8 +11,12 @@ object WebViewDebuggingGate {
     fun tryEnable(prefs: PrefsSnapshot) {
         if (!prefs.webviewDebugging) return
         if (!enabled.compareAndSet(false, true)) return
-        runCatching { WebView.setWebContentsDebuggingEnabled(true) }
-            .onSuccess { Logger.log("WebView debugging enabled") }
-            .onFailure { Logger.log("WebView debugging failed", it) }
+        runCatching {
+            WebView.setWebContentsDebuggingEnabled(true)
+        }.onSuccess {
+            Logger.log("WebView debugging enabled")
+        }.onFailure {
+            Logger.log("WebView debugging failed", it)
+        }
     }
 }

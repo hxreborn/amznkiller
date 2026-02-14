@@ -36,7 +36,6 @@ object SelectorUpdater {
         return MergeResult.Success(selectors = all)
     }
 
-    // Fetch, merge, and write to SharedPreferences
     fun refresh(prefs: SharedPreferences) {
         val url = Prefs.SELECTOR_URL.read(prefs)
         if (url.isBlank()) {
