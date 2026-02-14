@@ -81,3 +81,14 @@ jobs:
           prerelease: ${{ steps.version.outputs.prerelease }}
           body: ${{ steps.changelog.outputs.content || '' }}
           files: app/build/outputs/apk/release/*.apk
+
+      - name: Mirror to Xposed-Modules-Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: Xposed-Modules-Repo/eu.hxreborn.amznkiller
+          token: ${{ secrets.XPOSED_REPO_PAT }}
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          body: ${{ steps.changelog.outputs.content || '' }}
+          files: app/build/outputs/apk/release/*.apk
+          fail_on_unmatched_files: true
+          make_latest: true
