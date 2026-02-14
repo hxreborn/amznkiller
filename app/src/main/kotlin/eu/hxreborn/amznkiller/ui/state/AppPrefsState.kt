@@ -11,6 +11,8 @@ data class AppPrefsState(
     val debugLogs: Boolean = Prefs.DEBUG_LOGS.default,
     val injectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default,
     val webviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default,
+    val forceDarkWebview: Boolean = Prefs.FORCE_DARK_WEBVIEW.default,
+    val priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default,
     val autoUpdate: Boolean = Prefs.AUTO_UPDATE.default,
     val isStale: Boolean = true,
     val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,

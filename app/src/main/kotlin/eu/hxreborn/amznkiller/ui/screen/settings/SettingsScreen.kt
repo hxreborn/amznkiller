@@ -24,13 +24,15 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.CloudSync
-import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.FormatPaint
 import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Info
@@ -230,12 +232,82 @@ fun SettingsScreen(
                 )
 
                 preferenceCategory(
-                    key = "category_rule_management",
-                    title = { Text(stringResource(R.string.settings_rule_management)) },
+                    key = "category_ad_blocking",
+                    title = {
+                        Text(stringResource(R.string.settings_ad_blocking))
+                    },
                 )
 
-                val ruleItemCount = 2
-                val filterSourcesShape = shapeForPosition(ruleItemCount, 0)
+                val adBlockItemCount = 3
+                val filteringShape = shapeForPosition(adBlockItemCount, 0)
+                switchPreference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = filteringShape)
+                            .clip(filteringShape),
+                    key = "css_injection",
+                    value = prefs.injectionEnabled,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.Block,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_content_filtering),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.settings_content_filtering_summary,
+                                ),
+                        )
+                    },
+                    onValueChange = { viewModel.savePref(Prefs.INJECTION_ENABLED, it) },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val syncShape = shapeForPosition(adBlockItemCount, 1)
+                switchPreference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = syncShape)
+                            .clip(syncShape),
+                    key = "auto_update",
+                    value = prefs.autoUpdate,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.CloudSync,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_background_sync),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.settings_background_sync_summary,
+                                ),
+                        )
+                    },
+                    onValueChange = { viewModel.savePref(Prefs.AUTO_UPDATE, it) },
+                )
+
+                item(key = "spacer_rule_1") { Spacer(Modifier.height(2.dp)) }
+
+                val filterSourcesShape = shapeForPosition(adBlockItemCount, 2)
                 preference(
                     modifier =
                         Modifier
@@ -266,22 +338,32 @@ fun SettingsScreen(
                     onClick = { showUrlDialog = true },
                 )
 
-                item(key = "spacer_rule_1") { Spacer(Modifier.height(2.dp)) }
+                preferenceCategory(
+                    key = "category_shopping_display",
+                    title = {
+                        Text(stringResource(R.string.settings_shopping_display))
+                    },
+                )
 
-                val syncShape = shapeForPosition(ruleItemCount, 1)
+                val displayItemCount = 2
+                val chartsShape = shapeForPosition(displayItemCount, 0)
                 switchPreference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = syncShape).clip(syncShape),
-                    key = "auto_update",
-                    value = prefs.autoUpdate,
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = chartsShape)
+                            .clip(chartsShape),
+                    key = "price_charts",
+                    value = prefs.priceChartsEnabled,
                     icon = {
                         Icon(
-                            imageVector = Icons.Outlined.CloudSync,
+                            imageVector = Icons.Outlined.TrendingUp,
                             contentDescription = null,
                         )
                     },
                     title = {
                         Text(
-                            text = stringResource(R.string.settings_background_sync),
+                            text = stringResource(R.string.settings_marketplace_insights),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
@@ -289,11 +371,43 @@ fun SettingsScreen(
                         Text(
                             text =
                                 stringResource(
-                                    R.string.settings_background_sync_summary,
+                                    R.string.settings_marketplace_insights_summary,
                                 ),
                         )
                     },
-                    onValueChange = { viewModel.savePref(Prefs.AUTO_UPDATE, it) },
+                    onValueChange = { viewModel.savePref(Prefs.PRICE_CHARTS_ENABLED, it) },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val darkModeShape = shapeForPosition(displayItemCount, 1)
+                switchPreference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = darkModeShape)
+                            .clip(darkModeShape),
+                    key = "force_dark_webview",
+                    value = prefs.forceDarkWebview,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.DarkMode,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_dark_mode),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(
+                            text =
+                                stringResource(R.string.settings_dark_mode_summary),
+                        )
+                    },
+                    onValueChange = { viewModel.savePref(Prefs.FORCE_DARK_WEBVIEW, it) },
                 )
 
                 preferenceCategory(
@@ -301,41 +415,14 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_advanced)) },
                 )
 
-                val advancedItemCount = 3
-                val injectionShape = shapeForPosition(advancedItemCount, 0)
-                switchPreference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = injectionShape).clip(injectionShape),
-                    key = "css_injection",
-                    value = prefs.injectionEnabled,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Code,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.control_css_injection),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_css_injection_summary))
-                    },
-                    onValueChange = { viewModel.savePref(Prefs.INJECTION_ENABLED, it) },
-                )
-
-                item { Spacer(Modifier.height(2.dp)) }
-
-                val webviewDebugShape = shapeForPosition(advancedItemCount, 1)
+                val advancedItemCount = 2
+                val webviewDebugShape = shapeForPosition(advancedItemCount, 0)
                 switchPreference(
                     modifier =
                         Modifier
                             .padding(horizontal = 8.dp)
-                            .background(
-                                color = surface,
-                                shape = webviewDebugShape,
-                            ).clip(webviewDebugShape),
+                            .background(color = surface, shape = webviewDebugShape)
+                            .clip(webviewDebugShape),
                     key = "webview_debugging",
                     value = prefs.webviewDebugging,
                     icon = {
@@ -365,9 +452,13 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(2.dp)) }
 
-                val debugShape = shapeForPosition(advancedItemCount, 2)
+                val debugShape = shapeForPosition(advancedItemCount, 1)
                 switchPreference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = debugShape).clip(debugShape),
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = debugShape)
+                            .clip(debugShape),
                     key = "debug_logs",
                     value = prefs.debugLogs,
                     icon = {
@@ -782,6 +873,7 @@ private class PreviewSettingsViewModel : AppViewModel() {
                         selectorCount = 42,
                         lastFetched = System.currentTimeMillis() - 3_600_000,
                         injectionEnabled = true,
+                        forceDarkWebview = false,
                     ),
             ),
         )
