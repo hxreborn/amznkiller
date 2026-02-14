@@ -3,6 +3,12 @@ package eu.hxreborn.amznkiller.ui.screen.dashboard
 import android.content.Intent
 import android.os.Build
 import android.webkit.WebView
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.automirrored.outlined.Rule
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.outlined.Android
 import androidx.compose.material.icons.outlined.Construction
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -31,8 +38,8 @@ import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.PauseCircle
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Science
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.Vaccines
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CloudDone
 import androidx.compose.material.icons.rounded.Refresh
@@ -61,11 +68,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -88,6 +100,7 @@ import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.math.sin
 
 private const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
 
@@ -384,8 +397,7 @@ private fun UpdatesCard(
                     },
                 style = MaterialTheme.typography.bodyLarge,
             )
-            val lastChecked =
-                if (prefs.lastFetched > 0L) lastCheckedLine(prefs.lastFetched) else null
+            val lastChecked = if (prefs.lastFetched > 0L) lastCheckedLine(prefs.lastFetched) else null
             Text(
                 text =
                     when (status) {
@@ -593,7 +605,7 @@ private fun MetricsGrid(
     modifier: Modifier = Modifier,
 ) {
     val shape = Tokens.CardShape
-    val injectionActive = prefs.injectionEnabled
+    val adBlockingActive = prefs.injectionEnabled
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -607,8 +619,7 @@ private fun MetricsGrid(
                     .padding(16.dp),
         ) {
             Icon(
-                imageVector =
-                    if (injectionActive) Icons.Outlined.Vaccines else Icons.Outlined.PauseCircle,
+                imageVector = if (adBlockingActive) Icons.Outlined.Shield else Icons.Outlined.PauseCircle,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -621,13 +632,11 @@ private fun MetricsGrid(
             )
             Text(
                 text =
-                    stringResource(
-                        if (injectionActive) {
-                            R.string.dashboard_css_injection
-                        } else {
-                            R.string.dashboard_injection_paused
-                        },
-                    ),
+                    if (adBlockingActive) {
+                        stringResource(R.string.dashboard_webview_injection)
+                    } else {
+                        stringResource(R.string.dashboard_injection_paused)
+                    },
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
@@ -638,9 +647,9 @@ private fun MetricsGrid(
                     .weight(1f)
                     .background(color = surface, shape = shape)
                     .clip(shape)
-                    .then(if (injectionActive) Modifier.clickable(onClick = onShowRules) else Modifier)
+                    .then(if (adBlockingActive) Modifier.clickable(onClick = onShowRules) else Modifier)
                     .padding(16.dp)
-                    .then(if (injectionActive) Modifier else Modifier.alpha(0.38f)),
+                    .then(if (adBlockingActive) Modifier else Modifier.alpha(0.38f)),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -652,7 +661,7 @@ private fun MetricsGrid(
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (injectionActive) {
+                if (adBlockingActive) {
                     Spacer(Modifier.weight(1f))
                     Icon(
                         imageVector = Icons.Rounded.ChevronRight,
@@ -672,7 +681,7 @@ private fun MetricsGrid(
             )
             Text(
                 text =
-                    if (injectionActive) {
+                    if (adBlockingActive) {
                         stringResource(R.string.dashboard_rules_count, prefs.selectorCount)
                     } else {
                         stringResource(R.string.dashboard_no_active_rules)
