@@ -1,68 +1,75 @@
 package eu.hxreborn.amznkiller.ui.theme
 
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Dracula palette
-val DraculaBackground = Color(0xFF282A36)
-val DraculaCurrentLine = Color(0xFF44475A)
-val DraculaForeground = Color(0xFFF8F8F2)
-val DraculaComment = Color(0xFF6272A4)
-val DraculaCyan = Color(0xFF8BE9FD)
-val DraculaGreen = Color(0xFF50FA7B)
-val DraculaOrange = Color(0xFFFFB86C)
-val DraculaPink = Color(0xFFFF79C6)
-val DraculaPurple = Color(0xFFBD93F9)
-val DraculaRed = Color(0xFFFF5555)
-val DraculaYellow = Color(0xFFF1FA8C)
+val primaryLight = Color(0xFF445E91)
+val onPrimaryLight = Color(0xFFFFFFFF)
+val primaryContainerLight = Color(0xFFD8E2FF)
+val onPrimaryContainerLight = Color(0xFF2B4678)
+val secondaryLight = Color(0xFF575E71)
+val onSecondaryLight = Color(0xFFFFFFFF)
+val secondaryContainerLight = Color(0xFFDBE2F9)
+val onSecondaryContainerLight = Color(0xFF3F4759)
+val tertiaryLight = Color(0xFF715573)
+val onTertiaryLight = Color(0xFFFFFFFF)
+val tertiaryContainerLight = Color(0xFFFBD7FC)
+val onTertiaryContainerLight = Color(0xFF583E5B)
+val errorLight = Color(0xFFBA1A1A)
+val onErrorLight = Color(0xFFFFFFFF)
+val errorContainerLight = Color(0xFFFFDAD6)
+val onErrorContainerLight = Color(0xFF93000A)
+val backgroundLight = Color(0xFFF9F9FF)
+val onBackgroundLight = Color(0xFF1A1B20)
+val surfaceLight = Color(0xFFF9F9FF)
+val onSurfaceLight = Color(0xFF1A1B20)
+val surfaceVariantLight = Color(0xFFE1E2EC)
+val onSurfaceVariantLight = Color(0xFF44474F)
+val outlineLight = Color(0xFF74777F)
+val outlineVariantLight = Color(0xFFC4C6D0)
+val scrimLight = Color(0xFF000000)
+val inverseSurfaceLight = Color(0xFF2F3036)
+val inverseOnSurfaceLight = Color(0xFFF0F0F7)
+val inversePrimaryLight = Color(0xFFADC6FF)
+val surfaceDimLight = Color(0xFFD9D9E0)
+val surfaceBrightLight = Color(0xFFF9F9FF)
+val surfaceContainerLowestLight = Color(0xFFFFFFFF)
+val surfaceContainerLowLight = Color(0xFFF3F3FA)
+val surfaceContainerLight = Color(0xFFEDEDF4)
+val surfaceContainerHighLight = Color(0xFFE8E7EE)
+val surfaceContainerHighestLight = Color(0xFFE2E2E9)
 
-val LightColorScheme =
-    lightColorScheme(
-        primary = DraculaPurple,
-        onPrimary = Color.White,
-        primaryContainer = DraculaPurple.copy(alpha = 0.12f),
-        onPrimaryContainer = DraculaPurple,
-        secondary = DraculaPink,
-        onSecondary = Color.White,
-        secondaryContainer = DraculaPink.copy(alpha = 0.12f),
-        onSecondaryContainer = DraculaPink,
-        tertiary = DraculaCyan,
-        onTertiary = DraculaBackground,
-        tertiaryContainer = DraculaCyan.copy(alpha = 0.12f),
-        onTertiaryContainer = DraculaCyan,
-        background = DraculaForeground,
-        onBackground = DraculaBackground,
-        surface = Color.White,
-        onSurface = DraculaBackground,
-        surfaceVariant = Color(0xFFE8E8E8),
-        onSurfaceVariant = DraculaComment,
-        error = DraculaRed,
-        onError = Color.White,
-        outline = DraculaComment,
-    )
-
-val DarkColorScheme =
-    darkColorScheme(
-        primary = DraculaPurple,
-        onPrimary = DraculaBackground,
-        primaryContainer = DraculaCurrentLine,
-        onPrimaryContainer = DraculaForeground,
-        secondary = DraculaPink,
-        onSecondary = DraculaBackground,
-        secondaryContainer = DraculaCurrentLine,
-        onSecondaryContainer = DraculaForeground,
-        tertiary = DraculaCyan,
-        onTertiary = DraculaBackground,
-        tertiaryContainer = DraculaCurrentLine,
-        onTertiaryContainer = DraculaForeground,
-        background = DraculaBackground,
-        onBackground = DraculaForeground,
-        surface = DraculaBackground,
-        onSurface = DraculaForeground,
-        surfaceVariant = DraculaCurrentLine,
-        onSurfaceVariant = DraculaComment,
-        error = DraculaRed,
-        onError = DraculaForeground,
-        outline = DraculaComment,
-    )
+val primaryDark = Color(0xFFADC6FF)
+val onPrimaryDark = Color(0xFF102F60)
+val primaryContainerDark = Color(0xFF2B4678)
+val onPrimaryContainerDark = Color(0xFFD8E2FF)
+val secondaryDark = Color(0xFFBFC6DC)
+val onSecondaryDark = Color(0xFF293041)
+val secondaryContainerDark = Color(0xFF3F4759)
+val onSecondaryContainerDark = Color(0xFFDBE2F9)
+val tertiaryDark = Color(0xFFDEBCDF)
+val onTertiaryDark = Color(0xFF402843)
+val tertiaryContainerDark = Color(0xFF583E5B)
+val onTertiaryContainerDark = Color(0xFFFBD7FC)
+val errorDark = Color(0xFFFFB4AB)
+val onErrorDark = Color(0xFF690005)
+val errorContainerDark = Color(0xFF93000A)
+val onErrorContainerDark = Color(0xFFFFDAD6)
+val backgroundDark = Color(0xFF111318)
+val onBackgroundDark = Color(0xFFE2E2E9)
+val surfaceDark = Color(0xFF111318)
+val onSurfaceDark = Color(0xFFE2E2E9)
+val surfaceVariantDark = Color(0xFF44474F)
+val onSurfaceVariantDark = Color(0xFFC4C6D0)
+val outlineDark = Color(0xFF8E9099)
+val outlineVariantDark = Color(0xFF44474F)
+val scrimDark = Color(0xFF000000)
+val inverseSurfaceDark = Color(0xFFE2E2E9)
+val inverseOnSurfaceDark = Color(0xFF2F3036)
+val inversePrimaryDark = Color(0xFF445E91)
+val surfaceDimDark = Color(0xFF111318)
+val surfaceBrightDark = Color(0xFF37393E)
+val surfaceContainerLowestDark = Color(0xFF0C0E13)
+val surfaceContainerLowDark = Color(0xFF1A1B20)
+val surfaceContainerDark = Color(0xFF1E1F25)
+val surfaceContainerHighDark = Color(0xFF282A2F)
+val surfaceContainerHighestDark = Color(0xFF33353A)
