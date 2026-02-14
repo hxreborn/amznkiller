@@ -92,8 +92,8 @@
     <string name="settings_version_copied">Version copied</string>
     <string name="settings_git_repo">Source code</string>
     <string name="settings_git_repo_summary">Browse the project on GitHub</string>
-    <string name="settings_licenses">Open source licenses</string>
-    <string name="settings_licenses_summary">Third-party libraries and their licenses</string>
+    <string name="settings_licenses">Third-party licenses</string>
+    <string name="settings_licenses_summary">Libraries used in this app and their licenses</string>
     <string name="settings_report_issue">Report an issue</string>
     <string name="settings_report_issue_summary">Report a bug or suggest a feature on GitHub</string>
 
