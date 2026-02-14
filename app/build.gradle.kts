@@ -20,6 +20,7 @@ android {
         versionCode = project.property("version.code").toString().toInt()
     }
 
+    @Suppress("UnstableApiUsage")
     androidResources {
         localeFilters += "en"
     }

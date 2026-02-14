@@ -33,7 +33,7 @@ UPSTREAM_OUT = GEN_DIR / "upstream.txt"
 MERGED_OUT = GEN_DIR / "merged.txt"
 METADATA_OUT = GEN_DIR / "metadata.json"
 
-EMBEDDED_CSS = PAYLOAD_DIR / "embedded.css"
+EMBEDDED_CSS = PAYLOAD_DIR / "css" / "embedded.css"
 
 _AMAZON_RE = re.compile(
     r"^(?:www\.|smile\.|m\.)?"

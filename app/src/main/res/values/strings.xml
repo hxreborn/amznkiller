@@ -41,7 +41,7 @@
     <string name="snackbar_no_selectors">No selectors fetched</string>
     <string name="snackbar_up_to_date">Already up to date</string>
     <string name="snackbar_update_failed">Update failed</string>
-    <string name="snackbar_updated">Synced %s rules</string>
+    <string name="snackbar_updated">Synced %d rules</string>
     <string name="snackbar_amazon_not_installed">Amazon Shopping not installed</string>
 
     <string name="rules_copied">Copied to clipboard</string>

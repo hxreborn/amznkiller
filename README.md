@@ -18,6 +18,11 @@ Xposed module built on the modern LSPosed API that hides ads and sponsored conte
 - Material 3 Expressive settings UI with Jetpack Compose
 - Free and open source (FOSS)
 
+## Known Issues
+
+- [Force Dark](#how-does-force-dark-work) is experimental and disabled by default. Some Amazon screens may still have contrast issues. If this happens, disable Force Dark and report the page URL with a screenshot
+- Price history charts are still being expanded and may not appear on some product pages yet. 
+
 ## Requirements
 
 - Android 10 (API 29) or higher
@@ -115,14 +120,15 @@ Amazon Shopping if changes don't appear immediately.
 <details>
 <summary>How does Force Dark work?</summary>
 
-Force Dark hooks Android's framework-level darkening APIs (API 29+) to override Amazon's
-`android:forceDarkAllowed="false"` opt-out. Chromium's auto dark algorithm then darkens WebView
-content per-element. Supplementary CSS fixes shipped with the module correct contrast issues the
-algorithm introduces on buy buttons and product images.
+Amazon disables Android's force dark algorithm via its theme. The module hooks
+`ViewRootImpl.determineForceDarkType` and overrides the return to `FORCE_DARK_ALWAYS`, which
+triggers GPU-level algorithmic darkening on all content including WebViews. Additional hooks set
+dark window backgrounds, theme native nav elements, and prevent white flash on WebView load.
+`DarkModeInjector` ships CSS fixes for elements the algorithm gets wrong (product images,
+buy buttons, deal badges).
 
-This feature is experimental and defaults to off. Some elements may still have contrast issues.
-If you find one, open an issue with a screenshot and the DOM structure (enable WebView debugging,
-connect via `chrome://inspect`, and copy the relevant HTML).
+If you spot a rendering issue, open an issue with a screenshot and page URL. You can enable
+WebView debugging in settings and inspect via `chrome://inspect`.
 
 </details>
 

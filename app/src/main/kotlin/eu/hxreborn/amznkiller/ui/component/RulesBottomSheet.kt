@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.ui.component
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
@@ -44,6 +45,7 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun RulesBottomSheet(
     selectors: List<String>,

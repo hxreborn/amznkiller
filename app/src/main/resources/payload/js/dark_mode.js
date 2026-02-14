@@ -8,7 +8,8 @@
     '[class*=image-container] img{mix-blend-mode:normal!important}' +
     'img[style*="mix-blend-mode"]{mix-blend-mode:normal!important}' +
     '[class*=asin-metadata]{mix-blend-mode:normal!important}' +
-    // Prevent white flash on navigation
+    // TODO:
+    // Prevent white flash on navigation(WIP)
     'html{background-color:#1a1a1a!important}' +
     'body{background-color:#1a1a1a!important}' +
     // Deal cards: override #f7f7f7/#fff so HW renderer doesn't auto-darken unevenly

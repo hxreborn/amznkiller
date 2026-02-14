@@ -6,7 +6,7 @@ object EmbeddedSelectors {
     fun load(): List<String> =
         runCatching {
             EmbeddedSelectors::class.java.classLoader
-                ?.getResourceAsStream("payload/embedded.css")
+                ?.getResourceAsStream("payload/css/embedded.css")
                 ?.bufferedReader()
                 ?.use { reader ->
                     SelectorSanitizer.sanitize(reader.lineSequence())
