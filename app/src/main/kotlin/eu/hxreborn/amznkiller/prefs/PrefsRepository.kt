@@ -1,6 +1,7 @@
 package eu.hxreborn.amznkiller.prefs
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import eu.hxreborn.amznkiller.ui.state.AppPrefsState
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import kotlinx.coroutines.channels.awaitClose
@@ -41,6 +42,8 @@ class PrefsRepositoryImpl(
                         debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
                         injectionEnabled = Prefs.INJECTION_ENABLED.read(localPrefs),
                         webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(localPrefs),
+                        forceDarkWebview = Prefs.FORCE_DARK_WEBVIEW.read(localPrefs),
+                        priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(localPrefs),
                         autoUpdate = Prefs.AUTO_UPDATE.read(localPrefs),
                         isStale =
                             lastFetched == 0L ||
@@ -84,8 +87,8 @@ class PrefsRepositoryImpl(
 
     override fun syncLocalToRemote() {
         val remote = remotePrefsProvider() ?: return
-        val editor = remote.edit()
-        Prefs.all.forEach { it.copyTo(localPrefs, editor) }
-        editor.apply()
+        remote.edit {
+            Prefs.all.forEach { it.copyTo(localPrefs, this) }
+        }
     }
 }
