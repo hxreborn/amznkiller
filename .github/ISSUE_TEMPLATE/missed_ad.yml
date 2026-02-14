@@ -12,6 +12,8 @@ body:
         - Home feed
         - Cart / checkout
         - Browse / category page
+        - Order history
+        - Account pages
         - Other
 
   - type: textarea
@@ -35,7 +37,25 @@ body:
       render: html
 
   - type: input
+    id: device
+    attributes:
+      label: Device
+      placeholder: Pixel 9 Pro
+
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+      placeholder: "15 QPR2"
+
+  - type: input
     id: amazon_version
     attributes:
       label: Amazon Shopping version
       placeholder: "26.24.2.100"
+
+  - type: input
+    id: module_version
+    attributes:
+      label: Module version
+      placeholder: "0.1.0 (1005)"

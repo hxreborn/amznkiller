@@ -10,6 +10,8 @@ body:
         - Module not activating
         - UI bug or crash
         - Selector fetch failure
+        - Price charts not appearing
+        - Dark theme issue
         - Other
 
   - type: textarea
