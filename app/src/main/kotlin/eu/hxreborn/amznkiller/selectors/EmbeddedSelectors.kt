@@ -8,9 +8,9 @@ object EmbeddedSelectors {
             EmbeddedSelectors::class.java.classLoader
                 ?.getResourceAsStream("payload/embedded.css")
                 ?.bufferedReader()
-                ?.lineSequence()
-                ?.let { SelectorSanitizer.sanitize(it) }
-                ?: emptyList()
+                ?.use { reader ->
+                    SelectorSanitizer.sanitize(reader.lineSequence())
+                } ?: emptyList()
         }.getOrElse {
             Logger.log("Failed to load embedded.css", it)
             emptyList()
