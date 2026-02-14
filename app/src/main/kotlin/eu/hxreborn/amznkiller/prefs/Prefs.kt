@@ -15,6 +15,8 @@ object Prefs {
     val DEBUG_LOGS = BoolPref("debug_logs", false)
     val INJECTION_ENABLED = BoolPref("injection_enabled", true)
     val WEBVIEW_DEBUGGING = BoolPref("webview_debugging", false)
+    val FORCE_DARK_WEBVIEW = BoolPref("force_dark_webview", false)
+    val PRICE_CHARTS_ENABLED = BoolPref("price_charts_enabled", false)
 
     val LAST_REFRESH_FAILED = BoolPref("last_refresh_failed", false)
     val AUTO_UPDATE = BoolPref("auto_update", true)
@@ -31,6 +33,8 @@ object Prefs {
             DEBUG_LOGS,
             INJECTION_ENABLED,
             WEBVIEW_DEBUGGING,
+            FORCE_DARK_WEBVIEW,
+            PRICE_CHARTS_ENABLED,
             AUTO_UPDATE,
             DARK_THEME_CONFIG,
             USE_DYNAMIC_COLOR,

@@ -10,6 +10,8 @@ import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.selectors.EmbeddedSelectors
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.util.Logger
+import eu.hxreborn.amznkiller.xposed.hook.ForceDarkHooker
+import eu.hxreborn.amznkiller.xposed.hook.WebViewHooker
 import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
@@ -17,14 +19,11 @@ import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-internal lateinit var module: AmznkillerModule
-
 class AmznkillerModule(
     base: XposedInterface,
     param: ModuleLoadedParam,
 ) : XposedModule(base, param) {
     init {
-        module = this
         Logger.init(this)
         Logger.log(
             "Module v${BuildConfig.VERSION_NAME} on ${base.frameworkName} ${base.frameworkVersion}",
@@ -54,7 +53,10 @@ class AmznkillerModule(
             }
 
             Logger.log("Registering WebView hooks...")
-            WebViewHooker.hook()
+            WebViewHooker.hook(this)
+
+            Logger.log("Registering Force Dark hooks...")
+            ForceDarkHooker.hook(this)
 
             // Fallback refresh if the user hasn't opened the companion app recently
             if (PrefsManager.isStale()) {
@@ -113,7 +115,6 @@ class AmznkillerModule(
                 "No ads attached. Have fun",
                 "CSS injected. You're welcome",
                 "Jeff won't see you coming",
-                "Cleaner than he deserves",
                 "Ad-free mode: enabled",
             )
     }
