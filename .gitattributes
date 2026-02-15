@@ -8,8 +8,12 @@ lists/generated/*.txt linguist-language=AdBlock linguist-detectable
 .github/assets/** linguist-vendored
 .github/assets/** linguist-detectable=false
 
+.github/*.md linguist-vendored
+.github/**/*.md linguist-vendored
+
 *.sh linguist-detectable=true
 
 *.yml linguist-detectable=false
 *.yaml linguist-detectable=false
 *.toml linguist-detectable=false
+*.md linguist-vendored
