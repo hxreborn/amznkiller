@@ -1,12 +1,16 @@
 package eu.hxreborn.amznkiller.xposed.hook
 
 import android.app.Activity
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsetsController
 import android.webkit.WebView
+import android.widget.ImageView
 import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
@@ -15,54 +19,65 @@ import io.github.libxposed.api.XposedInterface.BeforeHookCallback
 import io.github.libxposed.api.annotations.AfterInvocation
 import io.github.libxposed.api.annotations.BeforeInvocation
 import io.github.libxposed.api.annotations.XposedHooker
+import java.util.Collections
+import java.util.WeakHashMap
 
 object ForceDarkHooker {
-    fun hook(xposed: XposedInterface) {
-        hookActivityOnCreate(xposed)
-        hookSetForceDarkAllowed(xposed)
+    val bottomTabIcons: MutableSet<View> =
+        Collections.newSetFromMap(WeakHashMap())
+
+    // GPU force dark inverts this grey to near-white
+    private val TAB_ICON_TINT = Color.rgb(168, 168, 168)
+    private val TAB_ICON_CSL = ColorStateList.valueOf(TAB_ICON_TINT)
+
+    lateinit var hostClassLoader: ClassLoader
+
+    fun hook(
+        xposed: XposedInterface,
+        classLoader: ClassLoader,
+    ) {
+        hostClassLoader = classLoader
+        hookMethod(xposed, Activity::class.java, "onCreate", Bundle::class.java) {
+            ActivityOnCreateHooker::class.java
+        }
         hookDetermineForceDarkType(xposed)
         hookRendererSetForceDark(xposed)
         hookWebViewBackground(xposed)
+        hookTabIcons(xposed)
     }
 
-    private fun hookActivityOnCreate(xposed: XposedInterface) {
+    fun applyTabIconTint(imageView: ImageView) {
+        bottomTabIcons.add(imageView)
+        imageView.imageTintList = TAB_ICON_CSL
+        imageView.colorFilter =
+            PorterDuffColorFilter(TAB_ICON_TINT, PorterDuff.Mode.SRC_IN)
+    }
+
+    private fun hookMethod(
+        xposed: XposedInterface,
+        clazz: Class<*>,
+        name: String,
+        vararg params: Class<*>,
+        hooker: () -> Class<out XposedInterface.Hooker>,
+    ) {
         runCatching {
-            val method =
-                Activity::class.java.getDeclaredMethod(
-                    "onCreate",
-                    Bundle::class.java,
-                )
-            xposed.hook(method, ActivityOnCreateHooker::class.java)
+            xposed.hook(clazz.getDeclaredMethod(name, *params), hooker())
         }.onSuccess {
-            Logger.log("Hooked Activity.onCreate")
+            Logger.log("Hooked ${clazz.simpleName}.$name")
         }.onFailure {
-            Logger.log("Failed to hook Activity.onCreate", it)
+            Logger.log("Failed to hook ${clazz.simpleName}.$name", it)
         }
     }
 
-    private fun hookSetForceDarkAllowed(xposed: XposedInterface) {
-        runCatching {
-            val method =
-                View::class.java.getDeclaredMethod(
-                    "setForceDarkAllowed",
-                    Boolean::class.javaPrimitiveType,
-                )
-            xposed.hook(method, ForceDarkOverrideHooker::class.java)
-        }.onSuccess {
-            Logger.log("Hooked View.setForceDarkAllowed")
-        }.onFailure {
-            Logger.log("Failed to hook View.setForceDarkAllowed", it)
-        }
-    }
-
-    // Amazon sets android:forceDarkAllowed=false in AmazonTheme (values-v29/styles.xml)
-    // ViewRootImpl.determineForceDarkType() reads this and returns 0 (NONE)
-    // Override to 2 (ALWAYS) to force the GPU renderer to apply algorithmic darkening
+    // Amazon sets android:forceDarkAllowed=false in AmazonTheme
+    // Override determineForceDarkType result from 0 (NONE) to 2 (ALWAYS)
     private fun hookDetermineForceDarkType(xposed: XposedInterface) {
         runCatching {
             val clazz = Class.forName("android.view.ViewRootImpl")
-            val method = clazz.getDeclaredMethod("determineForceDarkType")
-            xposed.hook(method, ForceDarkTypeHooker::class.java)
+            xposed.hook(
+                clazz.getDeclaredMethod("determineForceDarkType"),
+                ForceDarkTypeHooker::class.java,
+            )
         }.onSuccess {
             Logger.log("Hooked ViewRootImpl.determineForceDarkType")
         }.onFailure {
@@ -70,29 +85,33 @@ object ForceDarkHooker {
         }
     }
 
-    // Fallback for older Android versions where determineForceDarkType doesn't exist
+    // Fallback for older Android where determineForceDarkType doesn't exist
     private fun hookRendererSetForceDark(xposed: XposedInterface) {
-        val classNames =
+        val classes =
             listOf(
                 "android.graphics.HardwareRenderer",
                 "android.view.ThreadedRenderer",
             )
-        val paramTypes =
+        val params =
             listOf(
                 Boolean::class.javaPrimitiveType!!,
                 Int::class.javaPrimitiveType!!,
             )
-
-        for (className in classNames) {
-            val clazz = runCatching { Class.forName(className) }.getOrNull() ?: continue
-            for (paramType in paramTypes) {
-                val result =
+        for (cls in classes) {
+            val clazz =
+                runCatching { Class.forName(cls) }.getOrNull() ?: continue
+            for (param in params) {
+                val ok =
                     runCatching {
-                        val method = clazz.getDeclaredMethod("setForceDark", paramType)
-                        xposed.hook(method, RendererForceDarkHooker::class.java)
+                        xposed.hook(
+                            clazz.getDeclaredMethod("setForceDark", param),
+                            RendererForceDarkHooker::class.java,
+                        )
                     }
-                if (result.isSuccess) {
-                    Logger.log("Hooked $className.setForceDark(${paramType.simpleName})")
+                if (ok.isSuccess) {
+                    Logger.log(
+                        "Hooked $cls.setForceDark(${param.simpleName})",
+                    )
                     return
                 }
             }
@@ -100,34 +119,57 @@ object ForceDarkHooker {
         Logger.log("Failed to hook setForceDark on any renderer class")
     }
 
-    // Prevent white flash by intercepting WebView.setBackgroundColor
-    // and forcing dark on all WebView constructors
     private fun hookWebViewBackground(xposed: XposedInterface) {
         for (ctor in WebView::class.java.declaredConstructors) {
             runCatching {
                 xposed.hook(ctor, WebViewCtorDarkHooker::class.java)
-            }.onSuccess {
-                Logger.log("Hooked WebView.<init>(${ctor.parameterCount} params)")
-            }.onFailure {
-                Logger.log("Failed to hook WebView.<init>", it)
             }
         }
+        hookMethod(
+            xposed,
+            View::class.java,
+            "setBackgroundColor",
+            Int::class.javaPrimitiveType!!,
+        ) { BackgroundColorInterceptor::class.java }
+    }
 
-        runCatching {
-            val method =
-                View::class.java.getDeclaredMethod(
-                    "setBackgroundColor",
-                    Int::class.javaPrimitiveType,
+    private fun hookTabIcons(xposed: XposedInterface) {
+        val controllers =
+            listOf(
+                "com.amazon.mShop.chrome.bottomtabs.BaseTabController",
+                "com.amazon.mShop.chrome.bottomtabs.SavXTabController",
+                "com.amazon.mShop.chrome.bottomtabs.SwitcherTabController",
+            )
+        for (cls in controllers) {
+            runCatching {
+                val clazz =
+                    Class.forName(cls, false, hostClassLoader)
+                xposed.hook(
+                    clazz.declaredMethods.first { it.name == "getTabIcon" },
+                    GetTabIconHooker::class.java,
                 )
-            xposed.hook(method, BackgroundColorInterceptor::class.java)
-        }.onSuccess {
-            Logger.log("Hooked View.setBackgroundColor")
-        }.onFailure {
-            Logger.log("Failed to hook View.setBackgroundColor", it)
+            }.onSuccess {
+                Logger.log("Hooked $cls.getTabIcon")
+            }.onFailure {
+                Logger.logDebug("Failed to hook $cls.getTabIcon", it)
+            }
         }
+        hookMethod(
+            xposed,
+            ImageView::class.java,
+            "setImageDrawable",
+            android.graphics.drawable.Drawable::class.java,
+        ) { DrawableChangeGuard::class.java }
+        hookMethod(
+            xposed,
+            ImageView::class.java,
+            "setImageTintList",
+            ColorStateList::class.java,
+        ) { TintListGuard::class.java }
     }
 }
 
+// Enable force dark on activity window and darken system bars
 @XposedHooker
 class ActivityOnCreateHooker : XposedInterface.Hooker {
     companion object {
@@ -137,70 +179,37 @@ class ActivityOnCreateHooker : XposedInterface.Hooker {
             if (!PrefsManager.forceDarkWebview) return
             val activity = callback.thisObject as? Activity ?: return
             runCatching {
-                val decorView = activity.window?.decorView ?: return
-                decorView.isForceDarkAllowed = true
-
-                // Dark window background to prevent white flash on transitions
-                activity.window?.setBackgroundDrawable(ColorDrawable(Color.BLACK))
+                activity.window?.decorView?.let { it.isForceDarkAllowed = true }
+                activity.window?.setBackgroundDrawable(
+                    ColorDrawable(Color.BLACK),
+                )
                 activity.window?.statusBarColor = Color.BLACK
                 activity.window?.navigationBarColor = Color.BLACK
-
-                Logger.logDebug(
-                    "ForceDark: enabled on ${activity.javaClass.simpleName}",
+                activity.window?.insetsController?.setSystemBarsAppearance(
+                    0,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
+                        WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
                 )
-
-                // Dark system bars
-                activity.window?.insetsController?.let { controller ->
-                    controller.setSystemBarsAppearance(
-                        0,
-                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
-                            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
-                    )
-                }
-            }.onFailure {
-                Logger.logDebug("ForceDark: failed on ${activity.javaClass.simpleName}", it)
             }
         }
     }
 }
 
-@XposedHooker
-class ForceDarkOverrideHooker : XposedInterface.Hooker {
-    companion object {
-        @JvmStatic
-        @BeforeInvocation
-        fun before(callback: BeforeHookCallback) {
-            if (!PrefsManager.forceDarkWebview) return
-            val allowed = callback.args[0] as? Boolean ?: return
-            if (!allowed) {
-                callback.args[0] = true
-                Logger.logDebug("ForceDark: overrode setForceDarkAllowed(false) -> true")
-            }
-        }
-    }
-}
-
+// Override ViewRootImpl.determineForceDarkType from NONE(0) to ALWAYS(2)
 @XposedHooker
 class ForceDarkTypeHooker : XposedInterface.Hooker {
     companion object {
-        private const val FORCE_DARK_NONE = 0
-        private const val FORCE_DARK_ALWAYS = 2
-
         @JvmStatic
         @AfterInvocation
         fun after(callback: AfterHookCallback) {
             if (!PrefsManager.forceDarkWebview) return
             val result = callback.result as? Int ?: return
-            if (result == FORCE_DARK_NONE) {
-                callback.result = FORCE_DARK_ALWAYS
-                Logger.logDebug(
-                    "ForceDark: overrode determineForceDarkType $result -> $FORCE_DARK_ALWAYS",
-                )
-            }
+            if (result == 0) callback.result = 2
         }
     }
 }
 
+// Fallback for older Android: force dark on HardwareRenderer/ThreadedRenderer
 @XposedHooker
 class RendererForceDarkHooker : XposedInterface.Hooker {
     companion object {
@@ -209,26 +218,14 @@ class RendererForceDarkHooker : XposedInterface.Hooker {
         fun before(callback: BeforeHookCallback) {
             if (!PrefsManager.forceDarkWebview) return
             when (val arg = callback.args[0]) {
-                is Boolean -> {
-                    if (!arg) {
-                        callback.args[0] = true
-                        Logger.logDebug("ForceDark: overrode setForceDark(false) -> true")
-                    }
-                }
-
-                is Int -> {
-                    if (arg != 2) {
-                        callback.args[0] = 2
-                        Logger.logDebug("ForceDark: overrode setForceDark($arg) -> 2")
-                    }
-                }
+                is Boolean -> if (!arg) callback.args[0] = true
+                is Int -> if (arg != 2) callback.args[0] = 2
             }
         }
     }
 }
 
-// Force dark background right after WebView is constructed
-// Using Color.TRANSPARENT so the dark Activity window background shows through
+// Make WebView background transparent so the dark activity window shows through
 @XposedHooker
 class WebViewCtorDarkHooker : XposedInterface.Hooker {
     companion object {
@@ -245,8 +242,7 @@ class WebViewCtorDarkHooker : XposedInterface.Hooker {
     }
 }
 
-// Intercept any View.setBackgroundColor call on a WebView
-// Prevent Amazon from resetting it to white
+// Block Amazon from resetting WebView backgrounds to white
 @XposedHooker
 class BackgroundColorInterceptor : XposedInterface.Hooker {
     companion object {
@@ -262,6 +258,51 @@ class BackgroundColorInterceptor : XposedInterface.Hooker {
             if (r > 200 && g > 200 && b > 200) {
                 callback.args[0] = Color.TRANSPARENT
             }
+        }
+    }
+}
+
+// Tint bottom tab icons grey so GPU force dark inverts them to near-white
+@XposedHooker
+class GetTabIconHooker : XposedInterface.Hooker {
+    companion object {
+        @JvmStatic
+        @AfterInvocation
+        fun after(callback: AfterHookCallback) {
+            if (!PrefsManager.forceDarkWebview) return
+            val icon = callback.result as? ImageView ?: return
+            ForceDarkHooker.applyTabIconTint(icon)
+        }
+    }
+}
+
+// Prevent Amazon tab controllers from overriding our icon tint
+@XposedHooker
+class TintListGuard : XposedInterface.Hooker {
+    companion object {
+        @JvmStatic
+        @BeforeInvocation
+        fun before(callback: BeforeHookCallback) {
+            if (!PrefsManager.forceDarkWebview) return
+            val iv = callback.thisObject as? ImageView ?: return
+            if (iv !in ForceDarkHooker.bottomTabIcons) return
+            callback.args[0] =
+                ColorStateList.valueOf(Color.rgb(168, 168, 168))
+        }
+    }
+}
+
+// Re-apply grey tint after a tab icon drawable swap (animations, tab switch)
+@XposedHooker
+class DrawableChangeGuard : XposedInterface.Hooker {
+    companion object {
+        @JvmStatic
+        @AfterInvocation
+        fun after(callback: AfterHookCallback) {
+            if (!PrefsManager.forceDarkWebview) return
+            val iv = callback.thisObject as? ImageView ?: return
+            if (iv !in ForceDarkHooker.bottomTabIcons) return
+            iv.post { ForceDarkHooker.applyTabIconTint(iv) }
         }
     }
 }
