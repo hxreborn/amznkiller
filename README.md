@@ -53,6 +53,14 @@ Search query: _"macbook air m1 16gb 512"_
 </tr>
 </table>
 
+<table>
+<tr><th>Force Dark</th><th>Price History</th></tr>
+<tr>
+  <td><img src="https://github.com/user-attachments/assets/f24a9ac7-126e-4eff-b5e7-d3b8cc652158" width="280" alt="Force Dark mode" /></td>
+  <td><img src="https://github.com/user-attachments/assets/fbebb479-8bdc-4395-b531-318ac07a68c9" width="280" alt="Price history charts" /></td>
+</tr>
+</table>
+
 **Settings app**
 
 <table>
@@ -118,7 +126,7 @@ Amazon Shopping if changes don't appear immediately.
 </details>
 
 <details>
-<summary>How does Force Dark work?</summary>
+<summary id="how-does-force-dark-work">How does Force Dark work?</summary>
 
 Amazon disables Android's force dark algorithm via its theme. The module hooks
 `ViewRootImpl.determineForceDarkType` and overrides the return to `FORCE_DARK_ALWAYS`, which
