@@ -55,7 +55,7 @@ class AmznkillerModule(
             WebViewHooker.hook(this)
 
             Logger.log("Registering Force Dark hooks...")
-            ForceDarkHooker.hook(this)
+            ForceDarkHooker.hook(this, param.classLoader)
 
             // Fallback refresh if the user hasn't opened the companion app recently
             if (PrefsManager.isStale()) {
