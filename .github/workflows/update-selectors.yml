@@ -30,10 +30,7 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Validate selectors in headless Chromium
-        run: |
-          node scripts/ci/validate.mjs --strict \
-            lists/generated/merged.txt \
-            app/src/main/resources/payload/embedded.css
+        run: node scripts/ci/validate.mjs --strict lists/generated/merged.txt
 
       - name: Check for selector changes
         id: diff
@@ -41,7 +38,6 @@ jobs:
           git diff --quiet -- \
             'lists/generated/merged.txt' \
             'lists/generated/upstream.txt' \
-            'app/src/main/resources/payload/embedded.css' \
             && echo "changed=false" >> "$GITHUB_OUTPUT" \
             || echo "changed=true" >> "$GITHUB_OUTPUT"
 
