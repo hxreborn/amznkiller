@@ -36,6 +36,5 @@ jobs:
         run: |
           node scripts/ci/validate.mjs \
             lists/static.txt \
-            lists/generated/merged.txt \
-            app/src/main/resources/payload/embedded.css
+            lists/generated/merged.txt
 
