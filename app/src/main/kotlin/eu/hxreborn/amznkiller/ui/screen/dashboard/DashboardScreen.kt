@@ -89,7 +89,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-private const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
+private val AMAZON_PACKAGES =
+    listOf(
+        "com.amazon.mShop.android.shopping",
+        "in.amazon.mShop.android.shopping",
+    )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,19 +112,21 @@ fun DashboardScreen(
             context.resources.getStringArray(R.array.taglines).random()
         }
 
-    val amazonInfo =
+    val (amazonPackage, amazonInfo) =
         remember {
-            runCatching {
-                val packageManager = context.packageManager
-                val info = packageManager.getPackageInfo(AMAZON_PACKAGE, 0)
-                val icon = packageManager.getApplicationIcon(AMAZON_PACKAGE).toBitmap(128, 128).asImageBitmap()
-                val label =
-                    info.applicationInfo
-                        ?.let(packageManager::getApplicationLabel)
-                        ?.toString()
-                        .orEmpty()
-                Triple(icon, label, info.versionName)
-            }.getOrNull()
+            val packageManager = context.packageManager
+            AMAZON_PACKAGES.firstNotNullOfOrNull { pkg ->
+                runCatching {
+                    val info = packageManager.getPackageInfo(pkg, 0)
+                    val icon = packageManager.getApplicationIcon(pkg).toBitmap(128, 128).asImageBitmap()
+                    val label =
+                        info.applicationInfo
+                            ?.let(packageManager::getApplicationLabel)
+                            ?.toString()
+                            .orEmpty()
+                    pkg to Triple(icon, label, info.versionName)
+                }.getOrNull()
+            } ?: (null to null)
         }
 
     val webViewInfo =
@@ -240,16 +246,11 @@ fun DashboardScreen(
                                 if (amazonInfo != null) {
                                     IconButton(
                                         onClick = {
-                                            context.packageManager
-                                                .getLaunchIntentForPackage(
-                                                    AMAZON_PACKAGE,
-                                                )?.let {
-                                                    it.addFlags(
-                                                        Intent.FLAG_ACTIVITY_NEW_TASK,
-                                                    )
-                                                    context.startActivity(
-                                                        it,
-                                                    )
+                                            amazonPackage
+                                                ?.let { context.packageManager.getLaunchIntentForPackage(it) }
+                                                ?.let {
+                                                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                    context.startActivity(it)
                                                 }
                                         },
                                     ) {

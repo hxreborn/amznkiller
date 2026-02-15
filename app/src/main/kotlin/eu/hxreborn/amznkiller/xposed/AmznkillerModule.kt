@@ -33,7 +33,7 @@ class AmznkillerModule(
         Logger.log(
             "onPackageLoaded: ${param.packageName} isFirst=${param.isFirstPackage}",
         )
-        if (param.packageName != AMAZON_PACKAGE || !param.isFirstPackage) return
+        if (param.packageName !in AMAZON_PACKAGES || !param.isFirstPackage) return
 
         runCatching {
             Logger.log("Initializing PrefsManager...")
@@ -104,7 +104,11 @@ class AmznkillerModule(
         }.getOrNull()
 
     companion object {
-        const val AMAZON_PACKAGE = "com.amazon.mShop.android.shopping"
+        val AMAZON_PACKAGES =
+            setOf(
+                "com.amazon.mShop.android.shopping",
+                "in.amazon.mShop.android.shopping",
+            )
         private const val TOAST_DELAY_MS = 1500L
         private val executor = Executors.newSingleThreadExecutor()
 

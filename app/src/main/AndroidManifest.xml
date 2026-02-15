@@ -6,6 +6,7 @@
 
     <queries>
         <package android:name="com.amazon.mShop.android.shopping" />
+        <package android:name="in.amazon.mShop.android.shopping" />
     </queries>
 
     <application
