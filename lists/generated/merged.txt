@@ -70,7 +70,6 @@ div[data-csa-c-painter="single-video-card"]
 div[data-csa-c-painter="sp-cart-mobile-carousel-cards"]
 div[data-csa-c-slot-id^="loom-mobile-brand-footer-slot_hsa-id-"]
 div[data-csa-c-slot-id^="loom-mobile-top-slot_hsa-id-"]
-div[data-csa-c-type="widget"]:has([data-ad-feedback-label-id])
 div[id^="sims-simsContainer_feature_div_"]:has(.sp_info_link)
 div[id^="sp_detail"]
 span[cel_widget_id^="MAIN-FEATURED_ASINS_LIST-"]
