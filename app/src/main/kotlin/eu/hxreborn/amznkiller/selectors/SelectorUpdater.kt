@@ -1,9 +1,9 @@
 package eu.hxreborn.amznkiller.selectors
 
 import android.content.SharedPreferences
-import androidx.core.content.edit
 import eu.hxreborn.amznkiller.http.HttpClient
 import eu.hxreborn.amznkiller.prefs.Prefs
+import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.util.Logger
 
 sealed class MergeResult {
@@ -42,10 +42,7 @@ object SelectorUpdater {
             Logger.logDebug("No selector URL configured, using embedded only")
             val embedded = EmbeddedSelectors.load()
             if (embedded.isEmpty()) return
-            prefs.edit(commit = true) {
-                Prefs.CACHED_SELECTORS.write(this, embedded.sorted().joinToString("\n"))
-                Prefs.LAST_FETCHED.write(this, System.currentTimeMillis())
-            }
+            PrefsManager.setFallbackSelectors(embedded.sorted())
             Logger.logDebug("Cached ${embedded.size} embedded selectors")
             return
         }
@@ -56,10 +53,7 @@ object SelectorUpdater {
             return
         }
 
-        prefs.edit(commit = true) {
-            Prefs.CACHED_SELECTORS.write(this, result.selectors.joinToString("\n"))
-            Prefs.LAST_FETCHED.write(this, System.currentTimeMillis())
-        }
+        PrefsManager.setFallbackSelectors(result.selectors.toList())
         Logger.logDebug("Cached ${result.selectors.size} selectors")
     }
 }
