@@ -27,11 +27,9 @@ import androidx.compose.material.icons.automirrored.outlined.Rule
 import androidx.compose.material.icons.outlined.Android
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Construction
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.PhoneAndroid
-import androidx.compose.material.icons.outlined.Science
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CloudDone
@@ -533,54 +531,6 @@ private fun SystemEnvironmentCard(
                 )
                 Text(
                     text = "API ${Build.VERSION.SDK_INT}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 12.dp),
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Outlined.Science,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = stringResource(R.string.wip_title),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Text(
-                    text = stringResource(R.string.wip_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 12.dp),
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Outlined.Construction,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = stringResource(R.string.wip_title),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Text(
-                    text = stringResource(R.string.wip_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
