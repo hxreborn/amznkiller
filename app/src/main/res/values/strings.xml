@@ -3,7 +3,7 @@
     <string name="app_name">AmznKiller</string>
     <string name="app_bar_title">AmznKiller</string>
     <string name="app_desc">Strip out ads and purge low-quality promotional products from Amazon Shopping</string>
-    Z
+
     <string name="target_title">Amazon Shopping</string>
 
     <string name="config_active_selectors">Active selectors</string>
@@ -34,6 +34,9 @@
     <string name="hero_checking_subtitle">Fetching latest selectors\u2026</string>
     <string name="hero_error_title">Sync failed</string>
     <string name="hero_error_subtitle">Last sync failed. Tap refresh to retry</string>
+    <string name="hero_delta_added">+%d added</string>
+    <string name="hero_delta_removed">-%d removed</string>
+    <string name="hero_delta_changed">+%d added, -%d removed</string>
 
     <string name="snackbar_fetch_failed_bundled">Remote fetch failed, using bundled rules instead</string>
     <string name="snackbar_no_selectors">No selectors fetched</string>

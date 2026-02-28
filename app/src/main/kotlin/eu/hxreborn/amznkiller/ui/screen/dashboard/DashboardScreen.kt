@@ -404,15 +404,38 @@ private fun UpdatesCard(
                         }
 
                         UpdateStatus.UpToDate -> {
-                            stringResource(R.string.hero_operational_subtitle) + "\n" + lastChecked
+                            val delta =
+                                (outcomeEvent as? SelectorSyncEvent.Updated)?.let { ev ->
+                                    when {
+                                        ev.added > 0 && ev.removed > 0 -> {
+                                            stringResource(R.string.hero_delta_changed, ev.added, ev.removed)
+                                        }
+
+                                        ev.added > 0 -> {
+                                            stringResource(R.string.hero_delta_added, ev.added)
+                                        }
+
+                                        ev.removed > 0 -> {
+                                            stringResource(R.string.hero_delta_removed, ev.removed)
+                                        }
+
+                                        else -> {
+                                            null
+                                        }
+                                    }
+                                }
+                            listOfNotNull(
+                                stringResource(R.string.hero_operational_subtitle),
+                                lastChecked,
+                                delta,
+                            ).joinToString("\n")
                         }
 
                         UpdateStatus.Stale -> {
-                            if (lastChecked != null) {
-                                stringResource(R.string.hero_stale_subtitle) + "\n" + lastChecked
-                            } else {
-                                stringResource(R.string.hero_stale_subtitle)
-                            }
+                            listOfNotNull(
+                                stringResource(R.string.hero_stale_subtitle),
+                                lastChecked,
+                            ).joinToString("\n")
                         }
                     },
                 style = MaterialTheme.typography.bodyMedium,
