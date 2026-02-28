@@ -45,7 +45,7 @@ Xposed module built on the modern LSPosed API that hides ads and sponsored conte
 
 ## Known Issues
 
-- [Force Dark](#how-does-force-dark-work) is experimental and disabled by default. Some Amazon screens may still have contrast issues. If this happens, disable Force Dark and report the page URL with a screenshot
+- [Force Dark](#how-does-force-dark-work) is experimental and disabled by default. Requires Android 15 (API 35) or higher for full support. On Android 10-14 force dark may not apply correctly. Some Amazon screens may still have contrast issues even on supported versions
 - Price history charts are still being expanded and may not appear on some product pages yet. 
 
 ## Requirements
@@ -153,15 +153,20 @@ Amazon Shopping if changes don't appear immediately.
 <details>
 <summary id="how-does-force-dark-work">How does Force Dark work?</summary>
 
-Amazon disables Android's force dark algorithm via its theme. The module hooks
-`ViewRootImpl.determineForceDarkType` and overrides the return to `FORCE_DARK_ALWAYS`, which
-triggers GPU-level algorithmic darkening on all content including WebViews. Additional hooks set
-dark window backgrounds, theme native nav elements, and prevent white flash on WebView load.
-`DarkModeInjector` ships CSS fixes for elements the algorithm gets wrong (product images,
-buy buttons, deal badges).
+Amazon disables Android's force dark algorithm via its theme (`forceDarkAllowed=false`). The
+module hooks `ViewRootImpl.determineForceDarkType` and overrides the return to
+`FORCE_DARK_ALWAYS`, which triggers GPU-level algorithmic darkening on all content including
+WebViews. Additional hooks set dark window backgrounds, theme native nav elements, and prevent
+white flash on WebView load. `DarkModeInjector` ships CSS fixes for elements the algorithm gets
+wrong (product images, buy buttons, deal badges).
 
-If you spot a rendering issue, open an issue with a screenshot and page URL. You can enable
-WebView debugging in settings and inspect via `chrome://inspect`.
+**Limitation:** `ViewRootImpl.determineForceDarkType` was introduced in Android 15 (API 35).
+On Android 10-14, this method does not exist so the primary force dark override cannot apply.
+A fallback hook on `HardwareRenderer.setForceDark` is attempted but Amazon's theme-level
+opt-out still blocks darkening on those versions.
+
+If you spot a rendering issue, open an issue with a screenshot, page URL, and Android version.
+You can enable WebView debugging in settings and inspect via `chrome://inspect`.
 
 </details>
 
