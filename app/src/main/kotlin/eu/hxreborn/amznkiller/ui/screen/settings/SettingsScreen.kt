@@ -67,6 +67,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.getSystemService
@@ -384,7 +388,15 @@ fun SettingsScreen(
                     },
                     summary = {
                         Text(
-                            text = stringResource(R.string.settings_dark_mode_summary),
+                            text =
+                                buildAnnotatedString {
+                                    append(stringResource(R.string.settings_dark_mode_summary))
+                                    append("\n")
+                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("Note: ")
+                                    }
+                                    append("Requires Android 15 or higher to work properly")
+                                },
                         )
                     },
                     onValueChange = { viewModel.savePref(Prefs.FORCE_DARK_WEBVIEW, it) },
