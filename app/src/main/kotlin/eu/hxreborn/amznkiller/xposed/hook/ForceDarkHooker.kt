@@ -51,6 +51,7 @@ object ForceDarkHooker {
         imageView.imageTintList = TAB_ICON_CSL
         imageView.colorFilter =
             PorterDuffColorFilter(TAB_ICON_TINT, PorterDuff.Mode.SRC_IN)
+        Logger.logDebug("ForceDark: applyTabIconTint view=${imageView.hashCode()}")
     }
 
     private fun hookMethod(
@@ -74,6 +75,13 @@ object ForceDarkHooker {
     private fun hookDetermineForceDarkType(xposed: XposedInterface) {
         runCatching {
             val clazz = Class.forName("android.view.ViewRootImpl")
+            Logger.logDebug(
+                "ForceDark: ViewRootImpl forceDark methods: ${
+                    clazz.declaredMethods
+                        .filter { "forcedark" in it.name.lowercase() }
+                        .map { it.name }
+                }",
+            )
             xposed.hook(
                 clazz.getDeclaredMethod("determineForceDarkType"),
                 ForceDarkTypeHooker::class.java,
@@ -140,6 +148,7 @@ object ForceDarkHooker {
                 "com.amazon.mShop.chrome.bottomtabs.SavXTabController",
                 "com.amazon.mShop.chrome.bottomtabs.SwitcherTabController",
             )
+        var hooked = 0
         for (cls in controllers) {
             runCatching {
                 val clazz =
@@ -149,11 +158,13 @@ object ForceDarkHooker {
                     GetTabIconHooker::class.java,
                 )
             }.onSuccess {
+                hooked++
                 Logger.log("Hooked $cls.getTabIcon")
             }.onFailure {
                 Logger.logDebug("Failed to hook $cls.getTabIcon", it)
             }
         }
+        Logger.logDebug("ForceDark: tab icon hooks: $hooked of ${controllers.size} hooked")
         hookMethod(
             xposed,
             ImageView::class.java,
@@ -190,6 +201,8 @@ class ActivityOnCreateHooker : XposedInterface.Hooker {
                     WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
                         WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
                 )
+                val fda = activity.window?.decorView?.isForceDarkAllowed
+                Logger.logDebug("ForceDark: onCreate forceDarkAllowed=$fda")
             }
         }
     }
@@ -204,7 +217,10 @@ class ForceDarkTypeHooker : XposedInterface.Hooker {
         fun after(callback: AfterHookCallback) {
             if (!PrefsManager.forceDarkWebview) return
             val result = callback.result as? Int ?: return
-            if (result == 0) callback.result = 2
+            if (result == 0) {
+                callback.result = 2
+                Logger.logDebug("ForceDark: determineForceDarkType $result -> 2")
+            }
         }
     }
 }
@@ -237,6 +253,7 @@ class WebViewCtorDarkHooker : XposedInterface.Hooker {
             runCatching {
                 webView.setBackgroundColor(Color.TRANSPARENT)
                 webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                Logger.logDebug("ForceDark: WebView ctor, set transparent bg + HW layer")
             }
         }
     }
@@ -257,6 +274,7 @@ class BackgroundColorInterceptor : XposedInterface.Hooker {
             val b = color and 0xFF
             if (r > 200 && g > 200 && b > 200) {
                 callback.args[0] = Color.TRANSPARENT
+                Logger.logDebug("ForceDark: blocked bg #${Integer.toHexString(color)}")
             }
         }
     }
@@ -271,6 +289,7 @@ class GetTabIconHooker : XposedInterface.Hooker {
         fun after(callback: AfterHookCallback) {
             if (!PrefsManager.forceDarkWebview) return
             val icon = callback.result as? ImageView ?: return
+            Logger.logDebug("ForceDark: getTabIcon ${icon.javaClass.name} id=${icon.id}")
             ForceDarkHooker.applyTabIconTint(icon)
         }
     }
@@ -286,6 +305,7 @@ class TintListGuard : XposedInterface.Hooker {
             if (!PrefsManager.forceDarkWebview) return
             val iv = callback.thisObject as? ImageView ?: return
             if (iv !in ForceDarkHooker.bottomTabIcons) return
+            Logger.logDebug("ForceDark: TintListGuard intercepted ${iv.hashCode()}")
             callback.args[0] =
                 ColorStateList.valueOf(Color.rgb(168, 168, 168))
         }
@@ -302,6 +322,7 @@ class DrawableChangeGuard : XposedInterface.Hooker {
             if (!PrefsManager.forceDarkWebview) return
             val iv = callback.thisObject as? ImageView ?: return
             if (iv !in ForceDarkHooker.bottomTabIcons) return
+            Logger.logDebug("ForceDark: DrawableChangeGuard re-tinting ${iv.hashCode()}")
             iv.post { ForceDarkHooker.applyTabIconTint(iv) }
         }
     }
