@@ -13,22 +13,27 @@ object Logger {
         this.module = module
     }
 
+    fun log(msg: String) {
+        module?.log(Log.INFO, TAG, msg)
+        Log.d(TAG, msg)
+    }
+
     fun log(
         msg: String,
-        t: Throwable? = null,
+        t: Throwable,
     ) {
-        if (t == null) {
-            module?.log(msg)
-            Log.d(TAG, msg)
-        } else {
-            module?.log(msg, t)
-            Log.d(TAG, msg, t)
-        }
+        module?.log(Log.ERROR, TAG, msg, t)
+        Log.d(TAG, msg, t)
+    }
+
+    fun logDebug(msg: String) {
+        if (!PrefsManager.debugLogs) return
+        log(msg)
     }
 
     fun logDebug(
         msg: String,
-        t: Throwable? = null,
+        t: Throwable,
     ) {
         if (!PrefsManager.debugLogs) return
         log(msg, t)
