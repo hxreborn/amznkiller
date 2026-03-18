@@ -1,8 +1,6 @@
 plugins {
     alias(libs.plugins.agp.app)
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.ktlint)
     alias(libs.plugins.serialization)
     alias(libs.plugins.aboutlibraries)
 }
@@ -77,6 +75,7 @@ android {
     packaging {
         resources {
             pickFirsts += "META-INF/xposed/*"
+            excludes += "META-INF/LICENSE*"
         }
     }
 
@@ -88,25 +87,19 @@ android {
     }
 }
 
-android.applicationVariants.all {
-    outputs.forEach { output ->
-        if (output is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
-            output.outputFileName = "amznkiller-v$versionName-$name.apk"
-        }
-    }
+base {
+    archivesName.set("amznkiller-v${project.property("version.name")}")
 }
 
 kotlin {
     jvmToolchain(21)
 }
 
-ktlint {
-    version.set("1.8.0")
-    android.set(true)
-    ignoreFailures.set(false)
-}
+val ktlint: Configuration by configurations.creating
 
 dependencies {
+    ktlint("com.pinterest.ktlint:ktlint-cli:1.8.0")
+
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)
     implementation(libs.lifecycle.runtime)
@@ -130,14 +123,30 @@ dependencies {
     implementation(libs.aboutlibraries.compose)
 }
 
+val ktlintCheck by tasks.registering(JavaExec::class) {
+    group = "verification"
+    description = "Check Kotlin code style"
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    args("src/**/*.kt")
+}
+
+val ktlintFormat by tasks.registering(JavaExec::class) {
+    group = "formatting"
+    description = "Auto-format Kotlin code style"
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    args("-F", "src/**/*.kt")
+}
+
 val copyAboutLibraries by tasks.registering(Copy::class) {
     dependsOn("exportLibraryDefinitions")
     from("build/generated/aboutLibraries/aboutlibraries.json")
     into("build/generated/aboutLibrariesRes/raw")
 }
 
-android.sourceSets["main"].res.srcDir("build/generated/aboutLibrariesRes")
+android.sourceSets["main"].res.directories.add("build/generated/aboutLibrariesRes")
 
 tasks.named("preBuild").configure {
-    dependsOn("ktlintCheck", copyAboutLibraries)
+    dependsOn(ktlintCheck, copyAboutLibraries)
 }

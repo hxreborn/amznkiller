@@ -1,9 +1,8 @@
 [versions]
-agp = "8.13.1"
+agp = "9.1.0"
 kotlin = "2.3.10"
-ktlint = "14.0.1"
 versions = "0.53.0"
-xposed = "100"
+xposed = "101.0.0"
 lifecycle = "2.10.0"
 core-ktx = "1.17.0"
 compose-bom = "2026.01.01"
@@ -17,7 +16,7 @@ aboutlibraries = "11.6.3"
 
 [libraries]
 libxposed-api = { group = "io.github.libxposed", name = "api", version.ref = "xposed" }
-libxposed-service = { group = "io.github.libxposed", name = "service", version = "100-1.0.0" }
+libxposed-service = { group = "io.github.libxposed", name = "service", version.ref = "xposed" }
 lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
@@ -39,8 +38,6 @@ aboutlibraries-compose = { group = "com.mikepenz", name = "aboutlibraries-compos
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }

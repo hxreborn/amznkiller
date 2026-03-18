@@ -12,27 +12,19 @@ import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.util.Logger
 import eu.hxreborn.amznkiller.xposed.hook.ForceDarkHooker
 import eu.hxreborn.amznkiller.xposed.hook.WebViewHooker
-import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
-import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam
+import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
 import java.util.concurrent.Executors
 
-class AmznkillerModule(
-    base: XposedInterface,
-    param: ModuleLoadedParam,
-) : XposedModule(base, param) {
-    init {
+class AmznkillerModule : XposedModule() {
+    override fun onModuleLoaded(param: ModuleLoadedParam) {
         Logger.init(this)
-        Logger.log(
-            "Module v${BuildConfig.VERSION_NAME} on ${base.frameworkName} ${base.frameworkVersion}",
-        )
+        Logger.log("Module v${BuildConfig.VERSION_NAME} on $frameworkName $frameworkVersion")
     }
 
-    override fun onPackageLoaded(param: PackageLoadedParam) {
-        Logger.log(
-            "onPackageLoaded: ${param.packageName} isFirst=${param.isFirstPackage}",
-        )
+    override fun onPackageReady(param: PackageReadyParam) {
+        Logger.log("onPackageReady: ${param.packageName} isFirst=${param.isFirstPackage}")
         if (param.packageName !in AMAZON_PACKAGES || !param.isFirstPackage) return
 
         runCatching {
@@ -46,9 +38,7 @@ class AmznkillerModule(
             if (PrefsManager.selectors.isEmpty()) {
                 Logger.log("No cached selectors, loading embedded fallback...")
                 PrefsManager.setFallbackSelectors(EmbeddedSelectors.load())
-                Logger.log(
-                    "Embedded: ${PrefsManager.selectors.size} selectors loaded",
-                )
+                Logger.log("Embedded: ${PrefsManager.selectors.size} selectors loaded")
             }
 
             Logger.log("Registering WebView hooks...")
@@ -57,7 +47,6 @@ class AmznkillerModule(
             Logger.log("Registering Force Dark hooks...")
             ForceDarkHooker.hook(this, param.classLoader)
 
-            // Fallback refresh if the user hasn't opened the companion app recently
             if (PrefsManager.isStale()) {
                 Logger.log("Selectors stale, submitting background refresh...")
                 executor.submit {
@@ -75,7 +64,7 @@ class AmznkillerModule(
             }
 
             showToast(param.classLoader)
-        }.onFailure { Logger.log("onPackageLoaded failed", it) }
+        }.onFailure { Logger.log("onPackageReady failed", it) }
     }
 
     private fun showToast(classLoader: ClassLoader) {
