@@ -1,40 +1,40 @@
 {
-  "generated": "2026-03-09T06:21:44+00:00",
+  "generated": "2026-03-23T06:26:00+00:00",
   "sources": {
     "EasyList": {
       "url": "https://easylist.to/easylist/easylist.txt",
-      "checksum": "sha256:b1449159dd9a3846",
+      "checksum": "sha256:8c6e2f2ee3a7c3c9",
       "selectors_extracted": 52,
       "exceptions_extracted": 0,
       "dropped_negated": 0,
       "dropped_procedural": 0,
-      "dropped_non_amazon": 9840,
-      "dropped_no_domain": 13661
+      "dropped_non_amazon": 9907,
+      "dropped_no_domain": 13667
     },
     "uBlock Origin filters": {
       "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
-      "checksum": "sha256:a4295805083beff5",
+      "checksum": "sha256:d0be1b97adac767a",
       "selectors_extracted": 0,
       "exceptions_extracted": 0,
       "dropped_negated": 3,
       "dropped_procedural": 0,
-      "dropped_non_amazon": 1878,
+      "dropped_non_amazon": 1876,
       "dropped_no_domain": 51
     },
     "uBlock Origin quick-fixes": {
       "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
-      "checksum": "sha256:befb103460eb7962",
+      "checksum": "sha256:3ddef9939b917b7a",
       "selectors_extracted": 0,
       "exceptions_extracted": 0,
       "dropped_negated": 24,
       "dropped_procedural": 0,
-      "dropped_non_amazon": 57,
+      "dropped_non_amazon": 59,
       "dropped_no_domain": 0
     }
   },
   "total_upstream": 51,
-  "total_static": 75,
+  "total_static": 77,
   "total_denylisted": 1,
   "total_exceptions_applied": 0,
-  "total_merged": 77
+  "total_merged": 79
 }
