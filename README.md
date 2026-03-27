@@ -51,7 +51,7 @@ Xposed module built on the modern LSPosed API that hides ads and sponsored conte
 ## Requirements
 
 - Android 10 (API 29) or higher
-- [LSPosed](https://github.com/JingMatrix/LSPosed) (JingMatrix fork recommended)
+- An LSPosed Manager version with API 101 support (required for now)
 - Amazon Shopping app (`com.amazon.mShop.android.shopping`)
 
 ## Installation
