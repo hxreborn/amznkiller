@@ -4,7 +4,7 @@ Xposed module built on the modern LSPosed API that hides ads and sponsored conte
 
 <p align="center">
   <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Android-10+-3DDC84?style=flat&logo=android&logoColor=white" alt="Android 10+" /></a>
-  <a href="https://github.com/LSPosed/LSPosed"><img src="https://img.shields.io/badge/LSPosed_API-101-8F00FF?style=flat" alt="LSPosed API 101" /></a>
+  <img src="https://img.shields.io/badge/LSPosed_API-101-8F00FF?style=flat" alt="LSPosed API 101" />
   <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?style=flat&logo=kotlin&logoColor=white" alt="Kotlin" /></a>
   <a href="https://developer.android.com/compose"><img src="https://img.shields.io/badge/Compose_BOM-2026.01.01-4285F4?style=flat&logo=jetpackcompose&logoColor=white" alt="Compose BOM" /></a>
   <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.4-02303A?style=flat&logo=gradle&logoColor=white" alt="Gradle" /></a>
