@@ -3,7 +3,6 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 plugins {
     base
     alias(libs.plugins.versions)
-    alias(libs.plugins.aboutlibraries) apply false
 }
 
 fun isStable(version: String): Boolean {

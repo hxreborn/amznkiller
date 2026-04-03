@@ -1,18 +1,18 @@
 [versions]
 agp = "9.1.0"
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 versions = "0.53.0"
 xposed = "101.0.0"
 lifecycle = "2.10.0"
-core-ktx = "1.17.0"
-compose-bom = "2026.01.01"
-activity-compose = "1.12.3"
+core-ktx = "1.18.0"
+compose-bom = "2026.03.01"
+activity-compose = "1.13.0"
 splashscreen = "1.2.0"
-material3 = "1.5.0-alpha13"
-navigation3 = "1.1.0-alpha03"
-composePreferences = "2.1.1"
+material3 = "1.5.0-alpha16"
+navigation3 = "1.1.0-rc01"
+composePreferences = "2.2.0"
 materialMotionComposeCore = "2.0.1"
-aboutlibraries = "11.6.3"
+aboutlibraries = "12.2.4"
 
 [libraries]
 libxposed-api = { group = "io.github.libxposed", name = "api", version.ref = "xposed" }
@@ -33,8 +33,8 @@ navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runt
 navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 compose-preferences = { group = "me.zhanghai.compose.preference", name = "preference", version.ref = "composePreferences" }
 material-motion-compose-core = { group = "io.github.fornewid", name = "material-motion-compose-core", version.ref = "materialMotionComposeCore" }
-aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version = "13.2.1" }
-aboutlibraries-compose = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version = "13.2.1" }
+aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutlibraries" }
+aboutlibraries-compose = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
