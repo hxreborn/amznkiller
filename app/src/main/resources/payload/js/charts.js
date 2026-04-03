@@ -132,7 +132,7 @@
     // Re-inject on SPA variant navigation
     if (!window.AmznKiller._chartHooked) {
       window.AmznKiller._chartHooked = true;
-      var re = /\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i;
+      var re = /\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/i;
       function onNav() {
         var m = window.location.href.match(re);
         if (m) window.AmznKiller.injectCharts({ asin: m[1], dark: dark, domain: domain });
