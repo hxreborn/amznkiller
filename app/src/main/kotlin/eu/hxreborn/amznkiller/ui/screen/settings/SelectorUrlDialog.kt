@@ -41,6 +41,7 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.R as AndroidR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,7 +171,7 @@ internal fun SelectorUrlDialog(
                     }
                     Spacer(Modifier.weight(1f))
                     TextButton(onClick = onDismiss) {
-                        Text(stringResource(android.R.string.cancel))
+                        Text(stringResource(AndroidR.string.cancel))
                     }
                     Spacer(Modifier.width(8.dp))
                     Button(

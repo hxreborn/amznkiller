@@ -112,7 +112,7 @@ private fun MetricsGridPreview() {
         MetricsGrid(
             injectionEnabled = true,
             selectorCount = 42,
-            surface = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
+            surface = MaterialTheme.colorScheme.surfaceVariant,
         )
     }
 }

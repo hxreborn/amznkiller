@@ -23,6 +23,7 @@ import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
+import android.R as AndroidR
 
 @Composable
 internal fun ThemeDialog(
@@ -71,7 +72,7 @@ internal fun ThemeDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(android.R.string.cancel))
+                Text(stringResource(AndroidR.string.cancel))
             }
         },
     )

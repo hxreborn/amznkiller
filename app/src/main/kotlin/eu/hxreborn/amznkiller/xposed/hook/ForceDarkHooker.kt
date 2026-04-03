@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsetsController
@@ -18,8 +19,7 @@ import java.util.Collections
 import java.util.WeakHashMap
 
 object ForceDarkHooker {
-    val bottomTabIcons: MutableSet<View> =
-        Collections.newSetFromMap(WeakHashMap())
+    val bottomTabIcons: MutableSet<View> = Collections.newSetFromMap(WeakHashMap())
 
     // GPU force dark inverts this grey to near-white
     private val TAB_ICON_TINT = Color.rgb(168, 168, 168)
@@ -42,8 +42,7 @@ object ForceDarkHooker {
     fun applyTabIconTint(imageView: ImageView) {
         bottomTabIcons.add(imageView)
         imageView.imageTintList = TAB_ICON_CSL
-        imageView.colorFilter =
-            PorterDuffColorFilter(TAB_ICON_TINT, PorterDuff.Mode.SRC_IN)
+        imageView.colorFilter = PorterDuffColorFilter(TAB_ICON_TINT, PorterDuff.Mode.SRC_IN)
         Logger.logDebug("ForceDark: applyTabIconTint view=${imageView.hashCode()}")
     }
 
@@ -97,21 +96,18 @@ object ForceDarkHooker {
             val clazz = Class.forName("android.view.ViewRootImpl")
             Logger.logDebug(
                 "ForceDark: ViewRootImpl forceDark methods: ${
-                    clazz.declaredMethods
-                        .filter { "forcedark" in it.name.lowercase() }
+                    clazz.declaredMethods.filter { "forcedark" in it.name.lowercase() }
                         .map { it.name }
                 }",
             )
-            xposed
-                .hook(clazz.getDeclaredMethod("determineForceDarkType"))
-                .intercept { chain ->
-                    val result = chain.proceed()
-                    if (!PrefsManager.forceDarkWebview || result !is Int || result != 0) {
-                        return@intercept result
-                    }
-                    Logger.logDebug("ForceDark: determineForceDarkType $result -> 2")
-                    2
+            xposed.hook(clazz.getDeclaredMethod("determineForceDarkType")).intercept { chain ->
+                val result = chain.proceed()
+                if (!PrefsManager.forceDarkWebview || result !is Int || result != 0) {
+                    return@intercept result
                 }
+                Logger.logDebug("ForceDark: determineForceDarkType $result -> 2")
+                2
+            }
         }.onSuccess {
             Logger.log("Hooked ViewRootImpl.determineForceDarkType")
         }.onFailure {
@@ -132,8 +128,7 @@ object ForceDarkHooker {
                 Int::class.javaPrimitiveType!!,
             )
         for (cls in classes) {
-            val clazz =
-                runCatching { Class.forName(cls) }.getOrNull() ?: continue
+            val clazz = runCatching { Class.forName(cls) }.getOrNull() ?: continue
             for (param in params) {
                 val ok =
                     runCatching {
@@ -242,7 +237,7 @@ object ForceDarkHooker {
             xposed,
             ImageView::class.java,
             "setImageDrawable",
-            android.graphics.drawable.Drawable::class.java,
+            Drawable::class.java,
         ) { chain ->
             chain.proceed()
             if (!PrefsManager.forceDarkWebview) return@hookMethod null

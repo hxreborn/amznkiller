@@ -39,7 +39,10 @@ fun LicensesScreen(onBack: () -> Unit = {}) {
         contentWindowInsets = WindowInsets(0),
     ) { innerPadding ->
         LibrariesContainer(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
         )
     }
 }

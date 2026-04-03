@@ -63,12 +63,10 @@ internal fun TargetAppsCard(
             if (amazonInfo != null) {
                 IconButton(
                     onClick = {
-                        amazonPackage
-                            ?.let { context.packageManager.getLaunchIntentForPackage(it) }
-                            ?.let {
-                                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                context.startActivity(it)
-                            }
+                        amazonPackage?.let { context.packageManager.getLaunchIntentForPackage(it) }?.let {
+                            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(it)
+                        }
                     },
                 ) {
                     Icon(
@@ -143,7 +141,7 @@ private fun TargetAppsCardNotInstalledPreview() {
             amazonPackage = null,
             amazonInfo = null,
             webViewInfo = null,
-            surface = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
+            surface = MaterialTheme.colorScheme.surfaceVariant,
         )
     }
 }

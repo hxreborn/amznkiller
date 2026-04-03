@@ -145,7 +145,9 @@ val copyAboutLibraries by tasks.registering(Copy::class) {
     into("build/generated/aboutLibrariesRes/raw")
 }
 
-android.sourceSets["main"].res.directories.add("build/generated/aboutLibrariesRes")
+android.sourceSets["main"]
+    .res.directories
+    .add("build/generated/aboutLibrariesRes")
 
 tasks.named("preBuild").configure {
     dependsOn(ktlintCheck, copyAboutLibraries)

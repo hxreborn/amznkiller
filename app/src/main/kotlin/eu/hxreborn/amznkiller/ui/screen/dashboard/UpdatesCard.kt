@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.ui.screen.dashboard
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,7 +42,7 @@ internal enum class UpdateStatus { Refreshing, Error, UpToDate, Stale }
 internal fun lastCheckedLine(lastFetched: Long): String = stringResource(R.string.dashboard_last_checked, relativeTime(lastFetched))
 
 internal fun formatUpdateEventMessage(
-    context: android.content.Context,
+    context: Context,
     event: SelectorSyncEvent,
 ): String =
     when (event) {

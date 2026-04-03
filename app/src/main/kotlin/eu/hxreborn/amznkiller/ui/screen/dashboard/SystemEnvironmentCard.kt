@@ -139,7 +139,7 @@ private fun SystemEnvironmentCardPreview() {
         SystemEnvironmentCard(
             isXposedActive = true,
             frameworkVersion = "LSPosed v1.11.0",
-            surface = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
+            surface = MaterialTheme.colorScheme.surfaceVariant,
         )
     }
 }
