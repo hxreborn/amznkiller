@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -13,6 +12,7 @@ import android.view.View
 import android.view.WindowInsetsController
 import android.webkit.WebView
 import android.widget.ImageView
+import androidx.core.graphics.drawable.toDrawable
 import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
@@ -75,7 +75,7 @@ object ForceDarkHooker {
             val activity = chain.thisObject as? Activity ?: return@hookMethod null
             runCatching {
                 activity.window?.decorView?.let { it.isForceDarkAllowed = true }
-                activity.window?.setBackgroundDrawable(ColorDrawable(Color.BLACK))
+                activity.window?.setBackgroundDrawable(Color.BLACK.toDrawable())
                 activity.window?.statusBarColor = Color.BLACK
                 activity.window?.navigationBarColor = Color.BLACK
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
