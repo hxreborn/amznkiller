@@ -73,6 +73,8 @@
     <string name="settings_webview_debugging">WebView debugging</string>
     <string name="settings_webview_debugging_summary">Attach DevTools to Amazon WebViews. Requires force stopping Amazon to take effect</string>
     <string name="settings_debug_logs_summary">Write verbose hook and injection logs. Disable when not debugging</string>
+    <string name="settings_hide_launcher_icon">Hide launcher icon</string>
+    <string name="settings_hide_launcher_icon_summary">Hides app from launcher. You can still open it from LSPosed manager</string>
 
     <string name="settings_filter_sources">Selector sources</string>
     <string name="settings_filter_sources_summary">Set the remote URL for selector lists</string>

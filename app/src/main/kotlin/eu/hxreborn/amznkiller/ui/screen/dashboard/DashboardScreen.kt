@@ -250,4 +250,6 @@ private class PreviewAppViewModel : AppViewModel() {
         value: T,
     ) {
     }
+
+    override fun setLauncherIconHidden(hidden: Boolean) {}
 }

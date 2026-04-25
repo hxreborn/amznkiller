@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.FormatPaint
 import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.PhonelinkErase
 import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.DeveloperMode
@@ -381,8 +382,37 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_advanced)) },
                 )
 
-                val advancedItemCount = 2
-                val webviewDebugShape = shapeForPosition(advancedItemCount, 0)
+                val advancedItemCount = 3
+                val hideLauncherShape = shapeForPosition(advancedItemCount, 0)
+                switchPreference(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(color = surface, shape = hideLauncherShape)
+                            .clip(hideLauncherShape),
+                    key = "hide_launcher_icon",
+                    value = prefs.isLauncherIconHidden,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Outlined.PhonelinkErase,
+                            contentDescription = null,
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings_hide_launcher_icon),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
+                    summary = {
+                        Text(text = stringResource(R.string.settings_hide_launcher_icon_summary))
+                    },
+                    onValueChange = { viewModel.setLauncherIconHidden(it) },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val webviewDebugShape = shapeForPosition(advancedItemCount, 1)
                 switchPreference(
                     modifier =
                         Modifier
@@ -418,7 +448,7 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(2.dp)) }
 
-                val debugShape = shapeForPosition(advancedItemCount, 1)
+                val debugShape = shapeForPosition(advancedItemCount, 2)
                 switchPreference(
                     modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = debugShape).clip(debugShape),
                     key = "debug_logs",
@@ -613,4 +643,6 @@ private class PreviewSettingsViewModel : AppViewModel() {
         value: T,
     ) {
     }
+
+    override fun setLauncherIconHidden(hidden: Boolean) {}
 }

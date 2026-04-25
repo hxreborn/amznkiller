@@ -21,4 +21,6 @@ abstract class AppViewModel : ViewModel() {
         pref: PrefSpec<T>,
         value: T,
     )
+
+    abstract fun setLauncherIconHidden(hidden: Boolean)
 }

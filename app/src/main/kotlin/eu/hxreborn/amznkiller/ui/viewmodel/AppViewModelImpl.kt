@@ -3,6 +3,7 @@ package eu.hxreborn.amznkiller.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.PrefSpec
 import eu.hxreborn.amznkiller.prefs.Prefs
@@ -13,12 +14,12 @@ import eu.hxreborn.amznkiller.ui.state.DashboardUiState
 import eu.hxreborn.amznkiller.ui.state.SelectorSyncEvent
 import eu.hxreborn.amznkiller.ui.state.SelectorSyncOutcome
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState
+import eu.hxreborn.amznkiller.util.LauncherIconHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -34,6 +35,8 @@ class AppViewModelImpl(
     private val xposedActive = MutableStateFlow(false)
     private val frameworkVersion = MutableStateFlow<String?>(null)
     private val lastRefreshOutcome = MutableStateFlow<SelectorSyncOutcome?>(null)
+    private val launcherIconHidden =
+        MutableStateFlow(!LauncherIconHelper.isLauncherIconVisible(App.instance))
 
     override val dashboardUiState: StateFlow<DashboardUiState> =
         combine(
@@ -61,24 +64,27 @@ class AppViewModelImpl(
         )
 
     override val settingsUiState: StateFlow<SettingsUiState> =
-        repository.state
-            .map { prefs ->
-                SettingsReady(
-                    selectorUrl = prefs.selectorUrl,
-                    autoUpdate = prefs.autoUpdate,
-                    injectionEnabled = prefs.injectionEnabled,
-                    debugLogs = prefs.debugLogs,
-                    webviewDebugging = prefs.webviewDebugging,
-                    forceDarkWebview = prefs.forceDarkWebview,
-                    priceChartsEnabled = prefs.priceChartsEnabled,
-                    darkThemeConfig = prefs.darkThemeConfig,
-                    useDynamicColor = prefs.useDynamicColor,
-                )
-            }.stateIn(
-                scope = viewModelScope,
-                started = WhileSubscribed(5.seconds.inWholeMilliseconds),
-                initialValue = SettingsLoading,
+        combine(
+            repository.state,
+            launcherIconHidden,
+        ) { prefs, iconHidden ->
+            SettingsReady(
+                selectorUrl = prefs.selectorUrl,
+                autoUpdate = prefs.autoUpdate,
+                injectionEnabled = prefs.injectionEnabled,
+                debugLogs = prefs.debugLogs,
+                webviewDebugging = prefs.webviewDebugging,
+                forceDarkWebview = prefs.forceDarkWebview,
+                priceChartsEnabled = prefs.priceChartsEnabled,
+                darkThemeConfig = prefs.darkThemeConfig,
+                useDynamicColor = prefs.useDynamicColor,
+                isLauncherIconHidden = iconHidden,
             )
+        }.stateIn(
+            scope = viewModelScope,
+            started = WhileSubscribed(5.seconds.inWholeMilliseconds),
+            initialValue = SettingsLoading,
+        )
 
     override fun refreshAll() {
         if (refreshing.value) return
@@ -151,6 +157,11 @@ class AppViewModelImpl(
         value: T,
     ) {
         repository.save(pref, value)
+    }
+
+    override fun setLauncherIconHidden(hidden: Boolean) {
+        LauncherIconHelper.setLauncherIconVisible(App.instance, !hidden)
+        launcherIconHidden.value = hidden
     }
 }
 
