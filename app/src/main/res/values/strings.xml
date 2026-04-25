@@ -22,8 +22,6 @@
     <string name="dashboard_webview_injection">Ad blocking active</string>
     <string name="dashboard_injection_paused">Ad blocking paused</string>
     <string name="dashboard_no_active_rules">No active rules</string>
-    <string name="dashboard_rules_count">%d rules</string>
-    <string name="dashboard_rules_updated">Updated %d rules</string>
     <string name="dashboard_last_checked">Last checked %s</string>
 
     <string name="hero_operational_title">Up to date</string>
@@ -34,15 +32,12 @@
     <string name="hero_checking_subtitle">Fetching latest selectors\u2026</string>
     <string name="hero_error_title">Sync failed</string>
     <string name="hero_error_subtitle">Last sync failed. Tap refresh to retry</string>
-    <string name="hero_delta_added">+%d added</string>
-    <string name="hero_delta_removed">-%d removed</string>
-    <string name="hero_delta_changed">+%d added, -%d removed</string>
+    <string name="hero_delta_changed">+%1$d added, -%2$d removed</string>
 
     <string name="snackbar_fetch_failed_bundled">Remote fetch failed, using bundled rules instead</string>
     <string name="snackbar_no_selectors">No selectors fetched</string>
     <string name="snackbar_up_to_date">Already up to date</string>
     <string name="snackbar_update_failed">Update failed</string>
-    <string name="snackbar_updated">Synced %d rules</string>
     <string name="snackbar_amazon_not_installed">Amazon Shopping not installed</string>
 
     <string name="rules_copied">Copied to clipboard</string>

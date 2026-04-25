@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dashboard_rules_count">
+        <item quantity="one">%d rule</item>
+        <item quantity="other">%d rules</item>
+    </plurals>
+    <plurals name="snackbar_updated">
+        <item quantity="one">Synced %d rule</item>
+        <item quantity="other">Synced %d rules</item>
+    </plurals>
+    <plurals name="hero_delta_added">
+        <item quantity="one">+%d added</item>
+        <item quantity="other">+%d added</item>
+    </plurals>
+    <plurals name="hero_delta_removed">
+        <item quantity="one">-%d removed</item>
+        <item quantity="other">-%d removed</item>
+    </plurals>
+</resources>

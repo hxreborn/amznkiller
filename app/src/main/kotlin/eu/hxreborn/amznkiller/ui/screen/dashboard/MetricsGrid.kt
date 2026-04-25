@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.R
@@ -95,7 +96,7 @@ internal fun MetricsGrid(
             Text(
                 text =
                     if (injectionEnabled) {
-                        stringResource(R.string.dashboard_rules_count, selectorCount)
+                        pluralStringResource(R.plurals.dashboard_rules_count, selectorCount, selectorCount)
                     } else {
                         stringResource(R.string.dashboard_no_active_rules)
                     },
