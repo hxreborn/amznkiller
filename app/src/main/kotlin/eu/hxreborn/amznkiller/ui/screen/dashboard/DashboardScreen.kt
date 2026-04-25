@@ -126,7 +126,7 @@ fun DashboardScreen(
                                 },
                             maxLines =
                                 if (isExpandedSlot) {
-                                    Tokens.ExpandedTitleMaxLines
+                                    Tokens.EXPANDED_TITLE_MAX_LINES
                                 } else {
                                     1
                                 },

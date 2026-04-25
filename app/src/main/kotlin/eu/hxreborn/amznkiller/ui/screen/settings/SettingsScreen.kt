@@ -132,7 +132,7 @@ fun SettingsScreen(
                             } else {
                                 LocalTextStyle.current
                             },
-                        maxLines = if (isExpandedSlot) Tokens.ExpandedTitleMaxLines else 1,
+                        maxLines = if (isExpandedSlot) Tokens.EXPANDED_TITLE_MAX_LINES else 1,
                     )
                 },
                 scrollBehavior = scrollBehavior,
