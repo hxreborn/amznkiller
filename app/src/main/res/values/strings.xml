@@ -12,11 +12,7 @@
     <string name="env_xposed_active">Active (%s)</string>
     <string name="env_xposed_inactive">Inactive</string>
 
-    <string name="control_css_injection">Content Filtering</string>
-
-    <string name="dashboard_target">Target</string>
     <string name="dashboard_not_installed">Not installed</string>
-    <string name="dashboard_unknown">Unknown</string>
     <string name="dashboard_launch">Launch</string>
     <string name="dashboard_method">Status</string>
     <string name="dashboard_webview_injection">Ad blocking active</string>
@@ -38,12 +34,6 @@
     <string name="snackbar_no_selectors">No selectors fetched</string>
     <string name="snackbar_up_to_date">Already up to date</string>
     <string name="snackbar_update_failed">Update failed</string>
-    <string name="snackbar_amazon_not_installed">Amazon Shopping not installed</string>
-
-    <string name="rules_copied">Copied to clipboard</string>
-    <string name="rules_copy">Copy all</string>
-    <string name="rules_search_hint">Search selectors\u2026</string>
-    <string name="rules_selectors_count">%d CSS selectors</string>
 
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_settings">Settings</string>
@@ -74,7 +64,6 @@
     <string name="settings_filter_sources">Selector sources</string>
     <string name="settings_filter_sources_summary">Set the remote URL for selector lists</string>
     <string name="settings_filter_list_default">Default</string>
-    <string name="settings_filter_list_custom">Custom URL</string>
     <string name="settings_background_sync">Fetch rules automatically</string>
     <string name="settings_background_sync_summary">Check for updated selectors once a day on app launch</string>
     <string name="settings_selector_url_dialog_title">Selector URL</string>
@@ -82,8 +71,6 @@
     <string name="settings_selector_url_save">Save</string>
     <string name="settings_selector_url_test">Test</string>
     <string name="settings_selector_url_testing">Testing\u2026</string>
-    <string name="settings_selector_url_test_result">%d selectors found</string>
-    <string name="settings_selector_url_test_error">Failed: %s</string>
 
     <string name="settings_about">About</string>
     <string name="settings_app_version">App version</string>
