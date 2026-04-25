@@ -15,7 +15,6 @@ sealed class MergeResult {
 
     data class Partial(
         override val selectors: Set<String>,
-        val error: Throwable,
     ) : MergeResult()
 }
 
@@ -31,7 +30,7 @@ object SelectorUpdater {
         val error = remote.exceptionOrNull()
         if (error != null) {
             Logger.logDebug("Remote fetch failed", error)
-            return MergeResult.Partial(selectors = all, error = error)
+            return MergeResult.Partial(selectors = all)
         }
         return MergeResult.Success(selectors = all)
     }
