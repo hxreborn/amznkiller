@@ -79,7 +79,7 @@ internal fun UpdatesCard(
         when {
             isRefreshing -> UpdateStatus.Refreshing
             isError || isPersistedFailure -> UpdateStatus.Error
-            !isStale && !isError && !isPersistedFailure && lastFetched > 0L -> UpdateStatus.UpToDate
+            !isStale && lastFetched > 0L -> UpdateStatus.UpToDate
             else -> UpdateStatus.Stale
         }
 
