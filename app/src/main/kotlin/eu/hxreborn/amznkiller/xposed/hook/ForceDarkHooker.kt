@@ -7,6 +7,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsetsController
@@ -77,11 +78,13 @@ object ForceDarkHooker {
                 activity.window?.setBackgroundDrawable(ColorDrawable(Color.BLACK))
                 activity.window?.statusBarColor = Color.BLACK
                 activity.window?.navigationBarColor = Color.BLACK
-                activity.window?.insetsController?.setSystemBarsAppearance(
-                    0,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
-                        WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    activity.window?.insetsController?.setSystemBarsAppearance(
+                        0,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
+                            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+                    )
+                }
                 val fda = activity.window?.decorView?.isForceDarkAllowed
                 Logger.logDebug("ForceDark: onCreate forceDarkAllowed=$fda")
             }
