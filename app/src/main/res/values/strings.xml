@@ -55,6 +55,10 @@
     <string name="settings_marketplace_insights_summary">Show Keepa and CamelCamelCamel charts on product pages</string>
     <string name="settings_dark_mode">Dark mode (experimental)</string>
     <string name="settings_dark_mode_summary">Apply dark mode to Amazon pages. Requires force stopping Amazon to take effect</string>
+    <string name="settings_dark_mode_summary_with_mode">%1$s. Requires force stopping Amazon to take effect. Requires Android 15 or higher to work properly</string>
+    <string name="settings_force_dark_off">Off</string>
+    <string name="settings_force_dark_follow_system">Follow system dark mode</string>
+    <string name="settings_force_dark_on">On</string>
     <string name="settings_webview_debugging">WebView debugging</string>
     <string name="settings_webview_debugging_summary">Attach DevTools to Amazon WebViews. Requires force stopping Amazon to take effect</string>
     <string name="settings_debug_logs_summary">Write verbose hook and injection logs. Disable when not debugging</string>
