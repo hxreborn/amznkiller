@@ -9,9 +9,12 @@ data class PrefsSnapshot(
     val selectors: List<String>,
     val injectionEnabled: Boolean,
     val webviewDebugging: Boolean,
-    val forceDarkWebview: Boolean,
+    val forceDarkMode: ForceDarkMode,
     val priceChartsEnabled: Boolean,
-)
+) {
+    fun isForceDarkEnabled(systemInDarkMode: Boolean): Boolean =
+        forceDarkMode.isActive(systemInDarkMode)
+}
 
 object PrefsManager {
     @Volatile
@@ -35,8 +38,11 @@ object PrefsManager {
         private set
 
     @Volatile
-    var forceDarkWebview: Boolean = Prefs.FORCE_DARK_WEBVIEW.default
+    var forceDarkMode: ForceDarkMode = ForceDarkMode.OFF
         private set
+
+    val forceDarkWebview: Boolean
+        get() = forceDarkMode == ForceDarkMode.ON
 
     @Volatile
     var priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
@@ -61,7 +67,7 @@ object PrefsManager {
                 debugLogs = Prefs.DEBUG_LOGS.read(prefs)
                 injectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
                 webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
-                forceDarkWebview = Prefs.FORCE_DARK_WEBVIEW.read(prefs)
+                forceDarkMode = Prefs.readForceDarkMode(prefs)
                 priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
             }
         }.onFailure { Logger.log("refreshCache() failed", it) }
@@ -72,7 +78,7 @@ object PrefsManager {
             selectors = selectors,
             injectionEnabled = injectionEnabled,
             webviewDebugging = webviewDebugging,
-            forceDarkWebview = forceDarkWebview,
+            forceDarkMode = forceDarkMode,
             priceChartsEnabled = priceChartsEnabled,
         )
 
