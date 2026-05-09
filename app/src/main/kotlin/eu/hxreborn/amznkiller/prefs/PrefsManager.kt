@@ -19,7 +19,12 @@ data class PrefsSnapshot(
         get() = isForceDarkEnabled(currentApplication())
 
     fun isForceDarkEnabled(context: Context?): Boolean {
-        val nightMode = context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)
+        val nightMode =
+            context
+                ?.resources
+                ?.configuration
+                ?.uiMode
+                ?.and(Configuration.UI_MODE_NIGHT_MASK)
         return forceDarkMode.isActive(nightMode == Configuration.UI_MODE_NIGHT_YES)
     }
 }
