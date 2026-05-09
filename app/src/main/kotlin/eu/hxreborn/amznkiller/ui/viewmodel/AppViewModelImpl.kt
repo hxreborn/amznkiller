@@ -73,7 +73,7 @@ class AppViewModelImpl(
                 injectionEnabled = prefs.injectionEnabled,
                 debugLogs = prefs.debugLogs,
                 webviewDebugging = prefs.webviewDebugging,
-                forceDarkWebview = prefs.forceDarkWebview,
+                forceDarkMode = prefs.forceDarkMode,
                 priceChartsEnabled = prefs.priceChartsEnabled,
                 darkThemeConfig = prefs.darkThemeConfig,
                 useDynamicColor = prefs.useDynamicColor,
