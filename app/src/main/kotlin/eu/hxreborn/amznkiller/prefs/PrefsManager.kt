@@ -1,7 +1,6 @@
 package eu.hxreborn.amznkiller.prefs
 
 import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import eu.hxreborn.amznkiller.selectors.SelectorSanitizer
@@ -13,21 +12,9 @@ data class PrefsSnapshot(
     val injectionEnabled: Boolean,
     val webviewDebugging: Boolean,
     val forceDarkMode: ForceDarkMode,
+    val forceDarkWebview: Boolean,
     val priceChartsEnabled: Boolean,
-) {
-    val forceDarkWebview: Boolean
-        get() = isForceDarkEnabled(currentApplication())
-
-    fun isForceDarkEnabled(context: Context?): Boolean {
-        val nightMode =
-            context
-                ?.resources
-                ?.configuration
-                ?.uiMode
-                ?.and(Configuration.UI_MODE_NIGHT_MASK)
-        return forceDarkMode.isActive(nightMode == Configuration.UI_MODE_NIGHT_YES)
-    }
-}
+)
 
 object PrefsManager {
     @Volatile
@@ -92,8 +79,14 @@ object PrefsManager {
             injectionEnabled = injectionEnabled,
             webviewDebugging = webviewDebugging,
             forceDarkMode = forceDarkMode,
+            forceDarkWebview = forceDarkMode.isActive(systemInDarkMode()),
             priceChartsEnabled = priceChartsEnabled,
         )
+
+    private fun systemInDarkMode(): Boolean {
+        val uiMode = currentApplication()?.resources?.configuration?.uiMode ?: return false
+        return uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+    }
 
     fun setFallbackSelectors(fallback: List<String>) {
         selectors = fallback

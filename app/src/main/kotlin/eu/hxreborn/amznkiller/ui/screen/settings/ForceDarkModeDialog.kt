@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
@@ -61,7 +62,7 @@ internal fun ForceDarkModeDialog(
                             selected = option == currentMode,
                             onClick = null,
                         )
-                        Spacer(modifier = Modifier.padding(start = 16.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
                         Text(
                             text = labels[index],
                             style = MaterialTheme.typography.bodyLarge,
