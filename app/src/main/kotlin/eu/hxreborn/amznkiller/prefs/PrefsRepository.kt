@@ -39,7 +39,7 @@ class PrefsRepositoryImpl(
                         debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
                         injectionEnabled = Prefs.INJECTION_ENABLED.read(localPrefs),
                         webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(localPrefs),
-                        forceDarkWebview = Prefs.FORCE_DARK_WEBVIEW.read(localPrefs),
+                        forceDarkMode = Prefs.readForceDarkMode(localPrefs),
                         priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(localPrefs),
                         autoUpdate = Prefs.AUTO_UPDATE.read(localPrefs),
                         isStale =

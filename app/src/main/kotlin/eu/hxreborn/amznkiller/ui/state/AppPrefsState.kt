@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.ui.state
 
+import eu.hxreborn.amznkiller.prefs.ForceDarkMode
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 
@@ -10,7 +11,7 @@ data class AppPrefsState(
     val debugLogs: Boolean = Prefs.DEBUG_LOGS.default,
     val injectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default,
     val webviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default,
-    val forceDarkWebview: Boolean = Prefs.FORCE_DARK_WEBVIEW.default,
+    val forceDarkMode: ForceDarkMode = ForceDarkMode.OFF,
     val priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default,
     val autoUpdate: Boolean = Prefs.AUTO_UPDATE.default,
     val isStale: Boolean = true,

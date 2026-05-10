@@ -40,19 +40,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
+import eu.hxreborn.amznkiller.prefs.ForceDarkMode
 import eu.hxreborn.amznkiller.prefs.PrefSpec
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
@@ -92,6 +90,7 @@ fun SettingsScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var showThemeDialog by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
+    var showForceDarkModeDialog by remember { mutableStateOf(false) }
 
     if (showUrlDialog) {
         SelectorUrlDialog(
@@ -112,6 +111,17 @@ fun SettingsScreen(
                 showThemeDialog = false
             },
             onDismiss = { showThemeDialog = false },
+        )
+    }
+
+    if (showForceDarkModeDialog) {
+        ForceDarkModeDialog(
+            currentMode = prefs.forceDarkMode,
+            onSelect = { mode ->
+                viewModel.savePref(Prefs.FORCE_DARK_MODE, mode.prefValue)
+                showForceDarkModeDialog = false
+            },
+            onDismiss = { showForceDarkModeDialog = false },
         )
     }
 
@@ -158,23 +168,11 @@ fun SettingsScreen(
                 val appearanceItemCount = 2
                 val themeShape = shapeForPosition(appearanceItemCount, 0)
                 preference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = themeShape).clip(themeShape),
+                    modifier = preferenceModifier(surface, themeShape),
                     key = "theme",
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Palette,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_theme),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_theme_summary))
-                    },
+                    icon = { Icon(Icons.Outlined.Palette, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_theme) },
+                    summary = { Text(stringResource(R.string.settings_theme_summary)) },
                     onClick = { showThemeDialog = true },
                 )
 
@@ -182,64 +180,29 @@ fun SettingsScreen(
 
                 val dynamicColorShape = shapeForPosition(appearanceItemCount, 1)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = dynamicColorShape)
-                            .clip(dynamicColorShape),
+                    modifier = preferenceModifier(surface, dynamicColorShape),
                     key = "dynamic_color",
                     value = prefs.useDynamicColor,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.FormatPaint,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_dynamic_color),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_dynamic_color_summary))
-                    },
+                    icon = { Icon(Icons.Outlined.FormatPaint, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_dynamic_color) },
+                    summary = { Text(stringResource(R.string.settings_dynamic_color_summary)) },
                     onValueChange = { viewModel.savePref(Prefs.USE_DYNAMIC_COLOR, it) },
                 )
 
                 preferenceCategory(
                     key = "category_ad_blocking",
-                    title = {
-                        Text(stringResource(R.string.settings_ad_blocking))
-                    },
+                    title = { Text(stringResource(R.string.settings_ad_blocking)) },
                 )
 
                 val adBlockItemCount = 3
                 val filteringShape = shapeForPosition(adBlockItemCount, 0)
                 switchPreference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = filteringShape).clip(filteringShape),
+                    modifier = preferenceModifier(surface, filteringShape),
                     key = "css_injection",
                     value = prefs.injectionEnabled,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Block,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_content_filtering),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.settings_content_filtering_summary,
-                                ),
-                        )
-                    },
+                    icon = { Icon(Icons.Outlined.Block, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_content_filtering) },
+                    summary = { Text(stringResource(R.string.settings_content_filtering_summary)) },
                     onValueChange = { viewModel.savePref(Prefs.INJECTION_ENABLED, it) },
                 )
 
@@ -247,134 +210,54 @@ fun SettingsScreen(
 
                 val syncShape = shapeForPosition(adBlockItemCount, 1)
                 switchPreference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = syncShape).clip(syncShape),
+                    modifier = preferenceModifier(surface, syncShape),
                     key = "auto_update",
                     value = prefs.autoUpdate,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.CloudSync,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_background_sync),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.settings_background_sync_summary,
-                                ),
-                        )
-                    },
+                    icon = { Icon(Icons.Outlined.CloudSync, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_background_sync) },
+                    summary = { Text(stringResource(R.string.settings_background_sync_summary)) },
                     onValueChange = { viewModel.savePref(Prefs.AUTO_UPDATE, it) },
                 )
 
-                item(key = "spacer_rule_1") { Spacer(Modifier.height(2.dp)) }
+                item { Spacer(Modifier.height(2.dp)) }
 
                 val filterSourcesShape = shapeForPosition(adBlockItemCount, 2)
                 preference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = filterSourcesShape)
-                            .clip(filterSourcesShape),
+                    modifier = preferenceModifier(surface, filterSourcesShape),
                     key = "filter_sources",
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Link,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_filter_sources),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.settings_filter_sources_summary,
-                                ),
-                        )
-                    },
+                    icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_filter_sources) },
+                    summary = { Text(stringResource(R.string.settings_filter_sources_summary)) },
                     onClick = { showUrlDialog = true },
                 )
 
                 preferenceCategory(
                     key = "category_shopping_display",
-                    title = {
-                        Text(stringResource(R.string.settings_shopping_display))
-                    },
+                    title = { Text(stringResource(R.string.settings_shopping_display)) },
                 )
 
                 val displayItemCount = 2
                 val chartsShape = shapeForPosition(displayItemCount, 0)
                 switchPreference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = chartsShape).clip(chartsShape),
+                    modifier = preferenceModifier(surface, chartsShape),
                     key = "price_charts",
                     value = prefs.priceChartsEnabled,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.TrendingUp,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_marketplace_insights),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.settings_marketplace_insights_summary,
-                                ),
-                        )
-                    },
+                    icon = { Icon(Icons.Outlined.TrendingUp, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_marketplace_insights) },
+                    summary = { Text(stringResource(R.string.settings_marketplace_insights_summary)) },
                     onValueChange = { viewModel.savePref(Prefs.PRICE_CHARTS_ENABLED, it) },
                 )
 
                 item { Spacer(Modifier.height(2.dp)) }
 
                 val darkModeShape = shapeForPosition(displayItemCount, 1)
-                switchPreference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = darkModeShape).clip(darkModeShape),
-                    key = "force_dark_webview",
-                    value = prefs.forceDarkWebview,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.DarkMode,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_dark_mode),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(
-                            text =
-                                buildAnnotatedString {
-                                    append(stringResource(R.string.settings_dark_mode_summary))
-                                    append("\n")
-                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        append("Note: ")
-                                    }
-                                    append("Requires Android 15 or higher to work properly")
-                                },
-                        )
-                    },
-                    onValueChange = { viewModel.savePref(Prefs.FORCE_DARK_WEBVIEW, it) },
+                preference(
+                    modifier = preferenceModifier(surface, darkModeShape),
+                    key = "force_dark_mode",
+                    icon = { Icon(Icons.Outlined.DarkMode, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_dark_mode) },
+                    summary = { Text(forceDarkModeSummary(prefs.forceDarkMode)) },
+                    onClick = { showForceDarkModeDialog = true },
                 )
 
                 preferenceCategory(
@@ -385,28 +268,12 @@ fun SettingsScreen(
                 val advancedItemCount = 3
                 val hideLauncherShape = shapeForPosition(advancedItemCount, 0)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = hideLauncherShape)
-                            .clip(hideLauncherShape),
+                    modifier = preferenceModifier(surface, hideLauncherShape),
                     key = "hide_launcher_icon",
                     value = prefs.isLauncherIconHidden,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.PhonelinkErase,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_hide_launcher_icon),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_hide_launcher_icon_summary))
-                    },
+                    icon = { Icon(Icons.Outlined.PhonelinkErase, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_hide_launcher_icon) },
+                    summary = { Text(stringResource(R.string.settings_hide_launcher_icon_summary)) },
                     onValueChange = { viewModel.setLauncherIconHidden(it) },
                 )
 
@@ -414,60 +281,25 @@ fun SettingsScreen(
 
                 val webviewDebugShape = shapeForPosition(advancedItemCount, 1)
                 switchPreference(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp)
-                            .background(color = surface, shape = webviewDebugShape)
-                            .clip(webviewDebugShape),
+                    modifier = preferenceModifier(surface, webviewDebugShape),
                     key = "webview_debugging",
                     value = prefs.webviewDebugging,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.DeveloperMode,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_webview_debugging),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.settings_webview_debugging_summary,
-                                ),
-                        )
-                    },
-                    onValueChange = {
-                        viewModel.savePref(Prefs.WEBVIEW_DEBUGGING, it)
-                    },
+                    icon = { Icon(Icons.Rounded.DeveloperMode, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_webview_debugging) },
+                    summary = { Text(stringResource(R.string.settings_webview_debugging_summary)) },
+                    onValueChange = { viewModel.savePref(Prefs.WEBVIEW_DEBUGGING, it) },
                 )
 
                 item { Spacer(Modifier.height(2.dp)) }
 
                 val debugShape = shapeForPosition(advancedItemCount, 2)
                 switchPreference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = debugShape).clip(debugShape),
+                    modifier = preferenceModifier(surface, debugShape),
                     key = "debug_logs",
                     value = prefs.debugLogs,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.BugReport,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_debug_logs),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_debug_logs_summary))
-                    },
+                    icon = { Icon(Icons.Rounded.BugReport, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_debug_logs) },
+                    summary = { Text(stringResource(R.string.settings_debug_logs_summary)) },
                     onValueChange = { viewModel.savePref(Prefs.DEBUG_LOGS, it) },
                 )
 
@@ -479,52 +311,24 @@ fun SettingsScreen(
                 val aboutItemCount = 4
                 val versionShape = shapeForPosition(aboutItemCount, 0)
                 preference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = versionShape).clip(versionShape),
+                    modifier = preferenceModifier(surface, versionShape),
                     key = "app_version",
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Info,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_app_version),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(
-                            text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                        )
-                    },
+                    icon = { Icon(Icons.Rounded.Info, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_app_version) },
+                    summary = { Text("v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})") },
                 )
 
                 item { Spacer(Modifier.height(2.dp)) }
 
                 val gitRepoShape = shapeForPosition(aboutItemCount, 1)
                 preference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = gitRepoShape).clip(gitRepoShape),
+                    modifier = preferenceModifier(surface, gitRepoShape),
                     key = "git_repo",
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_github_24),
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_git_repo),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_git_repo_summary))
-                    },
+                    icon = { Icon(painterResource(R.drawable.ic_github_24), contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_git_repo) },
+                    summary = { Text(stringResource(R.string.settings_git_repo_summary)) },
                     onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, REPO_URL.toUri()),
-                        )
+                        context.startActivity(Intent(Intent.ACTION_VIEW, REPO_URL.toUri()))
                     },
                 )
 
@@ -532,23 +336,11 @@ fun SettingsScreen(
 
                 val licensesShape = shapeForPosition(aboutItemCount, 2)
                 preference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = licensesShape).clip(licensesShape),
+                    modifier = preferenceModifier(surface, licensesShape),
                     key = "licenses",
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Gavel,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_licenses),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_licenses_summary))
-                    },
+                    icon = { Icon(Icons.Outlined.Gavel, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_licenses) },
+                    summary = { Text(stringResource(R.string.settings_licenses_summary)) },
                     onClick = onNavigateToLicenses,
                 )
 
@@ -556,33 +348,43 @@ fun SettingsScreen(
 
                 val issueShape = shapeForPosition(aboutItemCount, 3)
                 preference(
-                    modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = issueShape).clip(issueShape),
+                    modifier = preferenceModifier(surface, issueShape),
                     key = "report_issue",
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Feedback,
-                            contentDescription = null,
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.settings_report_issue),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    summary = {
-                        Text(text = stringResource(R.string.settings_report_issue_summary))
-                    },
+                    icon = { Icon(Icons.Outlined.Feedback, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_report_issue) },
+                    summary = { Text(stringResource(R.string.settings_report_issue_summary)) },
                     onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, "$REPO_URL/issues/new/choose".toUri()),
-                        )
+                        context.startActivity(Intent(Intent.ACTION_VIEW, "$REPO_URL/issues/new/choose".toUri()))
                     },
                 )
             }
         }
     }
 }
+
+@Composable
+private fun PreferenceTitle(resId: Int) {
+    Text(
+        text = stringResource(resId),
+        style = MaterialTheme.typography.bodyLarge,
+    )
+}
+
+@Composable
+private fun forceDarkModeSummary(mode: ForceDarkMode): String {
+    val modeLabel =
+        when (mode) {
+            ForceDarkMode.OFF -> stringResource(R.string.settings_force_dark_off)
+            ForceDarkMode.FOLLOW_SYSTEM -> stringResource(R.string.settings_force_dark_follow_system)
+            ForceDarkMode.ON -> stringResource(R.string.settings_force_dark_on)
+        }
+    return stringResource(R.string.settings_dark_mode_summary_with_mode, modeLabel)
+}
+
+private fun preferenceModifier(
+    surface: androidx.compose.ui.graphics.Color,
+    shape: Shape,
+): Modifier = Modifier.padding(horizontal = 8.dp).background(color = surface, shape = shape).clip(shape)
 
 internal inline fun LazyListScope.switchPreference(
     key: String,
@@ -626,7 +428,7 @@ private class PreviewSettingsViewModel : AppViewModel() {
                 useDynamicColor = true,
                 debugLogs = false,
                 injectionEnabled = true,
-                forceDarkWebview = false,
+                forceDarkMode = ForceDarkMode.FOLLOW_SYSTEM,
             ),
         ).asStateFlow()
 

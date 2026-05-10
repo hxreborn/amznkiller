@@ -1,6 +1,8 @@
 package eu.hxreborn.amznkiller.prefs
 
+import android.app.Application
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import eu.hxreborn.amznkiller.selectors.SelectorSanitizer
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
@@ -9,6 +11,7 @@ data class PrefsSnapshot(
     val selectors: List<String>,
     val injectionEnabled: Boolean,
     val webviewDebugging: Boolean,
+    val forceDarkMode: ForceDarkMode,
     val forceDarkWebview: Boolean,
     val priceChartsEnabled: Boolean,
 )
@@ -35,8 +38,11 @@ object PrefsManager {
         private set
 
     @Volatile
-    var forceDarkWebview: Boolean = Prefs.FORCE_DARK_WEBVIEW.default
+    var forceDarkMode: ForceDarkMode = ForceDarkMode.OFF
         private set
+
+    val forceDarkWebview: Boolean
+        get() = snapshot().forceDarkWebview
 
     @Volatile
     var priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
@@ -61,7 +67,7 @@ object PrefsManager {
                 debugLogs = Prefs.DEBUG_LOGS.read(prefs)
                 injectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
                 webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
-                forceDarkWebview = Prefs.FORCE_DARK_WEBVIEW.read(prefs)
+                forceDarkMode = Prefs.readForceDarkMode(prefs)
                 priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
             }
         }.onFailure { Logger.log("refreshCache() failed", it) }
@@ -72,9 +78,15 @@ object PrefsManager {
             selectors = selectors,
             injectionEnabled = injectionEnabled,
             webviewDebugging = webviewDebugging,
-            forceDarkWebview = forceDarkWebview,
+            forceDarkMode = forceDarkMode,
+            forceDarkWebview = forceDarkMode.isActive(systemInDarkMode()),
             priceChartsEnabled = priceChartsEnabled,
         )
+
+    private fun systemInDarkMode(): Boolean {
+        val uiMode = currentApplication()?.resources?.configuration?.uiMode ?: return false
+        return uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+    }
 
     fun setFallbackSelectors(fallback: List<String>) {
         selectors = fallback
@@ -85,3 +97,11 @@ object PrefsManager {
         return System.currentTimeMillis() - fetched > Prefs.STALE_THRESHOLD_MS
     }
 }
+
+private fun currentApplication(): Application? =
+    runCatching {
+        Class
+            .forName("android.app.ActivityThread")
+            .getMethod("currentApplication")
+            .invoke(null) as? Application
+    }.getOrNull()
