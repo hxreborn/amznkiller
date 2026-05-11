@@ -43,7 +43,7 @@ object PrefsManager {
         private set
 
     val forceDarkWebview: Boolean
-        get() = snapshot().forceDarkWebview
+        get() = forceDarkMode.isActive(systemInDarkMode())
 
     @Volatile
     var priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
