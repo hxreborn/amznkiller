@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PhonelinkErase
+import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.DeveloperMode
@@ -236,7 +237,7 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_shopping_display)) },
                 )
 
-                val displayItemCount = 2
+                val displayItemCount = 3
                 val chartsShape = shapeForPosition(displayItemCount, 0)
                 switchPreference(
                     modifier = preferenceModifier(surface, chartsShape),
@@ -250,7 +251,20 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(2.dp)) }
 
-                val darkModeShape = shapeForPosition(displayItemCount, 1)
+                val hideRufusShape = shapeForPosition(displayItemCount, 1)
+                switchPreference(
+                    modifier = preferenceModifier(surface, hideRufusShape),
+                    key = "hide_rufus",
+                    value = prefs.hideRufus,
+                    icon = { Icon(Icons.Outlined.SmartToy, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_hide_rufus) },
+                    summary = { Text(stringResource(R.string.settings_hide_rufus_summary)) },
+                    onValueChange = { viewModel.savePref(Prefs.HIDE_RUFUS, it) },
+                )
+
+                item { Spacer(Modifier.height(2.dp)) }
+
+                val darkModeShape = shapeForPosition(displayItemCount, 2)
                 preference(
                     modifier = preferenceModifier(surface, darkModeShape),
                     key = "force_dark_mode",

@@ -17,6 +17,7 @@ sealed interface SettingsUiState {
         val webviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default,
         val forceDarkMode: ForceDarkMode = ForceDarkMode.OFF,
         val priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default,
+        val hideRufus: Boolean = Prefs.HIDE_RUFUS.default,
         val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
         val useDynamicColor: Boolean = Prefs.USE_DYNAMIC_COLOR.default,
         val isLauncherIconHidden: Boolean = false,

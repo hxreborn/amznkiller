@@ -14,6 +14,7 @@ data class PrefsSnapshot(
     val forceDarkMode: ForceDarkMode,
     val forceDarkWebview: Boolean,
     val priceChartsEnabled: Boolean,
+    val hideRufus: Boolean,
 )
 
 object PrefsManager {
@@ -48,6 +49,10 @@ object PrefsManager {
     var priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
         private set
 
+    @Volatile
+    var hideRufus: Boolean = Prefs.HIDE_RUFUS.default
+        private set
+
     fun init(xposed: XposedInterface) {
         runCatching {
             remotePrefs = xposed.getRemotePreferences(Prefs.GROUP)
@@ -69,6 +74,7 @@ object PrefsManager {
                 webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
                 forceDarkMode = Prefs.readForceDarkMode(prefs)
                 priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
+                hideRufus = Prefs.HIDE_RUFUS.read(prefs)
             }
         }.onFailure { Logger.log("refreshCache() failed", it) }
     }
@@ -81,6 +87,7 @@ object PrefsManager {
             forceDarkMode = forceDarkMode,
             forceDarkWebview = forceDarkMode.isActive(systemInDarkMode()),
             priceChartsEnabled = priceChartsEnabled,
+            hideRufus = hideRufus,
         )
 
     private fun systemInDarkMode(): Boolean {

@@ -13,6 +13,7 @@ data class AppPrefsState(
     val webviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default,
     val forceDarkMode: ForceDarkMode = ForceDarkMode.OFF,
     val priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default,
+    val hideRufus: Boolean = Prefs.HIDE_RUFUS.default,
     val autoUpdate: Boolean = Prefs.AUTO_UPDATE.default,
     val isStale: Boolean = true,
     val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,

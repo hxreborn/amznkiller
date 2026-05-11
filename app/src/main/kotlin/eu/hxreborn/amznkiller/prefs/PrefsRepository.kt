@@ -41,6 +41,7 @@ class PrefsRepositoryImpl(
                         webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(localPrefs),
                         forceDarkMode = Prefs.readForceDarkMode(localPrefs),
                         priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(localPrefs),
+                        hideRufus = Prefs.HIDE_RUFUS.read(localPrefs),
                         autoUpdate = Prefs.AUTO_UPDATE.read(localPrefs),
                         isStale =
                             lastFetched == 0L ||

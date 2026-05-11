@@ -11,6 +11,7 @@ import eu.hxreborn.amznkiller.selectors.EmbeddedSelectors
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.util.Logger
 import eu.hxreborn.amznkiller.xposed.hook.ForceDarkHooker
+import eu.hxreborn.amznkiller.xposed.hook.RufusHooker
 import eu.hxreborn.amznkiller.xposed.hook.WebViewHooker
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
@@ -46,6 +47,9 @@ class AmznkillerModule : XposedModule() {
 
             Logger.log("Registering Force Dark hooks...")
             ForceDarkHooker.hook(this, param.classLoader)
+
+            Logger.log("Registering Rufus hooks...")
+            RufusHooker.hook(this, param.classLoader)
 
             if (PrefsManager.isStale()) {
                 Logger.log("Selectors stale, submitting background refresh...")

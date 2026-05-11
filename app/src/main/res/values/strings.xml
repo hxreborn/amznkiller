@@ -53,6 +53,8 @@
     <string name="settings_content_filtering_summary">Inject CSS rules into Amazon app to hide ads and sponsored junk</string>
     <string name="settings_marketplace_insights">Price history charts</string>
     <string name="settings_marketplace_insights_summary">Show Keepa and CamelCamelCamel charts on product pages</string>
+    <string name="settings_hide_rufus">Hide Rufus AI</string>
+    <string name="settings_hide_rufus_summary">Disable Amazon\'s Rufus AI assistant. Requires force stopping Amazon to take effect</string>
     <string name="settings_dark_mode">Dark mode (experimental)</string>
     <string name="settings_dark_mode_summary">Apply dark mode to Amazon pages. Requires force stopping Amazon to take effect</string>
     <string name="settings_dark_mode_summary_with_mode">%1$s. Requires force stopping Amazon to take effect. Requires Android 15 or higher to work properly</string>
