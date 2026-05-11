@@ -14,6 +14,7 @@ import json
 import re
 import sys
 from collections import Counter
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -149,43 +150,23 @@ def split_toplevel_commas(selector: str) -> list[str]:
     return parts
 
 
+# Keep `##` last because it prefixes the others.
+_SEPARATORS = ("#@#", "#?#", "##+js(", "##^", "##")
+
+
 def find_separator(line: str) -> tuple[str, int] | None:
-    idx = line.find("#@#")
-    if idx != -1:
-        return ("#@#", idx)
-
-    idx = line.find("#?#")
-    if idx != -1:
-        return ("#?#", idx)
-
-    idx = line.find("##+js(")
-    if idx != -1:
-        return ("##+js(", idx)
-
-    idx = line.find("##^")
-    if idx != -1:
-        return ("##^", idx)
-
-    idx = line.find("##")
-    if idx != -1:
-        return ("##", idx)
-
+    for sep in _SEPARATORS:
+        if (idx := line.find(sep)) != -1:
+            return sep, idx
     return None
 
 
 def parse_domains(domain_str: str) -> list[tuple[str, bool]]:
-    if not domain_str.strip():
-        return []
-    result = []
-    for d in domain_str.split(","):
-        d = d.strip().lower()
-        if not d:
-            continue
-        negated = d.startswith("~")
-        if negated:
-            d = d[1:]
-        result.append((d, negated))
-    return result
+    return [
+        (d.removeprefix("~"), d.startswith("~"))
+        for raw in domain_str.split(",")
+        if (d := raw.strip().lower())
+    ]
 
 
 def parse_source(raw: str, stats: SourceStats) -> tuple[set[str], set[str]]:
@@ -194,10 +175,7 @@ def parse_source(raw: str, stats: SourceStats) -> tuple[set[str], set[str]]:
 
     for line in raw.splitlines():
         line = line.strip()
-
-        if not line or line.startswith("!") or line.startswith("["):
-            continue
-        if line.startswith("||") or line.startswith("@@"):
+        if not line or line.startswith(("!", "[", "||", "@@")):
             continue
 
         sep = find_separator(line)
@@ -259,100 +237,81 @@ def fetch_list(url: str) -> str:
 
 
 def load_lines(path: Path) -> set[str]:
-    """Read non-blank, non-comment lines. Comment prefix is ! because # starts CSS IDs."""
+    """Lines starting with `!` are comments (`#` is reserved for CSS IDs)."""
     if not path.exists():
         return set()
-    lines = set()
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if line and not line.startswith("!"):
-            lines.add(line)
-    return lines
+    return {
+        stripped
+        for line in path.read_text().splitlines()
+        if (stripped := line.strip()) and not stripped.startswith("!")
+    }
 
 
 def write_sorted(path: Path, selectors: set[str] | frozenset[str]) -> None:
-    sorted_sels = sorted(selectors)
-    path.write_text(("\n".join(sorted_sels) + "\n") if sorted_sels else "")
+    path.write_text("".join(f"{s}\n" for s in sorted(selectors)))
+
+
+_RULES: tuple[tuple[Callable[[str], bool], str], ...] = (
+    (lambda s: "##" in s, "contains '##'"),
+    (lambda s: "#@#" in s, "contains '#@#'"),
+    (lambda s: "{" in s or "}" in s, "contains curly brace"),
+    (lambda s: "/*" in s or "*/" in s, "contains comment token"),
+    (lambda s: "\x00" in s, "contains NUL byte"),
+    (lambda s: "\r" in s or "\n" in s, "contains newline"),
+    (has_procedural, "contains unsupported/procedural selector"),
+    (lambda s: s.lstrip().startswith((">", "+", "~")), "starts with a combinator"),
+    (lambda s: not s.strip(), "whitespace-only selector"),
+)
 
 
 def validate_output(selectors: set[str]) -> list[str]:
-    errors = []
-    for s in selectors:
-        if "##" in s:
-            errors.append(f"contains '##': {s}")
-        if "#@#" in s:
-            errors.append(f"contains '#@#': {s}")
-        if "{" in s or "}" in s:
-            errors.append(f"contains curly brace: {s}")
-        if "/*" in s or "*/" in s:
-            errors.append(f"contains comment token: {s}")
-        if "\x00" in s:
-            errors.append(f"contains NUL byte: {s!r}")
-        if "\r" in s or "\n" in s:
-            errors.append(f"contains newline: {s!r}")
-        if has_procedural(s):
-            errors.append(f"contains unsupported/procedural selector: {s}")
-        if s.lstrip().startswith((">", "+", "~")):
-            errors.append(f"starts with a combinator (invalid in style rules): {s}")
-        errors.extend(_validate_balanced(s))
-        if not s.strip():
-            errors.append("whitespace-only selector")
-    return errors
+    return [
+        f"{msg}: {s!r}"
+        for s in selectors
+        for check, msg in _RULES
+        if check(s)
+    ] + [err for s in selectors for err in _validate_balanced(s)]
 
 
 def _validate_balanced(selector: str) -> list[str]:
     errors: list[str] = []
-    paren_depth = 0
-    bracket_depth = 0
+    parens = brackets = 0
     quote: str | None = None
     escape = False
 
     for ch in selector:
         if escape:
             escape = False
-            continue
-
-        if ch == "\\":
-            escape = True
-            continue
-
-        if quote is not None:
+        elif quote is not None:
             if ch == quote:
                 quote = None
-            continue
-
-        if ch in ("'", '"'):
+        elif ch == "\\":
+            escape = True
+        elif ch in ("'", '"'):
             quote = ch
-            continue
-
-        if ch == "(":
-            paren_depth += 1
-            continue
-        if ch == ")":
-            paren_depth -= 1
-            if paren_depth < 0:
+        elif ch == "(":
+            parens += 1
+        elif ch == ")":
+            parens -= 1
+            if parens < 0:
                 errors.append(f"unbalanced ')': {selector}")
-                paren_depth = 0
-            continue
-        if ch == "[":
-            bracket_depth += 1
-            continue
-        if ch == "]":
-            bracket_depth -= 1
-            if bracket_depth < 0:
+                parens = 0
+        elif ch == "[":
+            brackets += 1
+        elif ch == "]":
+            brackets -= 1
+            if brackets < 0:
                 errors.append(f"unbalanced ']': {selector}")
-                bracket_depth = 0
-            continue
+                brackets = 0
 
     if escape:
         errors.append(f"dangling backslash escape: {selector}")
     if quote is not None:
         errors.append(f"unbalanced quote {quote}: {selector}")
-    if paren_depth != 0:
+    if parens:
         errors.append(f"unbalanced parentheses: {selector}")
-    if bracket_depth != 0:
+    if brackets:
         errors.append(f"unbalanced brackets: {selector}")
-
     return errors
 
 
@@ -482,7 +441,6 @@ def cmd_validate() -> int:
         if errors:
             all_errors.extend(f"{path.name}: {e}" for e in errors)
 
-    # Check for duplicates in merged output
     if MERGED_OUT.exists():
         lines = [l.strip() for l in MERGED_OUT.read_text().splitlines() if l.strip()]
         counts = Counter(lines)
