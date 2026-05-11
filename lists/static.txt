@@ -4,7 +4,6 @@
 .ape-wrapper
 .dp-widget-card-deck:has([data-ad-placement-metadata])
 .s-result-item.AdHolder
-.s-result-item:has(.s-messaging-widget-results-header)
 .s-result-item:has([data-ad-feedback])
 .s-result-item:has([data-ad-feedback-label-id])
 .s-result-list > .a-section:has(.sbv-ad-content-container)
@@ -63,10 +62,12 @@ div[data-cel-widget^="multi-brand-video-mobile_DetailPage_"]
 div[data-cel-widget^="multi-card-creative-desktop_loom-desktop-top-slot_"]
 div[data-cel-widget^="sb-"]
 div[data-cel-widget^="sp-mobile-thematic-bundle"]
-div[data-csa-c-painter="single-creative-card"]
-div[data-csa-c-painter="single-video-card"]
-li.gwm-window-tile:has(div[data-csa-c-painter="single-creative-card"])
-li.gwm-window-tile:has(div[data-csa-c-painter="single-video-card"])
+div[cel_widget_id^="sb-themed-collection"]
+div[data-cel-widget*="-mobile_loom-mobile-inline-slot"]
+div[data-csa-c-painter="single-creative-card"]:has([data-ad-feedback-label-id])
+div[data-csa-c-painter="single-video-card"]:has([data-ad-feedback-label-id])
+li.gwm-window-tile:has(div[data-csa-c-painter="single-creative-card"] [data-ad-feedback-label-id])
+li.gwm-window-tile:has(div[data-csa-c-painter="single-video-card"] [data-ad-feedback-label-id])
 div[data-csa-c-painter="sp-cart-mobile-carousel-cards"]
 div[data-csa-c-slot-id^="loom-mobile-brand-footer-slot_hsa-id-"]
 div[data-csa-c-slot-id^="loom-mobile-top-slot_hsa-id-"]

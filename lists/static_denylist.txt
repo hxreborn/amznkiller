@@ -3,3 +3,11 @@
 
 ! Broken backslash escaping from EasyList; static.txt has the correct single-quoted version
 div[data-a-carousel-options*="\\\"isSponsoredProduct\\\":\\\"true\\\""]
+
+! Gateway deals/categories carousel is Amazon's own promo content, not ads.
+! Bare single-creative-card matches legit homepage tiles; static.txt uses a tightened
+! :has([data-ad-feedback-label-id]) variant that only hits actual sponsored cards.
+div[data-csa-c-painter="single-creative-card"]
+div[data-csa-c-painter="single-video-card"]
+li.gwm-tile
+li.gwm-window-tile

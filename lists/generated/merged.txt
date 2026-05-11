@@ -20,7 +20,6 @@
 .p13n-sc-unified-ad-label
 .s-result-item.AdHolder
 .s-result-item:has(.puis-sponsored-label-text)
-.s-result-item:has(.s-messaging-widget-results-header)
 .s-result-item:has([data-ad-feedback-label-id])
 .s-result-item:has([data-ad-feedback])
 .s-result-item:has(div[cel_widget_id^="MAIN-FEATURED_ASINS_LIST-"])
@@ -52,11 +51,13 @@ div[cel_widget_id^="MAIN-VIDEO_SINGLE_PRODUCT-"]
 div[cel_widget_id^="adplacements:"]
 div[cel_widget_id^="multi-brand-"]
 div[cel_widget_id^="sb-"]
+div[cel_widget_id^="sb-themed-collection"]
 div[cel_widget_id^="sp-desktop-carousel_handsfree-browse"]
 div[cel_widget_id^="sp-mobile-thematic-bundle"]
 div[class*="SponsoredProducts"]
 div[class*="_dpNoOverflow_"][data-idt]
 div[data-a-carousel-options*='"isSponsoredProduct":"true"']
+div[data-cel-widget*="-mobile_loom-mobile-inline-slot"]
 div[data-cel-widget="sp-rhf-desktop-carousel_desktop-rhf_1"]
 div[data-cel-widget="sp-shiptrack-desktop-carousel_desktop-yo-shiptrack_0"]
 div[data-cel-widget^="mobile-ads-"]
@@ -65,15 +66,15 @@ div[data-cel-widget^="multi-brand-video-mobile_DetailPage_"]
 div[data-cel-widget^="multi-card-creative-desktop_loom-desktop-top-slot_"]
 div[data-cel-widget^="sb-"]
 div[data-cel-widget^="sp-mobile-thematic-bundle"]
-div[data-csa-c-painter="single-creative-card"]
-div[data-csa-c-painter="single-video-card"]
+div[data-csa-c-painter="single-creative-card"]:has([data-ad-feedback-label-id])
+div[data-csa-c-painter="single-video-card"]:has([data-ad-feedback-label-id])
 div[data-csa-c-painter="sp-cart-mobile-carousel-cards"]
 div[data-csa-c-slot-id^="loom-mobile-brand-footer-slot_hsa-id-"]
 div[data-csa-c-slot-id^="loom-mobile-top-slot_hsa-id-"]
 div[id^="sims-simsContainer_feature_div_"]:has(.sp_info_link)
 div[id^="sp_detail"]
-li.gwm-window-tile:has(div[data-csa-c-painter="single-creative-card"])
-li.gwm-window-tile:has(div[data-csa-c-painter="single-video-card"])
+li.gwm-window-tile:has(div[data-csa-c-painter="single-creative-card"] [data-ad-feedback-label-id])
+li.gwm-window-tile:has(div[data-csa-c-painter="single-video-card"] [data-ad-feedback-label-id])
 span[cel_widget_id^="MAIN-FEATURED_ASINS_LIST-"]
 span[cel_widget_id^="MAIN-loom-desktop-brand-footer-slot_hsa-id-CARDS-"]
 span[cel_widget_id^="MAIN-loom-desktop-top-slot_hsa-id-CARDS-"]
