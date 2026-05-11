@@ -46,6 +46,7 @@ local.properties
 *.swp
 *.swo
 *.db
+*.tar.gz
 
 # Native build outputs
 .cxx/
