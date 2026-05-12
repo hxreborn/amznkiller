@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
@@ -18,11 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
+import eu.hxreborn.amznkiller.ui.theme.Tokens
 import android.R as AndroidR
 
 @Composable
@@ -49,19 +50,19 @@ internal fun ThemeDialog(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .height(56.dp)
+                                .height(Tokens.ListRowHeight)
                                 .selectable(
                                     selected = option == currentConfig,
                                     onClick = { onSelect(option) },
                                     role = Role.RadioButton,
-                                ).padding(horizontal = 16.dp),
+                                ).padding(horizontal = Tokens.SpacingLg),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(
                             selected = option == currentConfig,
                             onClick = null,
                         )
-                        Spacer(modifier = Modifier.padding(start = 16.dp))
+                        Spacer(modifier = Modifier.width(Tokens.SpacingLg))
                         Text(
                             text = labels[index],
                             style = MaterialTheme.typography.bodyLarge,

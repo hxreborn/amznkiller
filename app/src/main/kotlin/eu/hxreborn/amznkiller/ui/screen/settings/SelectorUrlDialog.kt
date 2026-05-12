@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -30,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.Prefs
@@ -38,6 +36,7 @@ import eu.hxreborn.amznkiller.selectors.MergeResult
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.theme.Tokens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,23 +59,23 @@ internal fun SelectorUrlDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
-            modifier = Modifier.width(320.dp),
-            shape = RoundedCornerShape(28.dp),
+            modifier = Modifier.width(Tokens.DialogWidth),
+            shape = MaterialTheme.shapes.extraLarge,
             tonalElevation = AlertDialogDefaults.TonalElevation,
             color = AlertDialogDefaults.containerColor,
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier.padding(Tokens.SpacingXl)) {
                 Text(
                     text = stringResource(R.string.settings_selector_url_dialog_title),
                     style = MaterialTheme.typography.headlineSmall,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Tokens.SpacingSm))
                 Text(
                     text = stringResource(R.string.settings_selector_url_dialog_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Tokens.SpacingLg))
 
                 OutlinedTextField(
                     value = url,
@@ -89,7 +88,7 @@ internal fun SelectorUrlDialog(
                     maxLines = 4,
                     textStyle = MaterialTheme.typography.bodySmall,
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Tokens.SpacingMd))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -125,14 +124,14 @@ internal fun SelectorUrlDialog(
                     ) {
                         Text(stringResource(R.string.settings_selector_url_test))
                     }
-                    Spacer(Modifier.width(12.dp))
+                    Spacer(Modifier.width(Tokens.SpacingMd))
 
                     if (isTesting) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(Tokens.IconSm),
+                            strokeWidth = Tokens.ProgressStroke,
                         )
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(Tokens.SpacingSm))
                         Text(
                             text = stringResource(R.string.settings_selector_url_testing),
                             style = MaterialTheme.typography.bodySmall,
@@ -148,9 +147,9 @@ internal fun SelectorUrlDialog(
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Tokens.SpacingLg))
                 HorizontalDivider()
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(Tokens.SpacingLg))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -168,7 +167,7 @@ internal fun SelectorUrlDialog(
                     TextButton(onClick = onDismiss) {
                         Text(stringResource(AndroidR.string.cancel))
                     }
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(Tokens.SpacingSm))
                     Button(
                         onClick = { onSave(url) },
                         enabled = url.isNotBlank(),

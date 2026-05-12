@@ -1,39 +1,39 @@
 package eu.hxreborn.amznkiller.ui.util
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.unit.dp
-
-private val CornerLarge = 24.dp
-private val CornerSmall = 4.dp
+import eu.hxreborn.amznkiller.ui.theme.Tokens
 
 fun shapeForPosition(
     count: Int,
     index: Int,
-): RoundedCornerShape =
-    when {
+): RoundedCornerShape {
+    val large = Tokens.GroupedShapeCornerLarge
+    val small = Tokens.GroupedShapeCornerSmall
+    return when {
         count == 1 -> {
-            RoundedCornerShape(CornerLarge)
+            RoundedCornerShape(large)
         }
 
         index == 0 -> {
             RoundedCornerShape(
-                topStart = CornerLarge,
-                topEnd = CornerLarge,
-                bottomEnd = CornerSmall,
-                bottomStart = CornerSmall,
+                topStart = large,
+                topEnd = large,
+                bottomEnd = small,
+                bottomStart = small,
             )
         }
 
         index == count - 1 -> {
             RoundedCornerShape(
-                topStart = CornerSmall,
-                topEnd = CornerSmall,
-                bottomEnd = CornerLarge,
-                bottomStart = CornerLarge,
+                topStart = small,
+                topEnd = small,
+                bottomEnd = large,
+                bottomStart = large,
             )
         }
 
         else -> {
-            RoundedCornerShape(CornerSmall)
+            RoundedCornerShape(small)
         }
     }
+}
