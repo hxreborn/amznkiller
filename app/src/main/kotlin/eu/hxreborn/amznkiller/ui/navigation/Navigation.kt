@@ -1,27 +1,53 @@
 package eu.hxreborn.amznkiller.ui.navigation
 
-import android.provider.Settings
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -73,8 +99,6 @@ val bottomNavItems =
         ),
     )
 
-private val SLIDE_DISTANCE = 96.dp
-
 @Composable
 fun MainNavDisplay(
     backStack: NavBackStack<NavKey>,
@@ -82,7 +106,7 @@ fun MainNavDisplay(
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
-    val slideInDistance = with(LocalDensity.current) { SLIDE_DISTANCE.roundToPx() }
+    val slideInDistance = with(LocalDensity.current) { Tokens.NavSlideDistance.roundToPx() }
 
     NavDisplay(
         backStack = backStack,
@@ -131,55 +155,129 @@ fun MainNavDisplay(
     )
 }
 
+@OptIn(
+    ExperimentalMaterial3ExpressiveApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+)
 @Composable
 fun BottomNav(
     backStack: NavBackStack<NavKey>,
     currentKey: NavKey?,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    val buttonBounds = remember { mutableStateMapOf<Int, Rect>() }
+    val currentIndex = bottomNavItems.indexOfFirst { it.key == currentKey }.coerceAtLeast(0)
+    val targetRect = buttonBounds[currentIndex]
+    val anchorRect = buttonBounds[0]
+    val pillTargetX = (targetRect?.left ?: 0f) - (anchorRect?.left ?: 0f)
+    val pillTargetWidth = targetRect?.width ?: 0f
 
-    val animDuration =
-        remember {
-            val scale =
-                runCatching {
-                    Settings.Global.getFloat(
-                        context.contentResolver,
-                        Settings.Global.ANIMATOR_DURATION_SCALE,
-                        1f,
-                    )
-                }.getOrDefault(1f)
-            (Tokens.ANIMATION_DURATION_MS * scale).toInt().coerceAtLeast(0)
-        }
+    val pillAnimatedX by animateFloatAsState(
+        targetValue = pillTargetX,
+        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+        label = "navPillX",
+    )
+    val pillAnimatedWidth by animateFloatAsState(
+        targetValue = pillTargetWidth,
+        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+        label = "navPillWidth",
+    )
+    val pillColor = MaterialTheme.colorScheme.primary
 
-    NavigationBar(modifier = modifier) {
-        bottomNavItems.forEach { item ->
-            val selected = currentKey == item.key
-            NavigationBarItem(
-                selected = selected,
-                onClick = {
-                    if (!selected) {
-                        backStack.removeAll { it != Screen.Dashboard }
-                        if (item.key != Screen.Dashboard) {
-                            backStack.add(item.key)
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(bottom = Tokens.FloatingBarBottomPadding),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        HorizontalFloatingToolbar(
+            expanded = true,
+            colors =
+                FloatingToolbarDefaults.vibrantFloatingToolbarColors(
+                    toolbarContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    toolbarContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+        ) {
+            CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                bottomNavItems.forEachIndexed { index, item ->
+                    val selected = currentKey == item.key
+
+                    ToggleButton(
+                        checked = selected,
+                        onCheckedChange = {
+                            if (!selected) {
+                                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                backStack.clear()
+                                backStack.add(item.key)
+                            }
+                        },
+                        modifier =
+                            Modifier
+                                .height(Tokens.FloatingBarItemHeight)
+                                .onGloballyPositioned { coords ->
+                                    buttonBounds[index] = coords.boundsInParent()
+                                }.then(
+                                    if (index == 0) {
+                                        Modifier.drawWithContent {
+                                            if (pillAnimatedWidth > 0f) {
+                                                drawRoundRect(
+                                                    color = pillColor,
+                                                    topLeft = Offset(pillAnimatedX, 0f),
+                                                    size = Size(pillAnimatedWidth, size.height),
+                                                    cornerRadius = CornerRadius(size.height / 2f),
+                                                )
+                                            }
+                                            drawContent()
+                                        }
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
+                        colors =
+                            ToggleButtonDefaults.toggleButtonColors(
+                                containerColor = Color.Transparent,
+                                checkedContainerColor = Color.Transparent,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                checkedContentColor = MaterialTheme.colorScheme.onPrimary,
+                            ),
+                        shapes =
+                            ToggleButtonDefaults.shapes(
+                                shape = CircleShape,
+                                pressedShape = CircleShape,
+                                checkedShape = CircleShape,
+                            ),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                contentDescription = stringResource(item.titleRes),
+                            )
+                            AnimatedVisibility(
+                                visible = selected,
+                                enter =
+                                    expandHorizontally(
+                                        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                    ),
+                                exit =
+                                    shrinkHorizontally(
+                                        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                    ),
+                            ) {
+                                Text(
+                                    text = stringResource(item.titleRes),
+                                    modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
+                                    style =
+                                        MaterialTheme.typography.titleSmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                        ),
+                                )
+                            }
                         }
                     }
-                },
-                icon = {
-                    Crossfade(
-                        targetState = selected,
-                        animationSpec = tween(durationMillis = animDuration),
-                        label = "iconCrossfade",
-                    ) { isSelected ->
-                        Icon(
-                            imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                            contentDescription = stringResource(item.titleRes),
-                        )
-                    }
-                },
-                label = { Text(stringResource(item.titleRes)) },
-                alwaysShowLabel = false,
-            )
+                }
+            }
         }
     }
 }

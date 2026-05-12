@@ -42,6 +42,7 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Ready
+import eu.hxreborn.amznkiller.ui.state.SelectorSyncEvent
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
@@ -147,8 +148,10 @@ fun DashboardScreen(
         LaunchedEffect(outcome?.id) {
             if (outcome != null && outcome.id != lastHandledOutcomeId) {
                 lastHandledOutcomeId = outcome.id
-                val message = formatUpdateEventMessage(context, outcome.event)
-                snackbarHostState.showSnackbar(message)
+                if (outcome.event !is SelectorSyncEvent.UpToDate) {
+                    val message = formatUpdateEventMessage(context, outcome.event)
+                    snackbarHostState.showSnackbar(message)
+                }
             }
         }
 
