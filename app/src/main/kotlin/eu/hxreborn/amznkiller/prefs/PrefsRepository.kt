@@ -12,6 +12,7 @@ interface PrefsRepository {
     val state: Flow<AppPrefsState>
     val currentSelectors: List<String>
     val selectorUrl: String
+    val autoUpdate: Boolean
 
     fun <T : Any> save(
         pref: PrefSpec<T>,
@@ -83,6 +84,9 @@ class PrefsRepositoryImpl(
 
     override val selectorUrl: String
         get() = Prefs.SELECTOR_URL.read(localPrefs)
+
+    override val autoUpdate: Boolean
+        get() = Prefs.AUTO_UPDATE.read(localPrefs)
 
     override fun syncLocalToRemote() {
         val remote = remotePrefsProvider() ?: return

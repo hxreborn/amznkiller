@@ -449,6 +449,8 @@ private class PreviewSettingsViewModel : AppViewModel() {
 
     override fun refreshAll() {}
 
+    override fun triggerAutoUpdateIfEnabled() {}
+
     override fun setXposedActive(
         active: Boolean,
         frameworkVersion: String?,

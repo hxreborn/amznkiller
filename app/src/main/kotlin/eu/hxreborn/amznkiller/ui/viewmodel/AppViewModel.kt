@@ -12,6 +12,8 @@ abstract class AppViewModel : ViewModel() {
 
     abstract fun refreshAll()
 
+    abstract fun triggerAutoUpdateIfEnabled()
+
     abstract fun setXposedActive(
         active: Boolean,
         frameworkVersion: String? = null,

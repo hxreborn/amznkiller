@@ -45,6 +45,8 @@ class MainActivity :
             viewModel.settingsUiState.value is SettingsLoading
         }
 
+        viewModel.triggerAutoUpdateIfEnabled()
+
         setContent {
             val settings = viewModel.settingsUiState.collectAsStateWithLifecycle()
             val (darkThemeConfig, useDynamicColor) =

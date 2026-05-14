@@ -16,17 +16,22 @@ import eu.hxreborn.amznkiller.ui.state.SelectorSyncOutcome
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState
 import eu.hxreborn.amznkiller.util.LauncherIconHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Loading as DashboardLoading
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Ready as DashboardReady
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Loading as SettingsLoading
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Ready as SettingsReady
+
+private val MIN_REFRESH_DISPLAY = 1000.milliseconds
 
 class AppViewModelImpl(
     private val repository: PrefsRepository,
@@ -36,6 +41,8 @@ class AppViewModelImpl(
     private val frameworkVersion = MutableStateFlow<String?>(null)
     private val lastRefreshOutcome = MutableStateFlow<SelectorSyncOutcome?>(null)
     private val launcherIconHidden = MutableStateFlow(!LauncherIconHelper.isLauncherIconVisible(App.instance))
+
+    @Volatile private var autoUpdateTriggered = false
 
     override val dashboardUiState: StateFlow<DashboardUiState> =
         combine(
@@ -90,6 +97,7 @@ class AppViewModelImpl(
         if (refreshing.value) return
         viewModelScope.launch(Dispatchers.IO) {
             refreshing.value = true
+            val mark = TimeSource.Monotonic.markNow()
             try {
                 repository.save(Prefs.LAST_REFRESH_FAILED, false)
                 val oldSelectors = repository.currentSelectors.toSet()
@@ -128,9 +136,17 @@ class AppViewModelImpl(
                     emitFailure(R.string.snackbar_update_failed, fallback = it.message)
                 }
             } finally {
+                val remaining = MIN_REFRESH_DISPLAY - mark.elapsedNow()
+                if (remaining.isPositive()) delay(remaining)
                 refreshing.value = false
             }
         }
+    }
+
+    override fun triggerAutoUpdateIfEnabled() {
+        if (autoUpdateTriggered || !repository.autoUpdate) return
+        autoUpdateTriggered = true
+        refreshAll()
     }
 
     private fun emitFailure(
