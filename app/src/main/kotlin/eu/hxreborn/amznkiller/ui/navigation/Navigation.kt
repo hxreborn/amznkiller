@@ -52,6 +52,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
@@ -83,6 +84,17 @@ data class BottomNavItem(
     val unselectedIcon: ImageVector,
 )
 
+private fun tabIndexOf(contentKey: Any?): Int = bottomNavItems.indexOfFirst { it.key.toString() == contentKey }
+
+private fun isForwardTabTransition(
+    initial: Scene<NavKey>,
+    target: Scene<NavKey>,
+): Boolean {
+    val initialIdx = tabIndexOf(initial.entries.lastOrNull()?.contentKey)
+    val targetIdx = tabIndexOf(target.entries.lastOrNull()?.contentKey)
+    return if (initialIdx >= 0 && targetIdx >= 0) targetIdx >= initialIdx else true
+}
+
 val bottomNavItems =
     listOf(
         BottomNavItem(
@@ -113,9 +125,10 @@ fun MainNavDisplay(
         onBack = { backStack.removeLastOrNull() },
         modifier = modifier,
         transitionSpec = {
-            materialSharedAxisXIn(forward = true, slideDistance = slideInDistance) togetherWith
+            val forward = isForwardTabTransition(initialState, targetState)
+            materialSharedAxisXIn(forward = forward, slideDistance = slideInDistance) togetherWith
                 materialSharedAxisXOut(
-                    forward = true,
+                    forward = forward,
                     slideDistance = slideInDistance,
                 )
         },
