@@ -109,4 +109,10 @@
         <item>Ad blocking enabled</item>
         <item>!ads</item>
     </string-array>
+
+    <string name="easter_shareholder_already">No need. You are already an Amazon shareholder</string>
+    <plurals name="easter_shareholder_countdown">
+        <item quantity="one">You are now %d step away from becoming an Amazon shareholder</item>
+        <item quantity="other">You are now %d steps away from becoming an Amazon shareholder</item>
+    </plurals>
 </resources>
