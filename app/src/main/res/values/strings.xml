@@ -28,7 +28,6 @@
     <string name="hero_checking_subtitle">Fetching latest selectors\u2026</string>
     <string name="hero_error_title">Sync failed</string>
     <string name="hero_error_subtitle">Last sync failed. Tap refresh to retry</string>
-    <string name="hero_delta_changed">+%1$d added, -%2$d removed</string>
 
     <string name="cd_refresh">Refresh selectors</string>
 
@@ -73,7 +72,7 @@
     <string name="settings_filter_sources_summary">Set the remote URL for selector lists</string>
     <string name="settings_filter_list_default">Default</string>
     <string name="settings_background_sync">Fetch rules automatically</string>
-    <string name="settings_background_sync_summary">Check for updated selectors once a day on app launch</string>
+    <string name="settings_background_sync_summary">Check for updated selectors on app launch</string>
     <string name="settings_selector_url_dialog_title">Selector URL</string>
     <string name="settings_selector_url_dialog_subtitle">Enter the URL for the remote filter list source.</string>
     <string name="settings_selector_url_save">Save</string>

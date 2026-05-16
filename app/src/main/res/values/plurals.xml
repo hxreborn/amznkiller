@@ -8,12 +8,12 @@
         <item quantity="one">Synced %d rule</item>
         <item quantity="other">Synced %d rules</item>
     </plurals>
-    <plurals name="hero_delta_added">
-        <item quantity="one">+%d added</item>
-        <item quantity="other">+%d added</item>
+    <plurals name="delta_added_a11y">
+        <item quantity="one">%d selector added</item>
+        <item quantity="other">%d selectors added</item>
     </plurals>
-    <plurals name="hero_delta_removed">
-        <item quantity="one">-%d removed</item>
-        <item quantity="other">-%d removed</item>
+    <plurals name="delta_removed_a11y">
+        <item quantity="one">%d selector removed</item>
+        <item quantity="other">%d selectors removed</item>
     </plurals>
 </resources>
