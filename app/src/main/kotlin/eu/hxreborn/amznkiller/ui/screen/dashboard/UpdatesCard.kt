@@ -22,11 +22,13 @@ import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.rounded.CloudDone
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -232,11 +234,20 @@ internal fun UpdatesCard(
                     }
                 }
             }
+            val isErrorState = status == UpdateStatus.Error
             IconButton(onClick = onRefresh, enabled = !isRefreshing) {
                 Icon(
-                    imageVector = Icons.Rounded.Refresh,
-                    contentDescription = stringResource(R.string.cd_refresh),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    imageVector = if (isErrorState) Icons.Rounded.Replay else Icons.Rounded.Refresh,
+                    contentDescription =
+                        stringResource(
+                            if (isErrorState) R.string.cd_retry else R.string.cd_refresh,
+                        ),
+                    tint =
+                        if (isErrorState) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            LocalContentColor.current
+                        },
                 )
             }
         }

@@ -30,6 +30,7 @@
     <string name="hero_error_subtitle">Last sync failed. Tap refresh to retry</string>
 
     <string name="cd_refresh">Refresh selectors</string>
+    <string name="cd_retry">Retry sync</string>
 
     <string name="snackbar_fetch_failed_bundled">Remote fetch failed, using bundled rules instead</string>
     <string name="snackbar_no_selectors">No selectors fetched</string>
