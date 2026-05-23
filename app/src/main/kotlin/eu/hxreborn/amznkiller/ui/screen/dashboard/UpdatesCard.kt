@@ -1,6 +1,5 @@
 package eu.hxreborn.amznkiller.ui.screen.dashboard
 
-import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -58,25 +57,6 @@ private enum class StatusIconKey { Refreshing, Error, UpToDate, UpdatedDelta, St
 
 @Composable
 internal fun lastCheckedLine(lastFetched: Long): String = stringResource(R.string.dashboard_last_checked, relativeTime(lastFetched))
-
-internal fun formatUpdateEventMessage(
-    context: Context,
-    event: SelectorSyncEvent,
-): String =
-    when (event) {
-        is SelectorSyncEvent.Updated -> {
-            val total = event.added + event.removed
-            context.resources.getQuantityString(R.plurals.snackbar_updated, total, total)
-        }
-
-        is SelectorSyncEvent.UpToDate -> {
-            context.getString(R.string.snackbar_up_to_date)
-        }
-
-        is SelectorSyncEvent.Error -> {
-            event.resolveMessage(context::getString)
-        }
-    }
 
 private fun resolveUpdateStatus(
     isRefreshing: Boolean,

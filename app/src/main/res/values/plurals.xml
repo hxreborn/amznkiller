@@ -4,10 +4,6 @@
         <item quantity="one">%d rule</item>
         <item quantity="other">%d rules</item>
     </plurals>
-    <plurals name="snackbar_updated">
-        <item quantity="one">Synced %d rule</item>
-        <item quantity="other">Synced %d rules</item>
-    </plurals>
     <plurals name="delta_added_a11y">
         <item quantity="one">%d selector added</item>
         <item quantity="other">%d selectors added</item>
