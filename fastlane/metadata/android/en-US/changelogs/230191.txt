@@ -1,0 +1,1 @@
+See what selectors changed after each refresh. Fixes for settings not saving when Xposed service is down, stale module config on first load, and force dark tab icon rendering glitches. Verbose logging toggle now works without restarting the app. Performance improvement for debug logging.
