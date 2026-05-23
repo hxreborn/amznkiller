@@ -75,8 +75,8 @@ class PrefsRepositoryImpl(
         pref: PrefSpec<T>,
         value: T,
     ) {
-        localPrefs.edit().also { pref.write(it, value) }.apply()
-        remotePrefsProvider()?.edit()?.also { pref.write(it, value) }?.apply()
+        localPrefs.edit { pref.write(this, value) }
+        runCatching { remotePrefsProvider()?.edit { pref.write(this, value) } }
     }
 
     override val currentSelectors: List<String>
