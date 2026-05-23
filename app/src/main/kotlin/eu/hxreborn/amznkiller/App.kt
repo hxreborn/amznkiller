@@ -34,6 +34,7 @@ class App : Application() {
         lateinit var instance: App
             private set
 
+        @Volatile
         var service: XposedService? = null
             private set
 

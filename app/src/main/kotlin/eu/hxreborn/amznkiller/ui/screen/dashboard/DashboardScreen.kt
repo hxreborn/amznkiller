@@ -14,17 +14,12 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -42,7 +37,6 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Ready
-import eu.hxreborn.amznkiller.ui.state.SelectorSyncEvent
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
@@ -68,10 +62,8 @@ fun DashboardScreen(
             Loading -> return
             is Ready -> s
         }
-    val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val context = LocalContext.current
-    var lastHandledOutcomeId by remember { mutableStateOf<Long?>(null) }
     val resources = LocalResources.current
     val tagline =
         rememberSaveable {
@@ -142,19 +134,7 @@ fun DashboardScreen(
                 scrollBehavior = scrollBehavior,
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
-        val outcome = state.lastRefreshOutcome
-        LaunchedEffect(outcome?.id) {
-            if (outcome != null && outcome.id != lastHandledOutcomeId) {
-                lastHandledOutcomeId = outcome.id
-                if (outcome.event !is SelectorSyncEvent.UpToDate) {
-                    val message = formatUpdateEventMessage(context, outcome.event)
-                    snackbarHostState.showSnackbar(message)
-                }
-            }
-        }
-
         val surface = MaterialTheme.colorScheme.surfaceVariant
 
         LazyColumn(
@@ -254,4 +234,6 @@ private class PreviewAppViewModel : AppViewModel() {
     }
 
     override fun setLauncherIconHidden(hidden: Boolean) {}
+
+    override fun syncLocalToRemote() {}
 }

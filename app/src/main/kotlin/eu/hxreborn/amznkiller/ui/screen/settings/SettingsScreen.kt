@@ -544,4 +544,6 @@ private class PreviewSettingsViewModel : AppViewModel() {
     }
 
     override fun setLauncherIconHidden(hidden: Boolean) {}
+
+    override fun syncLocalToRemote() {}
 }

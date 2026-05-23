@@ -23,7 +23,7 @@ import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Ready as SettingsReady
 class MainActivity :
     ComponentActivity(),
     XposedServiceHelper.OnServiceListener {
-    private var remotePrefs: SharedPreferences? = null
+    @Volatile private var remotePrefs: SharedPreferences? = null
 
     private val viewModel: AppViewModel by viewModels {
         AppViewModelFactory(
@@ -66,6 +66,7 @@ class MainActivity :
 
     override fun onServiceBind(service: XposedService) {
         remotePrefs = service.getRemotePreferences(Prefs.GROUP)
+        viewModel.syncLocalToRemote()
         viewModel.setXposedActive(
             active = true,
             frameworkVersion = "${service.frameworkName} v${service.frameworkVersion}",

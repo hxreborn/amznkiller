@@ -25,4 +25,6 @@ abstract class AppViewModel : ViewModel() {
     )
 
     abstract fun setLauncherIconHidden(hidden: Boolean)
+
+    abstract fun syncLocalToRemote()
 }

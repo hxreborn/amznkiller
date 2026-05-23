@@ -179,6 +179,10 @@ class AppViewModelImpl(
         LauncherIconHelper.setLauncherIconVisible(App.instance, !hidden)
         launcherIconHidden.value = hidden
     }
+
+    override fun syncLocalToRemote() {
+        repository.syncLocalToRemote()
+    }
 }
 
 class AppViewModelFactory(
