@@ -20,19 +20,19 @@ import java.util.Collections
 import java.util.WeakHashMap
 
 object ForceDarkHooker {
-    val bottomTabIcons: MutableSet<View> = Collections.newSetFromMap(WeakHashMap())
+    val bottomTabIcons: MutableSet<View> =
+        Collections.synchronizedSet(
+            Collections.newSetFromMap(WeakHashMap()),
+        )
 
     // GPU force dark inverts this grey to near-white
     private val TAB_ICON_TINT = Color.rgb(168, 168, 168)
     private val TAB_ICON_CSL = ColorStateList.valueOf(TAB_ICON_TINT)
 
-    lateinit var hostClassLoader: ClassLoader
-
     fun hook(
         xposed: XposedInterface,
         classLoader: ClassLoader,
     ) {
-        hostClassLoader = classLoader
         Logger.logDebug(
             "ForceDark: device=${Build.MANUFACTURER} ${Build.MODEL} " +
                 "SDK=${Build.VERSION.SDK_INT} hardware=${Build.HARDWARE}",
@@ -41,7 +41,7 @@ object ForceDarkHooker {
         hookDetermineForceDarkType(xposed)
         hookRendererSetForceDark(xposed)
         hookWebViewBackground(xposed)
-        hookTabIcons(xposed)
+        hookTabIcons(xposed, classLoader)
     }
 
     fun applyTabIconTint(imageView: ImageView) {
@@ -250,7 +250,10 @@ object ForceDarkHooker {
         }
     }
 
-    private fun hookTabIcons(xposed: XposedInterface) {
+    private fun hookTabIcons(
+        xposed: XposedInterface,
+        classLoader: ClassLoader,
+    ) {
         val controllers =
             listOf(
                 "com.amazon.mShop.chrome.bottomtabs.BaseTabController",
@@ -260,7 +263,7 @@ object ForceDarkHooker {
         var hooked = 0
         for (cls in controllers) {
             runCatching {
-                val clazz = Class.forName(cls, false, hostClassLoader)
+                val clazz = Class.forName(cls, false, classLoader)
                 xposed
                     .hook(clazz.declaredMethods.first { it.name == "getTabIcon" })
                     .intercept { chain ->
