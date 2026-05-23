@@ -1,7 +1,9 @@
 package eu.hxreborn.amznkiller.util
 
+import android.content.SharedPreferences
 import android.util.Log
-import eu.hxreborn.amznkiller.prefs.PrefsManager
+import eu.hxreborn.amznkiller.BuildConfig
+import eu.hxreborn.amznkiller.prefs.Prefs
 import io.github.libxposed.api.XposedModule
 
 object Logger {
@@ -27,7 +29,7 @@ object Logger {
     }
 
     fun logDebug(msg: String) {
-        if (!PrefsManager.debugLogs) return
+        if (!debugEnabled()) return
         log(msg)
     }
 
@@ -35,7 +37,19 @@ object Logger {
         msg: String,
         t: Throwable,
     ) {
-        if (!PrefsManager.debugLogs) return
+        if (!debugEnabled()) return
         log(msg, t)
     }
+
+    // LSPosed remote prefs do not fire change listeners — poll on each call
+    private fun debugEnabled(): Boolean =
+        BuildConfig.DEBUG || cachedPrefs()?.let { Prefs.DEBUG_LOGS.read(it) } == true
+
+    @Volatile
+    private var prefs: SharedPreferences? = null
+
+    private fun cachedPrefs(): SharedPreferences? =
+        prefs ?: runCatching { module?.getRemotePreferences(Prefs.GROUP) }
+            .getOrNull()
+            ?.also { prefs = it }
 }
