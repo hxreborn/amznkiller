@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.xposed.injector
 
+import android.util.Log
 import android.webkit.WebView
 import eu.hxreborn.amznkiller.prefs.PrefsSnapshot
 import eu.hxreborn.amznkiller.util.Logger
@@ -14,9 +15,9 @@ object WebViewDebuggingGate {
         runCatching {
             WebView.setWebContentsDebuggingEnabled(true)
         }.onSuccess {
-            Logger.log("WebView debugging enabled")
+            Logger.debug { "WebView debugging enabled" }
         }.onFailure {
-            Logger.log("WebView debugging failed", it)
+            Logger.log(Log.ERROR, "WebView debugging failed", it)
         }
     }
 }

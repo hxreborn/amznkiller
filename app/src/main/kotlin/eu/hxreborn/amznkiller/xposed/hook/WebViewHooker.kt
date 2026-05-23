@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.xposed.hook
 
+import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import eu.hxreborn.amznkiller.util.Logger
@@ -19,9 +20,9 @@ object WebViewHooker {
                             null
                         }
                     }.onSuccess {
-                        Logger.log("Hooked ${method.name}")
+                        Logger.debug { "Hooked ${method.name}" }
                     }.onFailure {
-                        Logger.log("Failed to hook ${method.name}", it)
+                        Logger.log(Log.ERROR, "Failed to hook ${method.name}", it)
                     }
                 }
 
@@ -37,9 +38,9 @@ object WebViewHooker {
                             null
                         }
                     }.onSuccess {
-                        Logger.log("Hooked ${method.name}")
+                        Logger.debug { "Hooked ${method.name}" }
                     }.onFailure {
-                        Logger.log("Failed to hook ${method.name}", it)
+                        Logger.log(Log.ERROR, "Failed to hook ${method.name}", it)
                     }
                 }
             }

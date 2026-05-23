@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.xposed.js
 
+import android.util.Log
 import eu.hxreborn.amznkiller.util.Logger
 
 object ScriptRepository {
@@ -18,7 +19,7 @@ object ScriptRepository {
                     }
                 stream.bufferedReader().readText()
             }.onFailure {
-                Logger.log("ScriptRepository: failed to load ${id.path}", it)
+                Logger.log(Log.ERROR, "ScriptRepository: failed to load ${id.path}", it)
             }.getOrDefault("")
         }
 }

@@ -14,7 +14,7 @@ object WebViewJsExecutor {
         fun run() {
             runCatching {
                 webView.evaluateJavascript(script) { onResult?.invoke(it) }
-            }.onFailure { Logger.logDebug("$tag: eval failed", it) }
+            }.onFailure { Logger.debug { "$tag: eval failed: ${it.message}" } }
         }
 
         runCatching {
@@ -23,6 +23,6 @@ object WebViewJsExecutor {
             } else {
                 webView.post { run() }
             }
-        }.onFailure { Logger.logDebug("$tag: post failed", it) }
+        }.onFailure { Logger.debug { "$tag: post failed: ${it.message}" } }
     }
 }

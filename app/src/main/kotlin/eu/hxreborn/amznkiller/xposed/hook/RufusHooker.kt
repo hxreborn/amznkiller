@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.xposed.hook
 
+import android.util.Log
 import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
@@ -23,9 +24,9 @@ object RufusHooker {
                 if (PrefsManager.hideRufus) null else chain.proceed()
             }
         }.onSuccess {
-            Logger.log("$TAG: hooked $SAVX_TAB_CONTROLLER")
+            Logger.debug { "$TAG: hooked $SAVX_TAB_CONTROLLER" }
         }.onFailure {
-            Logger.log("$TAG: failed to hook $SAVX_TAB_CONTROLLER", it)
+            Logger.log(Log.ERROR, "$TAG: failed to hook $SAVX_TAB_CONTROLLER", it)
         }
     }
 }

@@ -1,5 +1,6 @@
 package eu.hxreborn.amznkiller.selectors
 
+import android.util.Log
 import eu.hxreborn.amznkiller.util.Logger
 
 object EmbeddedSelectors {
@@ -12,7 +13,7 @@ object EmbeddedSelectors {
                     SelectorSanitizer.sanitize(reader.lineSequence())
                 } ?: emptyList()
         }.getOrElse {
-            Logger.log("Failed to load embedded.css", it)
+            Logger.log(Log.ERROR, "Failed to load embedded.css", it)
             emptyList()
         }
 }

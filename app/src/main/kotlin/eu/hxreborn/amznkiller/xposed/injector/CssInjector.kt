@@ -29,7 +29,7 @@ object CssInjector {
         if (!prefs.injectionEnabled) return
         val selectors = prefs.selectors
         if (selectors.isEmpty()) {
-            Logger.logDebug("CssInjector: no selectors")
+            Logger.debug { "CssInjector: no selectors" }
             return
         }
 
@@ -60,7 +60,7 @@ object CssInjector {
             if (result == null || result == "null" || result.contains("\"ok\":true")) {
                 return@evaluate
             }
-            Logger.logDebug("CSS validation: $result")
+            Logger.debug { "CSS validation: $result" }
         }
     }
 

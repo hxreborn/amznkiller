@@ -4,6 +4,8 @@ import android.app.ActivityManager
 import android.app.Application
 import android.os.Handler
 import android.os.Looper
+import android.os.Process
+import android.util.Log
 import android.widget.Toast
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.prefs.PrefsManager
@@ -18,57 +20,58 @@ import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
 import java.util.concurrent.Executors
 
+@PublishedApi
+internal lateinit var module: AmznkillerModule
+    private set
+
 class AmznkillerModule : XposedModule() {
     override fun onModuleLoaded(param: ModuleLoadedParam) {
-        Logger.init(this)
-        Logger.log("Module v${BuildConfig.VERSION_NAME} on $frameworkName $frameworkVersion")
+        module = this
+        Logger.log(
+            Log.INFO,
+            "Module v${BuildConfig.VERSION_NAME} on $frameworkName $frameworkVersion",
+        )
     }
 
     override fun onPackageReady(param: PackageReadyParam) {
-        Logger.log("onPackageReady: ${param.packageName} isFirst=${param.isFirstPackage}")
         if (param.packageName !in AMAZON_PACKAGES || !param.isFirstPackage) return
+        Logger.log(Log.INFO, "loaded for ${param.packageName} pid=${Process.myPid()}")
 
         runCatching {
-            Logger.log("Initializing PrefsManager...")
             PrefsManager.init(this)
-            Logger.log(
+            Logger.debug {
                 "PrefsManager: ${PrefsManager.selectors.size} cached selectors, " +
-                    "stale=${PrefsManager.isStale()}, remotePrefs=${PrefsManager.remotePrefs != null}",
-            )
-
-            if (PrefsManager.selectors.isEmpty()) {
-                Logger.log("No cached selectors, loading embedded fallback...")
-                PrefsManager.setFallbackSelectors(EmbeddedSelectors.load())
-                Logger.log("Embedded: ${PrefsManager.selectors.size} selectors loaded")
+                    "stale=${PrefsManager.isStale()}, remotePrefs=${PrefsManager.remotePrefs != null}"
             }
 
-            Logger.log("Registering WebView hooks...")
+            if (PrefsManager.selectors.isEmpty()) {
+                Logger.debug { "No cached selectors, loading embedded fallback" }
+                PrefsManager.setFallbackSelectors(EmbeddedSelectors.load())
+                Logger.debug { "Embedded: ${PrefsManager.selectors.size} selectors loaded" }
+            }
+
             WebViewHooker.hook(this)
-
-            Logger.log("Registering Force Dark hooks...")
             ForceDarkHooker.hook(this, param.classLoader)
-
-            Logger.log("Registering Rufus hooks...")
             RufusHooker.hook(this, param.classLoader)
 
             if (PrefsManager.isStale()) {
-                Logger.log("Selectors stale, submitting background refresh...")
+                Logger.debug { "Selectors stale, submitting background refresh" }
                 executor.submit {
                     runCatching {
                         val prefs =
                             PrefsManager.remotePrefs ?: run {
-                                Logger.log("Background refresh: no remote prefs")
+                                Logger.debug { "Background refresh: no remote prefs" }
                                 return@submit
                             }
                         SelectorUpdater.refresh(prefs)
                     }.onFailure {
-                        Logger.log("Background refresh failed", it)
+                        Logger.log(Log.ERROR, "Background refresh failed", it)
                     }
                 }
             }
 
             showToast(param.classLoader)
-        }.onFailure { Logger.log("onPackageReady failed", it) }
+        }.onFailure { Logger.log(Log.ERROR, "onPackageReady failed", it) }
     }
 
     private fun showToast(classLoader: ClassLoader) {

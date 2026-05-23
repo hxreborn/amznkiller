@@ -29,7 +29,7 @@ object SelectorUpdater {
         val all = (remote.getOrDefault(emptyList()) + embedded).toSortedSet()
         val error = remote.exceptionOrNull()
         if (error != null) {
-            Logger.logDebug("Remote fetch failed", error)
+            Logger.debug { "Remote fetch failed: ${error.message}" }
             return MergeResult.Partial(selectors = all)
         }
         return MergeResult.Success(selectors = all)
@@ -38,21 +38,21 @@ object SelectorUpdater {
     fun refresh(prefs: SharedPreferences) {
         val url = Prefs.SELECTOR_URL.read(prefs)
         if (url.isBlank()) {
-            Logger.logDebug("No selector URL configured, using embedded only")
+            Logger.debug { "No selector URL configured, using embedded only" }
             val embedded = EmbeddedSelectors.load()
             if (embedded.isEmpty()) return
             PrefsManager.setFallbackSelectors(embedded.sorted())
-            Logger.logDebug("Cached ${embedded.size} embedded selectors")
+            Logger.debug { "Cached ${embedded.size} embedded selectors" }
             return
         }
 
         val result = fetchMerged(url)
         if (result.selectors.isEmpty()) {
-            Logger.logDebug("No selectors after merge, keeping existing cache")
+            Logger.debug { "No selectors after merge, keeping existing cache" }
             return
         }
 
         PrefsManager.setFallbackSelectors(result.selectors.toList())
-        Logger.logDebug("Cached ${result.selectors.size} selectors")
+        Logger.debug { "Cached ${result.selectors.size} selectors" }
     }
 }

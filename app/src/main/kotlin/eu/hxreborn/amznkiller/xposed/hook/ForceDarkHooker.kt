@@ -8,6 +8,7 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowInsetsController
 import android.webkit.WebView
@@ -33,10 +34,10 @@ object ForceDarkHooker {
         xposed: XposedInterface,
         classLoader: ClassLoader,
     ) {
-        Logger.logDebug(
+        Logger.debug {
             "ForceDark: device=${Build.MANUFACTURER} ${Build.MODEL} " +
-                "SDK=${Build.VERSION.SDK_INT} hardware=${Build.HARDWARE}",
-        )
+                "SDK=${Build.VERSION.SDK_INT} hardware=${Build.HARDWARE}"
+        }
         hookActivityOnCreate(xposed)
         hookDetermineForceDarkType(xposed)
         hookRendererSetForceDark(xposed)
@@ -48,7 +49,7 @@ object ForceDarkHooker {
         bottomTabIcons.add(imageView)
         imageView.imageTintList = TAB_ICON_CSL
         imageView.colorFilter = PorterDuffColorFilter(TAB_ICON_TINT, PorterDuff.Mode.SRC_IN)
-        Logger.logDebug("ForceDark: applyTabIconTint view=${imageView.hashCode()}")
+        Logger.debug { "ForceDark: applyTabIconTint view=${imageView.hashCode()}" }
     }
 
     private fun hookMethod(
@@ -61,9 +62,9 @@ object ForceDarkHooker {
         runCatching {
             xposed.hook(clazz.getDeclaredMethod(name, *params)).intercept(interceptor)
         }.onSuccess {
-            Logger.log("Hooked ${clazz.simpleName}.$name")
+            Logger.debug { "Hooked ${clazz.simpleName}.$name" }
         }.onFailure {
-            Logger.log("Failed to hook ${clazz.simpleName}.$name", it)
+            Logger.log(Log.ERROR, "Failed to hook ${clazz.simpleName}.$name", it)
         }
     }
 
@@ -93,14 +94,16 @@ object ForceDarkHooker {
                 }
                 val uiMode = activity.resources.configuration.uiMode
                 val nightMode = uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
-                Logger.logDebug(
+                Logger.debug {
                     "ForceDark: onCreate ${activity.javaClass.name} " +
                         "forceDarkAllowed=$before->true " +
                         "nightMode=$nightMode " +
-                        "decorView=${decor?.javaClass?.simpleName}",
-                )
+                        "decorView=${decor?.javaClass?.simpleName}"
+                }
             }.onFailure {
-                Logger.logDebug("ForceDark: onCreate failed for ${activity.javaClass.name}", it)
+                Logger.debug {
+                    "ForceDark: onCreate failed for ${activity.javaClass.name}: ${it.message}"
+                }
             }
             null
         }
@@ -111,32 +114,32 @@ object ForceDarkHooker {
     private fun hookDetermineForceDarkType(xposed: XposedInterface) {
         runCatching {
             val clazz = Class.forName("android.view.ViewRootImpl")
-            Logger.logDebug(
+            Logger.debug {
                 "ForceDark: ViewRootImpl forceDark methods: ${
                     clazz.declaredMethods.filter { "forcedark" in it.name.lowercase() }
                         .map { it.name }
-                }",
-            )
+                }"
+            }
             xposed.hook(clazz.getDeclaredMethod("determineForceDarkType")).intercept { chain ->
                 val result = chain.proceed()
                 if (!PrefsManager.forceDarkWebview) return@intercept result
                 if (result !is Int) {
-                    Logger.logDebug(
-                        "ForceDark: determineForceDarkType unexpected type: ${result?.javaClass?.name}",
-                    )
+                    Logger.debug {
+                        "ForceDark: determineForceDarkType unexpected type: ${result?.javaClass?.name}"
+                    }
                     return@intercept result
                 }
                 if (result != 0) {
-                    Logger.logDebug("ForceDark: determineForceDarkType already $result, skip")
+                    Logger.debug { "ForceDark: determineForceDarkType already $result, skip" }
                     return@intercept result
                 }
-                Logger.logDebug("ForceDark: determineForceDarkType $result -> 2")
+                Logger.debug { "ForceDark: determineForceDarkType $result -> 2" }
                 2
             }
         }.onSuccess {
-            Logger.log("Hooked ViewRootImpl.determineForceDarkType")
+            Logger.debug { "Hooked ViewRootImpl.determineForceDarkType" }
         }.onFailure {
-            Logger.log("Failed to hook determineForceDarkType", it)
+            Logger.log(Log.ERROR, "Failed to hook determineForceDarkType", it)
         }
     }
 
@@ -155,7 +158,7 @@ object ForceDarkHooker {
         for (cls in classes) {
             val clazz =
                 runCatching { Class.forName(cls) }.getOrElse {
-                    Logger.logDebug("ForceDark: renderer class $cls not found")
+                    Logger.debug { "ForceDark: renderer class $cls not found" }
                     continue
                 }
             for (param in params) {
@@ -169,16 +172,16 @@ object ForceDarkHooker {
                             when (val arg = chain.getArg(0)) {
                                 is Boolean -> {
                                     if (!arg) {
-                                        Logger.logDebug(
-                                            "ForceDark: $cls.setForceDark($arg -> true)",
-                                        )
+                                        Logger.debug {
+                                            "ForceDark: $cls.setForceDark($arg -> true)"
+                                        }
                                         return@intercept chain.proceed(arrayOf(true))
                                     }
                                 }
 
                                 is Int -> {
                                     if (arg != 2) {
-                                        Logger.logDebug("ForceDark: $cls.setForceDark($arg -> 2)")
+                                        Logger.debug { "ForceDark: $cls.setForceDark($arg -> 2)" }
                                         return@intercept chain.proceed(arrayOf(2))
                                     }
                                 }
@@ -187,16 +190,16 @@ object ForceDarkHooker {
                         }
                     }
                 if (ok.isSuccess) {
-                    Logger.log("Hooked $cls.setForceDark(${param.simpleName})")
+                    Logger.debug { "Hooked $cls.setForceDark(${param.simpleName})" }
                     return
                 } else {
-                    Logger.logDebug(
-                        "ForceDark: $cls.setForceDark(${param.simpleName}) not found",
-                    )
+                    Logger.debug {
+                        "ForceDark: $cls.setForceDark(${param.simpleName}) not found"
+                    }
                 }
             }
         }
-        Logger.log("Failed to hook setForceDark on any renderer class")
+        Logger.log(Log.WARN, "Failed to hook setForceDark on any renderer class")
     }
 
     private fun hookWebViewBackground(xposed: XposedInterface) {
@@ -210,19 +213,19 @@ object ForceDarkHooker {
                     runCatching {
                         webView.setBackgroundColor(Color.TRANSPARENT)
                         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                        Logger.logDebug(
+                        Logger.debug {
                             "ForceDark: WebView ctor ${webView.javaClass.name}, " +
-                                "set transparent bg + HW layer",
-                        )
+                                "set transparent bg + HW layer"
+                        }
                     }
                     null
                 }
                 hookedCtors++
             }.onFailure {
-                Logger.logDebug("ForceDark: failed to hook WebView ctor: ${it.message}")
+                Logger.debug { "ForceDark: failed to hook WebView ctor: ${it.message}" }
             }
         }
-        Logger.logDebug("ForceDark: hooked $hookedCtors WebView constructors")
+        Logger.debug { "ForceDark: hooked $hookedCtors WebView constructors" }
         hookMethod(
             xposed,
             View::class.java,
@@ -236,15 +239,15 @@ object ForceDarkHooker {
             val g = (color shr 8) and 0xFF
             val b = color and 0xFF
             if (r > 200 && g > 200 && b > 200) {
-                Logger.logDebug(
+                Logger.debug {
                     "ForceDark: blocked WebView bg #${Integer.toHexString(color)} " +
-                        "on ${(chain.thisObject as View).javaClass.name}",
-                )
+                        "on ${(chain.thisObject as View).javaClass.name}"
+                }
                 chain.proceed(arrayOf(Color.TRANSPARENT))
             } else {
-                Logger.logDebug(
-                    "ForceDark: passed WebView bg #${Integer.toHexString(color)}",
-                )
+                Logger.debug {
+                    "ForceDark: passed WebView bg #${Integer.toHexString(color)}"
+                }
                 chain.proceed()
             }
         }
@@ -270,20 +273,20 @@ object ForceDarkHooker {
                         val result = chain.proceed()
                         if (!PrefsManager.forceDarkWebview) return@intercept result
                         val icon = result as? ImageView ?: return@intercept result
-                        Logger.logDebug(
-                            "ForceDark: getTabIcon ${icon.javaClass.name} id=${icon.id}",
-                        )
+                        Logger.debug {
+                            "ForceDark: getTabIcon ${icon.javaClass.name} id=${icon.id}"
+                        }
                         applyTabIconTint(icon)
                         result
                     }
             }.onSuccess {
                 hooked++
-                Logger.log("Hooked $cls.getTabIcon")
+                Logger.debug { "Hooked $cls.getTabIcon" }
             }.onFailure {
-                Logger.logDebug("Failed to hook $cls.getTabIcon: ${it.message}")
+                Logger.debug { "Failed to hook $cls.getTabIcon: ${it.message}" }
             }
         }
-        Logger.logDebug("ForceDark: tab icon hooks: $hooked of ${controllers.size}")
+        Logger.debug { "ForceDark: tab icon hooks: $hooked of ${controllers.size}" }
         hookMethod(
             xposed,
             ImageView::class.java,
@@ -294,7 +297,7 @@ object ForceDarkHooker {
             if (!PrefsManager.forceDarkWebview) return@hookMethod null
             val iv = chain.thisObject as? ImageView ?: return@hookMethod null
             if (iv !in bottomTabIcons) return@hookMethod null
-            Logger.logDebug("ForceDark: DrawableChangeGuard re-tinting ${iv.hashCode()}")
+            Logger.debug { "ForceDark: DrawableChangeGuard re-tinting ${iv.hashCode()}" }
             iv.post { applyTabIconTint(iv) }
             null
         }
@@ -307,7 +310,7 @@ object ForceDarkHooker {
             if (!PrefsManager.forceDarkWebview) return@hookMethod chain.proceed()
             val iv = chain.thisObject as? ImageView ?: return@hookMethod chain.proceed()
             if (iv !in bottomTabIcons) return@hookMethod chain.proceed()
-            Logger.logDebug("ForceDark: TintListGuard intercepted ${iv.hashCode()}")
+            Logger.debug { "ForceDark: TintListGuard intercepted ${iv.hashCode()}" }
             chain.proceed(arrayOf(ColorStateList.valueOf(Color.rgb(168, 168, 168))))
         }
     }

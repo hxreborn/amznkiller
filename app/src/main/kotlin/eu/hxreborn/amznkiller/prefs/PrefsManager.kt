@@ -3,6 +3,7 @@ package eu.hxreborn.amznkiller.prefs
 import android.app.Application
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.util.Log
 import eu.hxreborn.amznkiller.selectors.SelectorSanitizer
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
@@ -71,8 +72,8 @@ object PrefsManager {
         runCatching {
             remotePrefs = xposed.getRemotePreferences(Prefs.GROUP)
             refreshCache()
-            Logger.log("PrefsManager initialized")
-        }.onFailure { Logger.log("PrefsManager.init() failed", it) }
+            Logger.debug { "PrefsManager initialized" }
+        }.onFailure { Logger.log(Log.ERROR, "PrefsManager.init() failed", it) }
     }
 
     private fun refreshCache() {
@@ -87,7 +88,7 @@ object PrefsManager {
                 cachedPriceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
                 cachedHideRufus = Prefs.HIDE_RUFUS.read(prefs)
             }
-        }.onFailure { Logger.log("refreshCache() failed", it) }
+        }.onFailure { Logger.log(Log.ERROR, "refreshCache() failed", it) }
     }
 
     fun snapshot(): PrefsSnapshot {

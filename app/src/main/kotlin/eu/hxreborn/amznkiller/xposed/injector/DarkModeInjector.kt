@@ -13,7 +13,7 @@ object DarkModeInjector {
         webView: WebView,
         prefs: PrefsSnapshot,
     ) {
-        Logger.logDebug("DarkModeInjector: enabled=${prefs.forceDarkWebview}")
+        Logger.debug { "DarkModeInjector: enabled=${prefs.forceDarkWebview}" }
         val args = JSONObject().apply { put("enabled", prefs.forceDarkWebview) }
         val script =
             ScriptRepository.get(ScriptId.DARK_MODE) + "\n" +
