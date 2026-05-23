@@ -23,43 +23,54 @@ object PrefsManager {
         private set
 
     @Volatile
-    var selectors: List<String> = emptyList()
-        private set
+    private var cachedSelectors: List<String> = emptyList()
+
+    val selectors: List<String>
+        get() = cachedSelectors
 
     @Volatile
-    var debugLogs: Boolean = Prefs.DEBUG_LOGS.default
-        private set
+    private var cachedDebugLogs: Boolean = Prefs.DEBUG_LOGS.default
+
+    val debugLogs: Boolean
+        get() = cachedDebugLogs
 
     @Volatile
-    var injectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default
-        private set
+    private var cachedInjectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default
+
+    val injectionEnabled: Boolean
+        get() = cachedInjectionEnabled
 
     @Volatile
-    var webviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default
-        private set
+    private var cachedWebviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default
+
+    val webviewDebugging: Boolean
+        get() = cachedWebviewDebugging
 
     @Volatile
-    var forceDarkMode: ForceDarkMode = ForceDarkMode.OFF
-        private set
+    private var cachedForceDarkMode: ForceDarkMode = ForceDarkMode.OFF
+
+    val forceDarkMode: ForceDarkMode
+        get() = cachedForceDarkMode
 
     val forceDarkWebview: Boolean
-        get() = forceDarkMode.isActive(systemInDarkMode())
+        get() = cachedForceDarkMode.isActive(systemInDarkMode())
 
     @Volatile
-    var priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
-        private set
+    private var cachedPriceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
+
+    val priceChartsEnabled: Boolean
+        get() = cachedPriceChartsEnabled
 
     @Volatile
-    var hideRufus: Boolean = Prefs.HIDE_RUFUS.default
-        private set
+    private var cachedHideRufus: Boolean = Prefs.HIDE_RUFUS.default
+
+    val hideRufus: Boolean
+        get() = cachedHideRufus
 
     fun init(xposed: XposedInterface) {
         runCatching {
             remotePrefs = xposed.getRemotePreferences(Prefs.GROUP)
             refreshCache()
-            remotePrefs?.registerOnSharedPreferenceChangeListener { _, _ ->
-                refreshCache()
-            }
             Logger.log("PrefsManager initialized")
         }.onFailure { Logger.log("PrefsManager.init() failed", it) }
     }
@@ -68,27 +79,30 @@ object PrefsManager {
         runCatching {
             remotePrefs?.let { prefs ->
                 val raw = Prefs.CACHED_SELECTORS.read(prefs)
-                selectors = SelectorSanitizer.sanitize(raw.lineSequence())
-                debugLogs = Prefs.DEBUG_LOGS.read(prefs)
-                injectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
-                webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
-                forceDarkMode = Prefs.readForceDarkMode(prefs)
-                priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
-                hideRufus = Prefs.HIDE_RUFUS.read(prefs)
+                cachedSelectors = SelectorSanitizer.sanitize(raw.lineSequence())
+                cachedDebugLogs = Prefs.DEBUG_LOGS.read(prefs)
+                cachedInjectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
+                cachedWebviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
+                cachedForceDarkMode = Prefs.readForceDarkMode(prefs)
+                cachedPriceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
+                cachedHideRufus = Prefs.HIDE_RUFUS.read(prefs)
             }
         }.onFailure { Logger.log("refreshCache() failed", it) }
     }
 
-    fun snapshot() =
-        PrefsSnapshot(
-            selectors = selectors,
-            injectionEnabled = injectionEnabled,
-            webviewDebugging = webviewDebugging,
-            forceDarkMode = forceDarkMode,
-            forceDarkWebview = forceDarkMode.isActive(systemInDarkMode()),
-            priceChartsEnabled = priceChartsEnabled,
-            hideRufus = hideRufus,
+    fun snapshot(): PrefsSnapshot {
+        refreshCache()
+        val darkMode = cachedForceDarkMode
+        return PrefsSnapshot(
+            selectors = cachedSelectors,
+            injectionEnabled = cachedInjectionEnabled,
+            webviewDebugging = cachedWebviewDebugging,
+            forceDarkMode = darkMode,
+            forceDarkWebview = darkMode.isActive(systemInDarkMode()),
+            priceChartsEnabled = cachedPriceChartsEnabled,
+            hideRufus = cachedHideRufus,
         )
+    }
 
     private fun systemInDarkMode(): Boolean {
         val uiMode = currentApplication()?.resources?.configuration?.uiMode ?: return false
@@ -96,12 +110,28 @@ object PrefsManager {
     }
 
     fun setFallbackSelectors(fallback: List<String>) {
-        selectors = fallback
+        cachedSelectors = fallback
     }
 
     fun isStale(): Boolean {
-        val fetched = remotePrefs?.let { Prefs.LAST_FETCHED.read(it) } ?: 0L
+        val fetched =
+            runCatching {
+                remotePrefs?.let { Prefs.LAST_FETCHED.read(it) }
+            }.getOrNull() ?: 0L
         return System.currentTimeMillis() - fetched > Prefs.STALE_THRESHOLD_MS
+    }
+
+    private inline fun <T> readRemote(
+        fallback: T,
+        read: (SharedPreferences) -> T,
+        cache: (T) -> Unit,
+    ): T {
+        val value =
+            runCatching {
+                remotePrefs?.let(read)
+            }.getOrNull() ?: return fallback
+        cache(value)
+        return value
     }
 }
 
