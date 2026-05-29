@@ -1,11 +1,20 @@
-# AmznKiller
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner_dark.png">
+    <img src="assets/banner_light.png" alt="AmznKiller" width="520">
+  </picture>
+</h1>
 
-Hide ads and sponsored content in the Amazon Shopping Android app.
+<p align="center">
+  Xposed module that hides ads and sponsored content in the Amazon Shopping Android app.
+</p>
 
-![Android 10+](https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat&logo=android&logoColor=white)
-![libxposed API 101](https://img.shields.io/badge/libxposed-API_101-ff69b4?style=flat)
-[![Release](https://img.shields.io/github/v/release/hxreborn/amznkiller?style=flat&logo=github)](https://github.com/hxreborn/amznkiller/releases/latest)
-[![Build](https://img.shields.io/github/actions/workflow/status/hxreborn/amznkiller/android-ci.yml?label=build&style=flat&logo=githubactions&logoColor=white)](https://github.com/hxreborn/amznkiller/actions/workflows/android-ci.yml)
+<p align="center">
+  <img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android 10+">
+  <img src="https://img.shields.io/badge/libxposed-API_101-ff69b4?style=for-the-badge" alt="libxposed API 101">
+  <a href="https://github.com/hxreborn/amznkiller/releases/latest"><img src="https://img.shields.io/github/v/release/hxreborn/amznkiller?style=for-the-badge&logo=github" alt="Release"></a>
+  <a href="https://github.com/hxreborn/amznkiller/actions/workflows/android-ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hxreborn/amznkiller/android-ci.yml?label=build&style=for-the-badge&logo=githubactions&logoColor=white" alt="Build"></a>
+</p>
 
 ## Features
 
