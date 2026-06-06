@@ -31,6 +31,7 @@ internal fun ThemeDialog(
     currentConfig: DarkThemeConfig,
     onSelect: (DarkThemeConfig) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val options = DarkThemeConfig.entries
     val labels =
@@ -42,6 +43,7 @@ internal fun ThemeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = modifier,
         title = { Text(stringResource(R.string.settings_theme)) },
         text = {
             Column(modifier = Modifier.selectableGroup()) {
