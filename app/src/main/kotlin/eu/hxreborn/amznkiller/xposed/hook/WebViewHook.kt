@@ -7,7 +7,7 @@ import eu.hxreborn.amznkiller.util.Logger
 import eu.hxreborn.amznkiller.xposed.runtime.PageRuntime
 import io.github.libxposed.api.XposedInterface
 
-object WebViewHooker {
+object WebViewHook {
     fun hook(xposed: XposedInterface) {
         for (method in WebViewClient::class.java.declaredMethods) {
             when (method.name) {
@@ -20,9 +20,9 @@ object WebViewHooker {
                             null
                         }
                     }.onSuccess {
-                        Logger.debug { "Hooked ${method.name}" }
+                        Logger.debug { "hooked method=${method.name}" }
                     }.onFailure {
-                        Logger.log(Log.ERROR, "Failed to hook ${method.name}", it)
+                        Logger.log(Log.ERROR, "hook fail method=${method.name}", it)
                     }
                 }
 
@@ -38,9 +38,9 @@ object WebViewHooker {
                             null
                         }
                     }.onSuccess {
-                        Logger.debug { "Hooked ${method.name}" }
+                        Logger.debug { "hooked method=${method.name}" }
                     }.onFailure {
-                        Logger.log(Log.ERROR, "Failed to hook ${method.name}", it)
+                        Logger.log(Log.ERROR, "hook fail method=${method.name}", it)
                     }
                 }
             }

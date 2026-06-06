@@ -5,8 +5,7 @@ import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 
-object RufusHooker {
-    private const val TAG = "RufusHooker"
+object RufusHook {
     private const val SAVX_TAB_CONTROLLER = "com.amazon.mShop.chrome.bottomtabs.SavXTabController"
 
     fun hook(
@@ -24,9 +23,9 @@ object RufusHooker {
                 if (PrefsManager.hideRufus) null else chain.proceed()
             }
         }.onSuccess {
-            Logger.debug { "$TAG: hooked $SAVX_TAB_CONTROLLER" }
+            Logger.debug { "hooked target=$SAVX_TAB_CONTROLLER" }
         }.onFailure {
-            Logger.log(Log.ERROR, "$TAG: failed to hook $SAVX_TAB_CONTROLLER", it)
+            Logger.log(Log.ERROR, "hook fail target=$SAVX_TAB_CONTROLLER", it)
         }
     }
 }
