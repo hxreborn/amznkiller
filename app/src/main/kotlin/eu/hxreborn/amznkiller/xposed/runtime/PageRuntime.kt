@@ -23,7 +23,7 @@ object PageRuntime {
         val prefs = PrefsManager.snapshot()
         WebViewDebuggingGate.tryEnable(prefs)
         DarkModeInjector.inject(webView, prefs)
-        CssInjector.inject(webView, url, prefs)
+        CssInjector.inject(webView, url)
         PriceChartsInjector.inject(webView, prefs, amazon)
     }
 }

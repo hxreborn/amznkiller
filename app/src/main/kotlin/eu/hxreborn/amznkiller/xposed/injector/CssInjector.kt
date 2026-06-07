@@ -2,8 +2,9 @@ package eu.hxreborn.amznkiller.xposed.injector
 
 import android.webkit.WebView
 import eu.hxreborn.amznkiller.BuildConfig
-import eu.hxreborn.amznkiller.prefs.PrefsSnapshot
 import eu.hxreborn.amznkiller.util.Logger
+import eu.hxreborn.amznkiller.xposed.hook.cachedInjectionEnabled
+import eu.hxreborn.amznkiller.xposed.hook.cachedSelectors
 import eu.hxreborn.amznkiller.xposed.js.ScriptId
 import eu.hxreborn.amznkiller.xposed.js.ScriptRepository
 import eu.hxreborn.amznkiller.xposed.js.WebViewJsExecutor
@@ -24,10 +25,9 @@ object CssInjector {
     fun inject(
         webView: WebView,
         url: String,
-        prefs: PrefsSnapshot,
     ) {
-        if (!prefs.injectionEnabled) return
-        val selectors = prefs.selectors
+        if (!cachedInjectionEnabled) return
+        val selectors = cachedSelectors
         if (selectors.isEmpty()) {
             Logger.debug { "css skip reason=empty-selectors" }
             return
