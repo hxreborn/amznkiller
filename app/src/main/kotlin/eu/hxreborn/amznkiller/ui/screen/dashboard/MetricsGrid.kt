@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +45,6 @@ internal fun MetricsGrid(
                 Modifier
                     .weight(1f)
                     .background(color = surface, shape = shape)
-                    .clip(shape)
                     .padding(16.dp),
         ) {
             Icon(
@@ -77,7 +75,6 @@ internal fun MetricsGrid(
                 Modifier
                     .weight(1f)
                     .background(color = surface, shape = shape)
-                    .clip(shape)
                     .padding(16.dp)
                     .then(if (injectionEnabled) Modifier else Modifier.alpha(0.38f)),
         ) {
