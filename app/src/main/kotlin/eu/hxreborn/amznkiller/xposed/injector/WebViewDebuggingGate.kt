@@ -15,9 +15,9 @@ object WebViewDebuggingGate {
         runCatching {
             WebView.setWebContentsDebuggingEnabled(true)
         }.onSuccess {
-            Logger.debug { "WebView debugging enabled" }
+            Logger.debug { "webview debug enabled" }
         }.onFailure {
-            Logger.log(Log.ERROR, "WebView debugging failed", it)
+            Logger.log(Log.ERROR, "webview debug fail", it)
         }
     }
 }

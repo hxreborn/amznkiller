@@ -51,7 +51,7 @@ object PriceChartsInjector {
         val keepaId = KEEPA_DOMAINS[domain] ?: 1
         val camelLocale = CAMEL_LOCALES[domain] ?: "us"
 
-        Logger.debug { "PriceChartsInjector: $asin on $domain" }
+        Logger.debug { "charts inject asin=$asin domain=$domain" }
         val args =
             JSONObject().apply {
                 put("asin", asin)
@@ -63,7 +63,7 @@ object PriceChartsInjector {
         val script =
             ScriptRepository.get(ScriptId.CHARTS) + "\n" + "window.AmznKiller.injectCharts($args);"
         WebViewJsExecutor.evaluate(webView, script, "PriceChartsInjector") {
-            Logger.debug { "PriceChartsInjector result: $it" }
+            Logger.debug { "charts result=$it" }
         }
     }
 }
