@@ -8,13 +8,14 @@ import android.os.Process
 import android.util.Log
 import android.widget.Toast
 import eu.hxreborn.amznkiller.BuildConfig
-import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.selectors.EmbeddedSelectors
 import eu.hxreborn.amznkiller.util.Logger
 import eu.hxreborn.amznkiller.xposed.hook.ForceDarkHook
 import eu.hxreborn.amznkiller.xposed.hook.RufusHook
 import eu.hxreborn.amznkiller.xposed.hook.WebViewHook
+import eu.hxreborn.amznkiller.xposed.hook.cachedSelectors
 import eu.hxreborn.amznkiller.xposed.hook.installHookPrefs
+import eu.hxreborn.amznkiller.xposed.hook.setFallbackSelectors
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
@@ -37,11 +38,10 @@ class AmznkillerModule : XposedModule() {
         Logger.log(Log.INFO, "loaded pkg=${param.packageName} pid=${Process.myPid()}")
 
         installHookPrefs(this)
-        PrefsManager.init(this)
 
-        if (PrefsManager.selectors.isEmpty()) {
-            PrefsManager.setFallbackSelectors(EmbeddedSelectors.load())
-            Logger.log(Log.INFO, "embedded fallback count=${PrefsManager.selectors.size}")
+        if (cachedSelectors.isEmpty()) {
+            setFallbackSelectors(EmbeddedSelectors.load())
+            Logger.log(Log.INFO, "embedded fallback count=${cachedSelectors.size}")
         }
 
         runCatching { WebViewHook.hook(this) }
