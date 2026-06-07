@@ -24,6 +24,6 @@ object PageRuntime {
         WebViewDebuggingGate.tryEnable(prefs)
         DarkModeInjector.inject(webView)
         CssInjector.inject(webView, url)
-        PriceChartsInjector.inject(webView, prefs, amazon)
+        PriceChartsInjector.inject(webView, amazon)
     }
 }
