@@ -14,7 +14,6 @@ import android.view.WindowInsetsController
 import android.webkit.WebView
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toDrawable
-import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 import java.util.Collections
@@ -76,7 +75,7 @@ object ForceDarkHook {
             Bundle::class.java,
         ) { chain ->
             chain.proceed()
-            if (!PrefsManager.forceDarkWebview) return@hookMethod null
+            if (!forceDarkWebview) return@hookMethod null
             val activity = chain.thisObject as? Activity ?: return@hookMethod null
             runCatching {
                 val decor = activity.window?.decorView
@@ -123,7 +122,7 @@ object ForceDarkHook {
             }
             xposed.hook(clazz.getDeclaredMethod("determineForceDarkType")).intercept { chain ->
                 val result = chain.proceed()
-                if (!PrefsManager.forceDarkWebview) return@intercept result
+                if (!forceDarkWebview) return@intercept result
                 if (result !is Int) {
                     Logger.debug { "dark detect type unexpected class=${result?.javaClass?.name}" }
                     return@intercept result
@@ -165,7 +164,7 @@ object ForceDarkHook {
                     runCatching {
                         val method = clazz.getDeclaredMethod("setForceDark", param)
                         xposed.hook(method).intercept { chain ->
-                            if (!PrefsManager.forceDarkWebview) {
+                            if (!forceDarkWebview) {
                                 return@intercept chain.proceed()
                             }
                             when (val arg = chain.getArg(0)) {
@@ -209,7 +208,7 @@ object ForceDarkHook {
             runCatching {
                 xposed.hook(ctor).intercept { chain ->
                     chain.proceed()
-                    if (!PrefsManager.forceDarkWebview) return@intercept null
+                    if (!forceDarkWebview) return@intercept null
                     val webView = chain.thisObject as? WebView ?: return@intercept null
                     runCatching {
                         webView.setBackgroundColor(Color.TRANSPARENT)
@@ -232,7 +231,7 @@ object ForceDarkHook {
             "setBackgroundColor",
             Int::class.javaPrimitiveType!!,
         ) { chain ->
-            if (!PrefsManager.forceDarkWebview) return@hookMethod chain.proceed()
+            if (!forceDarkWebview) return@hookMethod chain.proceed()
             if (chain.thisObject !is WebView) return@hookMethod chain.proceed()
             val color = chain.getArg(0) as? Int ?: return@hookMethod chain.proceed()
             val r = (color shr 16) and 0xFF
@@ -270,7 +269,7 @@ object ForceDarkHook {
                     .hook(clazz.declaredMethods.first { it.name == "getTabIcon" })
                     .intercept { chain ->
                         val result = chain.proceed()
-                        if (!PrefsManager.forceDarkWebview) return@intercept result
+                        if (!forceDarkWebview) return@intercept result
                         val icon = result as? ImageView ?: return@intercept result
                         Logger.debug { "dark tab icon class=${icon.javaClass.name} id=${icon.id}" }
                         applyTabIconTint(icon)
@@ -291,7 +290,7 @@ object ForceDarkHook {
             Drawable::class.java,
         ) { chain ->
             chain.proceed()
-            if (!PrefsManager.forceDarkWebview) return@hookMethod null
+            if (!forceDarkWebview) return@hookMethod null
             val iv = chain.thisObject as? ImageView ?: return@hookMethod null
             if (iv !in bottomTabIcons) return@hookMethod null
             Logger.debug { "dark tab redraw view=${iv.hashCode()}" }
@@ -304,7 +303,7 @@ object ForceDarkHook {
             "setImageTintList",
             ColorStateList::class.java,
         ) { chain ->
-            if (!PrefsManager.forceDarkWebview) return@hookMethod chain.proceed()
+            if (!forceDarkWebview) return@hookMethod chain.proceed()
             val iv = chain.thisObject as? ImageView ?: return@hookMethod chain.proceed()
             if (iv !in bottomTabIcons) return@hookMethod chain.proceed()
             Logger.debug { "dark tab tint guard view=${iv.hashCode()}" }
