@@ -2,8 +2,7 @@ package eu.hxreborn.amznkiller.util
 
 import android.util.Log
 import eu.hxreborn.amznkiller.BuildConfig
-import eu.hxreborn.amznkiller.prefs.Prefs
-import eu.hxreborn.amznkiller.prefs.PrefsManager
+import eu.hxreborn.amznkiller.xposed.hook.cachedDebugLogs
 import eu.hxreborn.amznkiller.xposed.module
 
 object Logger {
@@ -20,5 +19,5 @@ object Logger {
     }
 
     @PublishedApi
-    internal fun debugEnabled(): Boolean = BuildConfig.DEBUG || PrefsManager.debugLogs
+    internal fun debugEnabled(): Boolean = BuildConfig.DEBUG || cachedDebugLogs
 }
