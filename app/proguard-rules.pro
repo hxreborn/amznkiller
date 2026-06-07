@@ -14,9 +14,6 @@
     public void onSystemServerStarting(...);
 }
 
-# Keep PrefsManager for remote preferences
--keep class eu.hxreborn.amznkiller.prefs.PrefsManager { *; }
-
 # Keep Xposed detection method
 -keep class eu.hxreborn.amznkiller.ui.MainActivity {
     public static boolean isXposedEnabled();
