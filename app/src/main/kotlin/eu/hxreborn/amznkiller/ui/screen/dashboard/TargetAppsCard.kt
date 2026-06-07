@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +36,13 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 
+@Immutable
+internal data class TargetAppData(
+    val icon: ImageBitmap,
+    val label: String,
+    val versionName: String?,
+)
+
 private val GRAYSCALE =
     ColorFilter.colorMatrix(
         ColorMatrix().apply { setToSaturation(0f) },
@@ -43,8 +51,8 @@ private val GRAYSCALE =
 @Composable
 internal fun TargetAppsCard(
     amazonPackage: String?,
-    amazonInfo: Triple<ImageBitmap, String, String?>?,
-    webViewInfo: Triple<ImageBitmap, String, String?>?,
+    amazonInfo: TargetAppData?,
+    webViewInfo: TargetAppData?,
     surface: Color,
     modifier: Modifier = Modifier,
 ) {
@@ -86,14 +94,14 @@ internal fun TargetAppsCard(
 
 @Composable
 internal fun TargetRow(
-    info: Triple<ImageBitmap, String, String?>?,
+    info: TargetAppData?,
     isGrayscale: Boolean = false,
     trailing: @Composable () -> Unit = {},
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (info != null) {
             Image(
-                bitmap = info.first,
+                bitmap = info.icon,
                 contentDescription = null,
                 colorFilter = if (isGrayscale) GRAYSCALE else null,
                 modifier = Modifier.size(32.dp).clip(RoundedCornerShape(6.dp)),
@@ -109,13 +117,13 @@ internal fun TargetRow(
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = info?.second ?: stringResource(R.string.target_title),
+                text = info?.label ?: stringResource(R.string.target_title),
                 style = MaterialTheme.typography.bodyLarge,
             )
             Text(
                 text =
                     if (info != null) {
-                        "v${info.third}"
+                        "v${info.versionName}"
                     } else {
                         stringResource(R.string.dashboard_not_installed)
                     },

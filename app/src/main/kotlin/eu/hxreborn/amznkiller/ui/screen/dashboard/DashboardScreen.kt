@@ -77,7 +77,7 @@ fun DashboardScreen(
                             ?.let(packageManager::getApplicationLabel)
                             ?.toString()
                             .orEmpty()
-                    pkg to Triple(icon, label, info.versionName)
+                    pkg to TargetAppData(icon, label, info.versionName)
                 }.getOrNull()
             } ?: (null to null)
         }
@@ -90,7 +90,7 @@ fun DashboardScreen(
                 val appInfo = packageManager.getApplicationInfo(webViewPackage.packageName, 0)
                 val icon = packageManager.getApplicationIcon(appInfo).toBitmap(128, 128).asImageBitmap()
                 val label = packageManager.getApplicationLabel(appInfo).toString()
-                Triple(icon, label, webViewPackage.versionName)
+                TargetAppData(icon, label, webViewPackage.versionName)
             }.getOrNull()
         }
 
