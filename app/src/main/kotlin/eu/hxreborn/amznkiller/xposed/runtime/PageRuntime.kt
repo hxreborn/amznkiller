@@ -21,7 +21,7 @@ object PageRuntime {
         val amazon = AmazonUrlParser.parse(url)
         if (!amazon.isAmazon) return
         val prefs = PrefsManager.snapshot()
-        WebViewDebuggingGate.tryEnable(prefs)
+        WebViewDebuggingGate.tryEnable()
         DarkModeInjector.inject(webView)
         CssInjector.inject(webView, url)
         PriceChartsInjector.inject(webView, amazon)
