@@ -11,7 +11,7 @@ object PageRuntime {
     fun onPageStarted(webView: WebView) {
         val prefs = PrefsManager.snapshot()
         if (!prefs.forceDarkWebview) return
-        DarkModeInjector.inject(webView, prefs)
+        DarkModeInjector.inject(webView)
     }
 
     fun onPageLoaded(
@@ -22,7 +22,7 @@ object PageRuntime {
         if (!amazon.isAmazon) return
         val prefs = PrefsManager.snapshot()
         WebViewDebuggingGate.tryEnable(prefs)
-        DarkModeInjector.inject(webView, prefs)
+        DarkModeInjector.inject(webView)
         CssInjector.inject(webView, url)
         PriceChartsInjector.inject(webView, prefs, amazon)
     }
