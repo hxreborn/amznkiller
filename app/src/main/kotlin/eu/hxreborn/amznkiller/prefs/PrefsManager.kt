@@ -68,12 +68,23 @@ object PrefsManager {
     val hideRufus: Boolean
         get() = cachedHideRufus
 
+    private var listener: SharedPreferences.OnSharedPreferenceChangeListener? = null
+
     fun init(xposed: XposedInterface) {
         runCatching {
-            remotePrefs = xposed.getRemotePreferences(Prefs.GROUP)
+            remotePrefs?.unregisterOnSharedPreferenceChangeListener(listener)
+            val prefs = xposed.getRemotePreferences(Prefs.GROUP)
+            remotePrefs = prefs
             refreshCache()
-            Logger.debug { "PrefsManager initialized" }
-        }.onFailure { Logger.log(Log.ERROR, "PrefsManager.init() failed", it) }
+            val l =
+                SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                    runCatching { refreshCache() }
+                        .onFailure { Logger.log(Log.ERROR, "prefs reload key=$key", it) }
+                }
+            listener = l
+            prefs.registerOnSharedPreferenceChangeListener(l)
+            Logger.log(Log.INFO, "prefs ready count=${cachedSelectors.size}")
+        }.onFailure { Logger.log(Log.ERROR, "prefs init", it) }
     }
 
     private fun refreshCache() {
@@ -88,11 +99,10 @@ object PrefsManager {
                 cachedPriceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
                 cachedHideRufus = Prefs.HIDE_RUFUS.read(prefs)
             }
-        }.onFailure { Logger.log(Log.ERROR, "refreshCache() failed", it) }
+        }.onFailure { Logger.log(Log.ERROR, "prefs refresh", it) }
     }
 
     fun snapshot(): PrefsSnapshot {
-        refreshCache()
         val darkMode = cachedForceDarkMode
         return PrefsSnapshot(
             selectors = cachedSelectors,
@@ -112,27 +122,6 @@ object PrefsManager {
 
     fun setFallbackSelectors(fallback: List<String>) {
         cachedSelectors = fallback
-    }
-
-    fun isStale(): Boolean {
-        val fetched =
-            runCatching {
-                remotePrefs?.let { Prefs.LAST_FETCHED.read(it) }
-            }.getOrNull() ?: 0L
-        return System.currentTimeMillis() - fetched > Prefs.STALE_THRESHOLD_MS
-    }
-
-    private inline fun <T> readRemote(
-        fallback: T,
-        read: (SharedPreferences) -> T,
-        cache: (T) -> Unit,
-    ): T {
-        val value =
-            runCatching {
-                remotePrefs?.let(read)
-            }.getOrNull() ?: return fallback
-        cache(value)
-        return value
     }
 }
 

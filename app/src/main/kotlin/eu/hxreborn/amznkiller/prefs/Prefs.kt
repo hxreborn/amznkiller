@@ -8,25 +8,25 @@ object Prefs {
     val STALE_THRESHOLD_MS = STALE_THRESHOLD.inWholeMilliseconds
 
     val SELECTOR_URL =
-        StringPref(
+        stringPref(
             "selector_url",
             "https://raw.githubusercontent.com/hxreborn/amznkiller/main/lists/generated/merged.txt",
         )
-    val CACHED_SELECTORS = StringPref("cached_selectors", "")
-    val LAST_FETCHED = LongPref("last_fetched", 0L)
-    val DEBUG_LOGS = BoolPref("debug_logs", false)
-    val INJECTION_ENABLED = BoolPref("injection_enabled", true)
-    val WEBVIEW_DEBUGGING = BoolPref("webview_debugging", false)
-    val FORCE_DARK_WEBVIEW = BoolPref("force_dark_webview", false)
-    val FORCE_DARK_MODE = StringPref("force_dark_mode", ForceDarkMode.OFF.prefValue)
-    val PRICE_CHARTS_ENABLED = BoolPref("price_charts_enabled", false)
+    val CACHED_SELECTORS = stringPref("cached_selectors", "")
+    val LAST_FETCHED = longPref("last_fetched", 0L)
+    val DEBUG_LOGS = boolPref("debug_logs", false)
+    val INJECTION_ENABLED = boolPref("injection_enabled", true)
+    val WEBVIEW_DEBUGGING = boolPref("webview_debugging", false)
+    val FORCE_DARK_WEBVIEW = boolPref("force_dark_webview", false)
+    val FORCE_DARK_MODE = stringPref("force_dark_mode", ForceDarkMode.OFF.prefValue)
+    val PRICE_CHARTS_ENABLED = boolPref("price_charts_enabled", false)
 
-    val HIDE_RUFUS = BoolPref("hide_rufus", false)
-    val LAST_REFRESH_FAILED = BoolPref("last_refresh_failed", false)
-    val AUTO_UPDATE = BoolPref("auto_update", true)
+    val HIDE_RUFUS = boolPref("hide_rufus", false)
+    val LAST_REFRESH_FAILED = boolPref("last_refresh_failed", false)
+    val AUTO_UPDATE = boolPref("auto_update", true)
 
-    val DARK_THEME_CONFIG = StringPref("dark_theme_config", "follow_system")
-    val USE_DYNAMIC_COLOR = BoolPref("use_dynamic_color", true)
+    val DARK_THEME_CONFIG = stringPref("dark_theme_config", "follow_system")
+    val USE_DYNAMIC_COLOR = boolPref("use_dynamic_color", true)
 
     val all: List<PrefSpec<*>> =
         listOf(

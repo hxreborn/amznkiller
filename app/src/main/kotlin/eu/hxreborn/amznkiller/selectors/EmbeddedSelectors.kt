@@ -1,9 +1,10 @@
 package eu.hxreborn.amznkiller.selectors
 
 import android.util.Log
-import eu.hxreborn.amznkiller.util.Logger
 
 object EmbeddedSelectors {
+    private const val TAG = "AmznKiller/Embedded"
+
     fun load(): List<String> =
         runCatching {
             EmbeddedSelectors::class.java.classLoader
@@ -13,7 +14,7 @@ object EmbeddedSelectors {
                     SelectorSanitizer.sanitize(reader.lineSequence())
                 } ?: emptyList()
         }.getOrElse {
-            Logger.log(Log.ERROR, "Failed to load embedded.css", it)
+            Log.e(TAG, "embedded load fail file=embedded.css", it)
             emptyList()
         }
 }
