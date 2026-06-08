@@ -48,6 +48,7 @@ internal fun SelectorUrlDialog(
     currentUrl: String,
     onSave: (String) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var url by remember { mutableStateOf(currentUrl) }
     var isTesting by remember { mutableStateOf(false) }
@@ -56,6 +57,7 @@ internal fun SelectorUrlDialog(
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
+        modifier = modifier,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(

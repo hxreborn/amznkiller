@@ -31,6 +31,7 @@ internal fun ForceDarkModeDialog(
     currentMode: ForceDarkMode,
     onSelect: (ForceDarkMode) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val options = ForceDarkMode.entries
     val labels =
@@ -42,6 +43,7 @@ internal fun ForceDarkModeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = modifier,
         title = { Text(stringResource(R.string.settings_dark_mode)) },
         text = {
             Column(modifier = Modifier.selectableGroup()) {

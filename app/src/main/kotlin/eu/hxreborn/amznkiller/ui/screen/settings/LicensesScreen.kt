@@ -21,8 +21,12 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LicensesScreen(onBack: () -> Unit = {}) {
+fun LicensesScreen(
+    onBack: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_licenses)) },
