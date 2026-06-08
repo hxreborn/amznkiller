@@ -71,14 +71,14 @@ commit_parsers = [
   { message = "^doc", group = "<!-- 07 -->Documentation" },
   { message = "^style", group = "<!-- 08 -->Styling" },
   { message = "^build", group = "<!-- 09 -->Build" },
-  { message = "^ci", group = "<!-- 10 -->CI" },
+  { message = "^ci", skip = true },
   { message = "^test", group = "<!-- 11 -->Tests" },
   # Mute release/changelog noise only
   { message = '^chore(\(release\))?:\s*(prepare|bump|align|v?\d+\.\d+)', skip = true },
   { message = '^release:\s*(bump|prepare|v?\d+\.\d+)', skip = true },
   { message = '^chore\(changelog\)', skip = true },
-  # Catch-all: skip anything uncategorized, no Miscellaneous bucket
-  { message = ".*", skip = true },
+  # Catch-all
+  { message = ".*", group = "<!-- 99 -->Miscellaneous" },
 ]
 filter_commits = false
 tag_pattern = "v[0-9]*"
