@@ -69,7 +69,7 @@ commit_parsers = [
   { message = "^[Rr]evert", group = "<!-- 05 -->Reverts" },
   { message = '^(build|chore)\(deps(-dev)?\)', skip = true },
   { message = "^doc", group = "<!-- 07 -->Documentation" },
-  { message = "^style", group = "<!-- 08 -->Styling" },
+  { message = "^style", skip = true },
   { message = "^build", group = "<!-- 09 -->Build" },
   { message = "^ci", skip = true },
   { message = "^test", group = "<!-- 11 -->Tests" },
