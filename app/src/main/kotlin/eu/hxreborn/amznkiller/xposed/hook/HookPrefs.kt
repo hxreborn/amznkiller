@@ -10,29 +10,29 @@ import eu.hxreborn.amznkiller.selectors.SelectorSanitizer
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 
-@Volatile internal var cachedSelectors: List<String> = emptyList()
+@Volatile internal var selectors: List<String> = emptyList()
 
-@Volatile internal var cachedDebugLogs: Boolean = Prefs.DEBUG_LOGS.default
+@Volatile internal var debugLogs: Boolean = Prefs.DEBUG_LOGS.default
 
-@Volatile internal var cachedInjectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default
+@Volatile internal var injectionEnabled: Boolean = Prefs.INJECTION_ENABLED.default
 
-@Volatile internal var cachedWebviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default
+@Volatile internal var webviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default
 
-@Volatile internal var cachedForceDarkMode: ForceDarkMode = ForceDarkMode.OFF
+@Volatile internal var forceDarkMode: ForceDarkMode = ForceDarkMode.OFF
 
-@Volatile internal var cachedPriceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
+@Volatile internal var priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
 
-@Volatile internal var cachedHideRufus: Boolean = Prefs.HIDE_RUFUS.default
+@Volatile internal var hideRufus: Boolean = Prefs.HIDE_RUFUS.default
 
 @Volatile private var remotePrefs: SharedPreferences? = null
 
 @Volatile private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
 internal val forceDarkWebview: Boolean
-    get() = cachedForceDarkMode.isActive(systemInDarkMode())
+    get() = forceDarkMode.isActive(systemInDarkMode())
 
 internal fun setFallbackSelectors(fallback: List<String>) {
-    cachedSelectors = fallback
+    selectors = fallback
 }
 
 internal fun installHookPrefs(xposed: XposedInterface) {
@@ -48,20 +48,20 @@ internal fun installHookPrefs(xposed: XposedInterface) {
             }
         prefsListener = l
         prefs.registerOnSharedPreferenceChangeListener(l)
-        Logger.info("prefs ready count=${cachedSelectors.size}")
+        Logger.info("prefs ready count=${selectors.size}")
     }.onFailure { Logger.log(Log.ERROR, "prefs init", it) }
 }
 
 internal fun loadHookPrefs(prefs: SharedPreferences) {
     runCatching {
         val raw = Prefs.CACHED_SELECTORS.read(prefs)
-        cachedSelectors = SelectorSanitizer.sanitize(raw.lineSequence())
-        cachedDebugLogs = Prefs.DEBUG_LOGS.read(prefs)
-        cachedInjectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
-        cachedWebviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
-        cachedForceDarkMode = Prefs.readForceDarkMode(prefs)
-        cachedPriceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
-        cachedHideRufus = Prefs.HIDE_RUFUS.read(prefs)
+        selectors = SelectorSanitizer.sanitize(raw.lineSequence())
+        debugLogs = Prefs.DEBUG_LOGS.read(prefs)
+        injectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
+        webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
+        forceDarkMode = Prefs.readForceDarkMode(prefs)
+        priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
+        hideRufus = Prefs.HIDE_RUFUS.read(prefs)
     }.onFailure { Logger.log(Log.ERROR, "prefs refresh", it) }
 }
 

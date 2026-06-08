@@ -3,7 +3,7 @@ package eu.hxreborn.amznkiller.util
 import android.util.Log
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.xposed.AmznkillerModule.Companion.TAG
-import eu.hxreborn.amznkiller.xposed.hook.cachedDebugLogs
+import eu.hxreborn.amznkiller.xposed.hook.debugLogs
 import eu.hxreborn.amznkiller.xposed.module
 
 object Logger {
@@ -20,5 +20,5 @@ object Logger {
     }
 
     @PublishedApi
-    internal fun debugEnabled(): Boolean = BuildConfig.DEBUG || cachedDebugLogs
+    internal fun debugEnabled(): Boolean = BuildConfig.DEBUG || debugLogs
 }

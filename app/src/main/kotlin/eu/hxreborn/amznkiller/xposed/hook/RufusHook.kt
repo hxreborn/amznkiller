@@ -15,11 +15,11 @@ object RufusHook {
             val controller = classLoader.loadClass(SAVX_TAB_CONTROLLER)
 
             xposed.hook(controller.getDeclaredMethod("isEnabled")).intercept { chain ->
-                if (cachedHideRufus) false else chain.proceed()
+                if (hideRufus) false else chain.proceed()
             }
 
             xposed.hook(controller.getDeclaredMethod("didTap")).intercept { chain ->
-                if (cachedHideRufus) null else chain.proceed()
+                if (hideRufus) null else chain.proceed()
             }
         }.onSuccess {
             Logger.debug { "hooked target=$SAVX_TAB_CONTROLLER" }

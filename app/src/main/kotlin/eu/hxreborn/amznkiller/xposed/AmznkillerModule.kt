@@ -13,8 +13,8 @@ import eu.hxreborn.amznkiller.util.Logger
 import eu.hxreborn.amznkiller.xposed.hook.ForceDarkHook
 import eu.hxreborn.amznkiller.xposed.hook.RufusHook
 import eu.hxreborn.amznkiller.xposed.hook.WebViewHook
-import eu.hxreborn.amznkiller.xposed.hook.cachedSelectors
 import eu.hxreborn.amznkiller.xposed.hook.installHookPrefs
+import eu.hxreborn.amznkiller.xposed.hook.selectors
 import eu.hxreborn.amznkiller.xposed.hook.setFallbackSelectors
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
@@ -36,9 +36,9 @@ class AmznkillerModule : XposedModule() {
 
         installHookPrefs(this)
 
-        if (cachedSelectors.isEmpty()) {
+        if (selectors.isEmpty()) {
             setFallbackSelectors(EmbeddedSelectors.load())
-            Logger.info("embedded fallback count=${cachedSelectors.size}")
+            Logger.info("embedded fallback count=${selectors.size}")
         }
 
         runCatching { WebViewHook.hook(this) }
