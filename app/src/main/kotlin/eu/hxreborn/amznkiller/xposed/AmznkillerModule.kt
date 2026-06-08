@@ -14,6 +14,7 @@ import eu.hxreborn.amznkiller.util.Logger
 import eu.hxreborn.amznkiller.xposed.hook.ForceDarkHook
 import eu.hxreborn.amznkiller.xposed.hook.RufusHook
 import eu.hxreborn.amznkiller.xposed.hook.WebViewHook
+import eu.hxreborn.amznkiller.xposed.hook.installHookPrefs
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
@@ -35,6 +36,7 @@ class AmznkillerModule : XposedModule() {
         if (param.packageName !in AMAZON_PACKAGES || !param.isFirstPackage) return
         Logger.log(Log.INFO, "loaded pkg=${param.packageName} pid=${Process.myPid()}")
 
+        installHookPrefs(this)
         PrefsManager.init(this)
 
         if (PrefsManager.selectors.isEmpty()) {

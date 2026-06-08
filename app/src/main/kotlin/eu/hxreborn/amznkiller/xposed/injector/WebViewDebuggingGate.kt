@@ -2,22 +2,22 @@ package eu.hxreborn.amznkiller.xposed.injector
 
 import android.util.Log
 import android.webkit.WebView
-import eu.hxreborn.amznkiller.prefs.PrefsSnapshot
 import eu.hxreborn.amznkiller.util.Logger
+import eu.hxreborn.amznkiller.xposed.hook.cachedWebviewDebugging
 import java.util.concurrent.atomic.AtomicBoolean
 
 object WebViewDebuggingGate {
     private val enabled = AtomicBoolean(false)
 
-    fun tryEnable(prefs: PrefsSnapshot) {
-        if (!prefs.webviewDebugging) return
+    fun tryEnable() {
+        if (!cachedWebviewDebugging) return
         if (!enabled.compareAndSet(false, true)) return
         runCatching {
             WebView.setWebContentsDebuggingEnabled(true)
         }.onSuccess {
-            Logger.debug { "WebView debugging enabled" }
+            Logger.debug { "webview debug enabled" }
         }.onFailure {
-            Logger.log(Log.ERROR, "WebView debugging failed", it)
+            Logger.log(Log.ERROR, "webview debug fail", it)
         }
     }
 }

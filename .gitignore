@@ -71,6 +71,19 @@ installed/
 # DOM dumps for analysis
 dom/
 
+# Visual debug + reverse engineering artifacts (local-only)
+amazon_decompiled/
+logsdarkhook/
+amazon_ss*.png
+amznkiller_ss.png
+amazon_ui*.xml
+current_state.png
+final_test.png
+last_screenshot.png
+test_result*.png
+test_v*.png
+test.pnh
+
 # Local MCP scripts
 scripts/grep_app_mcp.py
 

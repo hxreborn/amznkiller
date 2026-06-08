@@ -1,7 +1,6 @@
 package eu.hxreborn.amznkiller.xposed.hook
 
 import android.util.Log
-import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 
@@ -16,11 +15,11 @@ object RufusHook {
             val controller = classLoader.loadClass(SAVX_TAB_CONTROLLER)
 
             xposed.hook(controller.getDeclaredMethod("isEnabled")).intercept { chain ->
-                if (PrefsManager.hideRufus) false else chain.proceed()
+                if (cachedHideRufus) false else chain.proceed()
             }
 
             xposed.hook(controller.getDeclaredMethod("didTap")).intercept { chain ->
-                if (PrefsManager.hideRufus) null else chain.proceed()
+                if (cachedHideRufus) null else chain.proceed()
             }
         }.onSuccess {
             Logger.debug { "hooked target=$SAVX_TAB_CONTROLLER" }
