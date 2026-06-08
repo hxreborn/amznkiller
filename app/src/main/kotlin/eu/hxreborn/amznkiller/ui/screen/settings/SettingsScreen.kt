@@ -60,23 +60,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.ForceDarkMode
-import eu.hxreborn.amznkiller.prefs.PrefSpec
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.component.BalloonsOverlay
+import eu.hxreborn.amznkiller.ui.preview.FakeAppViewModel
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
-import eu.hxreborn.amznkiller.ui.state.DashboardUiState
-import eu.hxreborn.amznkiller.ui.state.SettingsUiState
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Ready
 import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
-import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.preference
@@ -508,42 +502,8 @@ internal inline fun LazyListScope.switchPreference(
 @PreviewLightDark
 @Composable
 private fun SettingsScreenPreview() {
+    val app = LocalContext.current.applicationContext as android.app.Application
     PreviewWrapper {
-        SettingsScreen(viewModel = PreviewSettingsViewModel())
+        SettingsScreen(viewModel = FakeAppViewModel(app))
     }
-}
-
-private class PreviewSettingsViewModel : AppViewModel() {
-    override val dashboardUiState: StateFlow<DashboardUiState> = MutableStateFlow(DashboardUiState.Loading).asStateFlow()
-
-    override val settingsUiState: StateFlow<SettingsUiState> =
-        MutableStateFlow(
-            Ready(
-                darkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
-                useDynamicColor = true,
-                debugLogs = false,
-                injectionEnabled = true,
-                forceDarkMode = ForceDarkMode.FOLLOW_SYSTEM,
-            ),
-        ).asStateFlow()
-
-    override fun refreshAll() {}
-
-    override fun triggerAutoUpdateIfEnabled() {}
-
-    override fun setXposedActive(
-        active: Boolean,
-        frameworkVersion: String?,
-    ) {
-    }
-
-    override fun <T : Any> savePref(
-        pref: PrefSpec<T>,
-        value: T,
-    ) {
-    }
-
-    override fun setLauncherIconHidden(hidden: Boolean) {}
-
-    override fun syncLocalToRemote() {}
 }

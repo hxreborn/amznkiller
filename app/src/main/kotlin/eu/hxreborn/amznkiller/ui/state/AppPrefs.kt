@@ -4,7 +4,7 @@ import eu.hxreborn.amznkiller.prefs.ForceDarkMode
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 
-data class AppPrefsState(
+data class AppPrefs(
     val selectorCount: Int = 0,
     val selectorUrl: String = Prefs.SELECTOR_URL.default,
     val lastFetched: Long = 0L,

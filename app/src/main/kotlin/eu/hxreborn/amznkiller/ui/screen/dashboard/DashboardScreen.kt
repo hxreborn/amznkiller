@@ -31,18 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.R
-import eu.hxreborn.amznkiller.prefs.PrefSpec
+import eu.hxreborn.amznkiller.ui.preview.FakeAppViewModel
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
-import eu.hxreborn.amznkiller.ui.state.DashboardUiState
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Ready
-import eu.hxreborn.amznkiller.ui.state.SettingsUiState
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 private val AMAZON_PACKAGES =
     listOf(
@@ -194,46 +189,8 @@ fun DashboardScreen(
 @PreviewLightDark
 @Composable
 private fun DashboardScreenPreview() {
+    val app = LocalContext.current.applicationContext as android.app.Application
     PreviewWrapper {
-        DashboardScreen(viewModel = PreviewAppViewModel())
+        DashboardScreen(viewModel = FakeAppViewModel(app))
     }
-}
-
-private class PreviewAppViewModel : AppViewModel() {
-    override val dashboardUiState: StateFlow<DashboardUiState> =
-        MutableStateFlow(
-            Ready(
-                isXposedActive = true,
-                frameworkVersion = "LSPosed v1.11.0",
-                isRefreshing = false,
-                isRefreshFailed = false,
-                isStale = false,
-                selectorCount = 42,
-                lastFetched = System.currentTimeMillis() - 3_600_000,
-                injectionEnabled = true,
-                lastRefreshOutcome = null,
-            ),
-        ).asStateFlow()
-
-    override val settingsUiState: StateFlow<SettingsUiState> = MutableStateFlow(SettingsUiState.Ready()).asStateFlow()
-
-    override fun refreshAll() {}
-
-    override fun triggerAutoUpdateIfEnabled() {}
-
-    override fun setXposedActive(
-        active: Boolean,
-        frameworkVersion: String?,
-    ) {
-    }
-
-    override fun <T : Any> savePref(
-        pref: PrefSpec<T>,
-        value: T,
-    ) {
-    }
-
-    override fun setLauncherIconHidden(hidden: Boolean) {}
-
-    override fun syncLocalToRemote() {}
 }

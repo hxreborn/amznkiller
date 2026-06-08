@@ -2,96 +2,78 @@ package eu.hxreborn.amznkiller.prefs
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import eu.hxreborn.amznkiller.ui.state.AppPrefsState
+import eu.hxreborn.amznkiller.ui.state.AppPrefs
 import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-interface PrefsRepository {
-    val state: Flow<AppPrefsState>
-    val currentSelectors: List<String>
-    val selectorUrl: String
-    val autoUpdate: Boolean
-
-    fun <T : Any> save(
-        pref: PrefSpec<T>,
-        value: T,
-    )
-
-    fun syncLocalToRemote()
-}
-
-class PrefsRepositoryImpl(
-    private val localPrefs: SharedPreferences,
-    private val remotePrefsProvider: () -> SharedPreferences?,
-) : PrefsRepository {
-    override val state: Flow<AppPrefsState> =
+class PrefsRepository(
+    private val local: SharedPreferences,
+    private val remoteProvider: () -> SharedPreferences?,
+) {
+    val state: Flow<AppPrefs> =
         callbackFlow {
-            fun sendState() {
-                val raw = Prefs.CACHED_SELECTORS.read(localPrefs)
+            fun emit() {
+                val raw = Prefs.CACHED_SELECTORS.read(local)
                 val selectors = Prefs.parseSelectors(raw)
-                val lastFetched = Prefs.LAST_FETCHED.read(localPrefs)
+                val lastFetched = Prefs.LAST_FETCHED.read(local)
                 trySend(
-                    AppPrefsState(
+                    AppPrefs(
                         selectorCount = selectors.size,
-                        selectorUrl = Prefs.SELECTOR_URL.read(localPrefs),
+                        selectorUrl = Prefs.SELECTOR_URL.read(local),
                         lastFetched = lastFetched,
-                        debugLogs = Prefs.DEBUG_LOGS.read(localPrefs),
-                        injectionEnabled = Prefs.INJECTION_ENABLED.read(localPrefs),
-                        webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(localPrefs),
-                        forceDarkMode = Prefs.readForceDarkMode(localPrefs),
-                        priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(localPrefs),
-                        hideRufus = Prefs.HIDE_RUFUS.read(localPrefs),
-                        autoUpdate = Prefs.AUTO_UPDATE.read(localPrefs),
+                        debugLogs = Prefs.DEBUG_LOGS.read(local),
+                        injectionEnabled = Prefs.INJECTION_ENABLED.read(local),
+                        webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(local),
+                        forceDarkMode = Prefs.readForceDarkMode(local),
+                        priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(local),
+                        hideRufus = Prefs.HIDE_RUFUS.read(local),
+                        autoUpdate = Prefs.AUTO_UPDATE.read(local),
                         isStale =
                             lastFetched == 0L ||
                                 System.currentTimeMillis() - lastFetched > Prefs.STALE_THRESHOLD_MS,
-                        isRefreshFailed = Prefs.LAST_REFRESH_FAILED.read(localPrefs),
+                        isRefreshFailed = Prefs.LAST_REFRESH_FAILED.read(local),
                         darkThemeConfig =
                             runCatching {
                                 DarkThemeConfig.valueOf(
-                                    Prefs.DARK_THEME_CONFIG.read(localPrefs).uppercase(),
+                                    Prefs.DARK_THEME_CONFIG.read(local).uppercase(),
                                 )
                             }.getOrDefault(DarkThemeConfig.FOLLOW_SYSTEM),
-                        useDynamicColor = Prefs.USE_DYNAMIC_COLOR.read(localPrefs),
+                        useDynamicColor = Prefs.USE_DYNAMIC_COLOR.read(local),
                     ),
                 )
             }
 
-            sendState()
-            val listener =
-                SharedPreferences.OnSharedPreferenceChangeListener {
-                    _,
-                    _,
-                    ->
-                    sendState()
-                }
-            localPrefs.registerOnSharedPreferenceChangeListener(listener)
-            awaitClose { localPrefs.unregisterOnSharedPreferenceChangeListener(listener) }
+            emit()
+            val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> emit() }
+            local.registerOnSharedPreferenceChangeListener(listener)
+            awaitClose { local.unregisterOnSharedPreferenceChangeListener(listener) }
         }
 
-    override fun <T : Any> save(
+    val currentSelectors: List<String>
+        get() = Prefs.parseSelectors(Prefs.CACHED_SELECTORS.read(local))
+
+    val selectorUrl: String
+        get() = Prefs.SELECTOR_URL.read(local)
+
+    val autoUpdate: Boolean
+        get() = Prefs.AUTO_UPDATE.read(local)
+
+    fun <T> save(
         pref: PrefSpec<T>,
         value: T,
     ) {
-        localPrefs.edit { pref.write(this, value) }
-        runCatching { remotePrefsProvider()?.edit { pref.write(this, value) } }
+        local.edit { pref.write(this, value) }
+        runCatching { remoteProvider()?.edit(commit = true) { pref.write(this, value) } }
     }
 
-    override val currentSelectors: List<String>
-        get() = Prefs.parseSelectors(Prefs.CACHED_SELECTORS.read(localPrefs))
-
-    override val selectorUrl: String
-        get() = Prefs.SELECTOR_URL.read(localPrefs)
-
-    override val autoUpdate: Boolean
-        get() = Prefs.AUTO_UPDATE.read(localPrefs)
-
-    override fun syncLocalToRemote() {
-        val remote = remotePrefsProvider() ?: return
-        remote.edit {
-            Prefs.all.forEach { it.copyTo(localPrefs, this) }
+    fun syncToRemote() {
+        val remote = remoteProvider() ?: return
+        runCatching {
+            remote.edit(commit = true) {
+                Prefs.all.forEach { it.copyIfChanged(local, remote, this) }
+            }
         }
     }
 }

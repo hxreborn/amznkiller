@@ -1,9 +1,9 @@
 package eu.hxreborn.amznkiller.util
 
-import android.content.SharedPreferences
 import android.util.Log
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.prefs.Prefs
+import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.xposed.module
 
 object Logger {
@@ -20,15 +20,5 @@ object Logger {
     }
 
     @PublishedApi
-    internal fun debugEnabled(): Boolean =
-        BuildConfig.DEBUG ||
-            cachedPrefs()?.let { Prefs.DEBUG_LOGS.read(it) } == true
-
-    @Volatile
-    private var prefs: SharedPreferences? = null
-
-    private fun cachedPrefs(): SharedPreferences? =
-        prefs ?: runCatching { module.getRemotePreferences(Prefs.GROUP) }
-            .getOrNull()
-            ?.also { prefs = it }
+    internal fun debugEnabled(): Boolean = BuildConfig.DEBUG || PrefsManager.debugLogs
 }

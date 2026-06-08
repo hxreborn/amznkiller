@@ -2,61 +2,44 @@ package eu.hxreborn.amznkiller.prefs
 
 import android.content.SharedPreferences
 
-sealed class PrefSpec<T : Any>(
+class PrefSpec<T>(
     val key: String,
     val default: T,
+    private val get: SharedPreferences.(String, T) -> T,
+    private val put: SharedPreferences.Editor.(String, T) -> Unit,
 ) {
-    abstract fun read(prefs: SharedPreferences): T
+    fun read(prefs: SharedPreferences): T = prefs.get(key, default)
 
-    abstract fun write(
+    fun write(
         editor: SharedPreferences.Editor,
         value: T,
-    )
+    ) {
+        editor.put(key, value)
+    }
 
-    fun copyTo(
+    fun copyIfChanged(
         from: SharedPreferences,
-        to: SharedPreferences.Editor,
-    ) = write(to, read(from))
+        to: SharedPreferences,
+        editor: SharedPreferences.Editor,
+    ): Boolean {
+        val value = read(from)
+        if (read(to) == value) return false
+        write(editor, value)
+        return true
+    }
 }
 
-class BoolPref(
+fun boolPref(
     key: String,
     default: Boolean,
-) : PrefSpec<Boolean>(key, default) {
-    override fun read(prefs: SharedPreferences): Boolean = prefs.getBoolean(key, default)
+) = PrefSpec(key, default, SharedPreferences::getBoolean) { k, v -> putBoolean(k, v) }
 
-    override fun write(
-        editor: SharedPreferences.Editor,
-        value: Boolean,
-    ) {
-        editor.putBoolean(key, value)
-    }
-}
-
-class StringPref(
-    key: String,
-    default: String,
-) : PrefSpec<String>(key, default) {
-    override fun read(prefs: SharedPreferences): String = prefs.getString(key, default) ?: default
-
-    override fun write(
-        editor: SharedPreferences.Editor,
-        value: String,
-    ) {
-        editor.putString(key, value)
-    }
-}
-
-class LongPref(
+fun longPref(
     key: String,
     default: Long,
-) : PrefSpec<Long>(key, default) {
-    override fun read(prefs: SharedPreferences): Long = prefs.getLong(key, default)
+) = PrefSpec(key, default, SharedPreferences::getLong) { k, v -> putLong(k, v) }
 
-    override fun write(
-        editor: SharedPreferences.Editor,
-        value: Long,
-    ) {
-        editor.putLong(key, value)
-    }
-}
+fun stringPref(
+    key: String,
+    default: String,
+) = PrefSpec(key, default, { k, d -> getString(k, d) ?: d }) { k, v -> putString(k, v) }
