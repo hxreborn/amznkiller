@@ -56,7 +56,6 @@ internal fun TargetAppsCard(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .background(color = surface, shape = shape)
-                .clip(shape)
                 .padding(16.dp),
     ) {
         TargetRow(amazonInfo) {
