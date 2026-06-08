@@ -2,12 +2,11 @@ package eu.hxreborn.amznkiller.util
 
 import android.util.Log
 import eu.hxreborn.amznkiller.BuildConfig
+import eu.hxreborn.amznkiller.xposed.AmznkillerModule.Companion.TAG
 import eu.hxreborn.amznkiller.xposed.hook.cachedDebugLogs
 import eu.hxreborn.amznkiller.xposed.module
 
 object Logger {
-    const val TAG = "AmznKiller"
-
     fun log(
         level: Int,
         msg: String,

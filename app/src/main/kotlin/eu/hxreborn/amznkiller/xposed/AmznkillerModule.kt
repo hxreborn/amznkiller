@@ -81,6 +81,8 @@ class AmznkillerModule : XposedModule() {
         }.getOrNull()
 
     companion object {
+        const val TAG = "AmznKiller"
+
         val AMAZON_PACKAGES =
             setOf(
                 "com.amazon.mShop.android.shopping",
