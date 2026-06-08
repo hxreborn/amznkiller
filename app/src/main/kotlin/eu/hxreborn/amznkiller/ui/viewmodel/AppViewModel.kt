@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.R
+import eu.hxreborn.amznkiller.XposedState
 import eu.hxreborn.amznkiller.prefs.PrefSpec
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepository
@@ -41,12 +42,12 @@ private val MIN_REFRESH_DISPLAY = 1000.milliseconds
 open class AppViewModel(
     private val application: Application,
     repositoryProvider: () -> PrefsRepository = { App.from(application).prefsRepository },
+    xposedStateProvider: () -> StateFlow<XposedState> = { App.from(application).xposedState },
 ) : ViewModel() {
     private val repository: PrefsRepository by lazy(repositoryProvider)
+    private val xposedState: StateFlow<XposedState> by lazy(xposedStateProvider)
 
     private val refreshing = MutableStateFlow(false)
-    private val xposedActive = MutableStateFlow(false)
-    private val frameworkVersion = MutableStateFlow<String?>(null)
     private val lastRefreshOutcome = MutableStateFlow<SelectorSyncOutcome?>(null)
     private val launcherIconHidden = MutableStateFlow(false)
 
@@ -64,13 +65,12 @@ open class AppViewModel(
         combine(
             repository.state,
             refreshing,
-            xposedActive,
+            xposedState,
             lastRefreshOutcome,
-            frameworkVersion,
-        ) { prefs, isRefreshing, active, outcome, fwVersion ->
+        ) { prefs, isRefreshing, xposed, outcome ->
             DashboardReady(
-                isXposedActive = active,
-                frameworkVersion = fwVersion,
+                isXposedActive = xposed.active,
+                frameworkVersion = xposed.frameworkVersion,
                 isRefreshing = isRefreshing,
                 isRefreshFailed = prefs.isRefreshFailed,
                 isStale = prefs.isStale,
@@ -182,14 +182,6 @@ open class AppViewModel(
             SelectorSyncOutcome(
                 SelectorSyncEvent.Error(messageResId = messageResId, fallback = fallback),
             )
-    }
-
-    open fun setXposedActive(
-        active: Boolean,
-        frameworkVersion: String? = null,
-    ) {
-        xposedActive.value = active
-        this.frameworkVersion.value = frameworkVersion
     }
 
     open fun <T> savePref(

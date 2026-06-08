@@ -42,6 +42,7 @@ internal class FakeAppViewModel(
 ) : AppViewModel(
         application,
         repositoryProvider = { error("preview FakeAppViewModel should not access repository") },
+        xposedStateProvider = { error("preview FakeAppViewModel should not access xposed state") },
     ) {
     override val dashboardUiState: StateFlow<DashboardUiState> =
         MutableStateFlow(dashboardState).asStateFlow()
@@ -52,11 +53,6 @@ internal class FakeAppViewModel(
     override fun refreshAll() = Unit
 
     override fun triggerAutoUpdateIfEnabled() = Unit
-
-    override fun setXposedActive(
-        active: Boolean,
-        frameworkVersion: String?,
-    ) = Unit
 
     override fun <T> savePref(
         pref: PrefSpec<T>,

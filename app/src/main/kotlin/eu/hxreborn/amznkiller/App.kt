@@ -7,19 +7,26 @@ import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.prefs.PrefsRepository
 import io.github.libxposed.service.XposedService
 import io.github.libxposed.service.XposedServiceHelper
-import java.util.concurrent.CopyOnWriteArrayList
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+data class XposedState(
+    val active: Boolean = false,
+    val frameworkVersion: String? = null,
+)
 
 class App :
     Application(),
     XposedServiceHelper.OnServiceListener {
     @Volatile
-    var mService: XposedService? = null
-        private set
+    private var mService: XposedService? = null
 
     lateinit var prefsRepository: PrefsRepository
         private set
 
-    private val listeners = CopyOnWriteArrayList<XposedServiceHelper.OnServiceListener>()
+    private val _xposedState = MutableStateFlow(XposedState())
+    val xposedState: StateFlow<XposedState> = _xposedState.asStateFlow()
 
     override fun onCreate() {
         super.onCreate()
@@ -35,22 +42,17 @@ class App :
         Log.i(TAG, "service bound: ${service.frameworkName} v${service.frameworkVersion}")
         mService = service
         prefsRepository.syncToRemote()
-        listeners.forEach { it.onServiceBind(service) }
+        _xposedState.value =
+            XposedState(
+                active = true,
+                frameworkVersion = "${service.frameworkName} v${service.frameworkVersion}",
+            )
     }
 
     override fun onServiceDied(service: XposedService) {
         Log.w(TAG, "service died")
         mService = null
-        listeners.forEach { it.onServiceDied(service) }
-    }
-
-    fun addServiceListener(listener: XposedServiceHelper.OnServiceListener) {
-        listeners.add(listener)
-        mService?.let { listener.onServiceBind(it) }
-    }
-
-    fun removeServiceListener(listener: XposedServiceHelper.OnServiceListener) {
-        listeners.remove(listener)
+        _xposedState.value = XposedState()
     }
 
     companion object {
