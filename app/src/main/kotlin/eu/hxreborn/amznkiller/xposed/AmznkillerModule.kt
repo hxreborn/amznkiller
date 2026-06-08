@@ -10,15 +10,13 @@ import android.widget.Toast
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.prefs.PrefsManager
 import eu.hxreborn.amznkiller.selectors.EmbeddedSelectors
-import eu.hxreborn.amznkiller.selectors.SelectorUpdater
 import eu.hxreborn.amznkiller.util.Logger
-import eu.hxreborn.amznkiller.xposed.hook.ForceDarkHooker
-import eu.hxreborn.amznkiller.xposed.hook.RufusHooker
-import eu.hxreborn.amznkiller.xposed.hook.WebViewHooker
+import eu.hxreborn.amznkiller.xposed.hook.ForceDarkHook
+import eu.hxreborn.amznkiller.xposed.hook.RufusHook
+import eu.hxreborn.amznkiller.xposed.hook.WebViewHook
 import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
-import java.util.concurrent.Executors
 
 @PublishedApi
 internal lateinit var module: AmznkillerModule
@@ -35,43 +33,24 @@ class AmznkillerModule : XposedModule() {
 
     override fun onPackageReady(param: PackageReadyParam) {
         if (param.packageName !in AMAZON_PACKAGES || !param.isFirstPackage) return
-        Logger.log(Log.INFO, "loaded for ${param.packageName} pid=${Process.myPid()}")
+        Logger.log(Log.INFO, "loaded pkg=${param.packageName} pid=${Process.myPid()}")
 
-        runCatching {
-            PrefsManager.init(this)
-            Logger.debug {
-                "PrefsManager: ${PrefsManager.selectors.size} cached selectors, " +
-                    "stale=${PrefsManager.isStale()}, remotePrefs=${PrefsManager.remotePrefs != null}"
-            }
+        PrefsManager.init(this)
 
-            if (PrefsManager.selectors.isEmpty()) {
-                Logger.debug { "No cached selectors, loading embedded fallback" }
-                PrefsManager.setFallbackSelectors(EmbeddedSelectors.load())
-                Logger.debug { "Embedded: ${PrefsManager.selectors.size} selectors loaded" }
-            }
+        if (PrefsManager.selectors.isEmpty()) {
+            PrefsManager.setFallbackSelectors(EmbeddedSelectors.load())
+            Logger.log(Log.INFO, "embedded fallback count=${PrefsManager.selectors.size}")
+        }
 
-            WebViewHooker.hook(this)
-            ForceDarkHooker.hook(this, param.classLoader)
-            RufusHooker.hook(this, param.classLoader)
+        runCatching { WebViewHook.hook(this) }
+            .onFailure { Logger.log(Log.ERROR, "hook fail name=WebViewHook", it) }
+        runCatching { ForceDarkHook.hook(this, param.classLoader) }
+            .onFailure { Logger.log(Log.ERROR, "hook fail name=ForceDarkHook", it) }
+        runCatching { RufusHook.hook(this, param.classLoader) }
+            .onFailure { Logger.log(Log.ERROR, "hook fail name=RufusHook", it) }
 
-            if (PrefsManager.isStale()) {
-                Logger.debug { "Selectors stale, submitting background refresh" }
-                executor.submit {
-                    runCatching {
-                        val prefs =
-                            PrefsManager.remotePrefs ?: run {
-                                Logger.debug { "Background refresh: no remote prefs" }
-                                return@submit
-                            }
-                        SelectorUpdater.refresh(prefs)
-                    }.onFailure {
-                        Logger.log(Log.ERROR, "Background refresh failed", it)
-                    }
-                }
-            }
-
-            showToast(param.classLoader)
-        }.onFailure { Logger.log(Log.ERROR, "onPackageReady failed", it) }
+        runCatching { showToast(param.classLoader) }
+            .onFailure { Logger.log(Log.ERROR, "toast fail", it) }
     }
 
     private fun showToast(classLoader: ClassLoader) {
@@ -106,7 +85,6 @@ class AmznkillerModule : XposedModule() {
                 "in.amazon.mShop.android.shopping",
             )
         private const val TOAST_DELAY_MS = 1500L
-        private val executor = Executors.newSingleThreadExecutor()
 
         private val TOAST_MESSAGES =
             arrayOf(
