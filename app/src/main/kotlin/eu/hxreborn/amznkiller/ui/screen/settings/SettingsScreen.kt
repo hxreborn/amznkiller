@@ -46,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -473,7 +472,7 @@ private fun forceDarkModeSummary(mode: ForceDarkMode): String {
 private fun Modifier.preferenceModifier(
     surface: Color,
     shape: Shape,
-): Modifier = padding(horizontal = Tokens.ScreenHorizontalPadding).background(color = surface, shape = shape).clip(shape)
+): Modifier = padding(horizontal = Tokens.ScreenHorizontalPadding).background(color = surface, shape = shape)
 
 internal inline fun LazyListScope.switchPreference(
     key: String,
