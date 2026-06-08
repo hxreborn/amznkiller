@@ -1,6 +1,7 @@
 package eu.hxreborn.amznkiller.ui.viewmodel
 
 import android.app.Application
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
@@ -36,6 +37,7 @@ import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Ready as SettingsReady
 
 private val MIN_REFRESH_DISPLAY = 1000.milliseconds
 
+@Stable
 open class AppViewModel(
     private val application: Application,
     repositoryProvider: () -> PrefsRepository = { App.from(application).prefsRepository },
