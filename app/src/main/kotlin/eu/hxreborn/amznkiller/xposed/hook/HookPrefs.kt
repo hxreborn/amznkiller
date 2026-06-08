@@ -10,12 +10,6 @@ import eu.hxreborn.amznkiller.selectors.SelectorSanitizer
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 
-// Cached snapshot of remote prefs, refreshed by the change listener registered in
-// installHookPrefs(). Hook process reads these on every intercept; getRemotePreferences()
-// is a synchronous Binder IPC and must not run on a hot path. Writes happen only in
-// loadHookPrefs() and setFallbackSelectors(); the hook process is read-only on remote
-// prefs (edit() silently fails from a hooked process).
-
 @Volatile internal var cachedSelectors: List<String> = emptyList()
 
 @Volatile internal var cachedDebugLogs: Boolean = Prefs.DEBUG_LOGS.default
