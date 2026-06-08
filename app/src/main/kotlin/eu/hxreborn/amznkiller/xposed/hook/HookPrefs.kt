@@ -54,7 +54,7 @@ internal fun installHookPrefs(xposed: XposedInterface) {
             }
         prefsListener = l
         prefs.registerOnSharedPreferenceChangeListener(l)
-        Logger.log(Log.INFO, "prefs ready count=${cachedSelectors.size}")
+        Logger.info("prefs ready count=${cachedSelectors.size}")
     }.onFailure { Logger.log(Log.ERROR, "prefs init", it) }
 }
 

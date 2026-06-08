@@ -27,21 +27,18 @@ internal lateinit var module: AmznkillerModule
 class AmznkillerModule : XposedModule() {
     override fun onModuleLoaded(param: ModuleLoadedParam) {
         module = this
-        Logger.log(
-            Log.INFO,
-            "Module v${BuildConfig.VERSION_NAME} on $frameworkName $frameworkVersion",
-        )
+        Logger.info("Module v${BuildConfig.VERSION_NAME} on $frameworkName $frameworkVersion")
     }
 
     override fun onPackageReady(param: PackageReadyParam) {
         if (param.packageName !in AMAZON_PACKAGES || !param.isFirstPackage) return
-        Logger.log(Log.INFO, "loaded pkg=${param.packageName} pid=${Process.myPid()}")
+        Logger.info("loaded pkg=${param.packageName} pid=${Process.myPid()}")
 
         installHookPrefs(this)
 
         if (cachedSelectors.isEmpty()) {
             setFallbackSelectors(EmbeddedSelectors.load())
-            Logger.log(Log.INFO, "embedded fallback count=${cachedSelectors.size}")
+            Logger.info("embedded fallback count=${cachedSelectors.size}")
         }
 
         runCatching { WebViewHook.hook(this) }

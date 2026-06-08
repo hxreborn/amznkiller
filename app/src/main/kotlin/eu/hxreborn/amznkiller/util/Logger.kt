@@ -13,6 +13,8 @@ object Logger {
         t: Throwable? = null,
     ) = if (t != null) module.log(level, TAG, msg, t) else module.log(level, TAG, msg)
 
+    fun info(msg: String) = module.log(Log.INFO, TAG, msg)
+
     inline fun debug(msg: () -> String) {
         if (debugEnabled()) module.log(Log.DEBUG, TAG, msg())
     }
