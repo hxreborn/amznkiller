@@ -28,8 +28,14 @@ import io.github.libxposed.api.XposedInterface
 
 @Volatile private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
+// hot path, read by interceptors on every hooked call, so OFF and ON skip the config lookup
 internal val forceDarkWebview: Boolean
-    get() = forceDarkMode.isActive(systemInDarkMode())
+    get() =
+        when (forceDarkMode) {
+            ForceDarkMode.OFF -> false
+            ForceDarkMode.ON -> true
+            ForceDarkMode.FOLLOW_SYSTEM -> systemInDarkMode()
+        }
 
 internal fun setFallbackSelectors(fallback: List<String>) {
     selectors = fallback
@@ -70,10 +76,13 @@ private fun systemInDarkMode(): Boolean {
     return uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 }
 
+@Volatile private var cachedApplication: Application? = null
+
+// the application is stable for the process lifetime so reflect at most until it resolves
 private fun currentApplication(): Application? =
-    runCatching {
+    cachedApplication ?: runCatching {
         Class
             .forName("android.app.ActivityThread")
             .getMethod("currentApplication")
             .invoke(null) as? Application
-    }.getOrNull()
+    }.getOrNull()?.also { cachedApplication = it }

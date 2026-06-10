@@ -9,13 +9,6 @@ enum class ForceDarkMode {
     val prefValue: String
         get() = name.lowercase()
 
-    fun isActive(systemInDarkMode: Boolean): Boolean =
-        when (this) {
-            OFF -> false
-            FOLLOW_SYSTEM -> systemInDarkMode
-            ON -> true
-        }
-
     companion object {
         fun fromPrefValue(value: String): ForceDarkMode =
             entries.firstOrNull { it.prefValue == value.lowercase() }
