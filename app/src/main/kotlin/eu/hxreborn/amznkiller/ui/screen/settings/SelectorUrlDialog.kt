@@ -102,7 +102,7 @@ internal fun SelectorUrlDialog(
                             scope.launch {
                                 val result =
                                     withContext(Dispatchers.IO) {
-                                        runCatching { SelectorUpdater.fetchMerged(url) }
+                                        runCatching { SelectorUpdater.fetchMerged(url.trim()) }
                                     }
                                 isTesting = false
                                 testResult =
@@ -171,7 +171,7 @@ internal fun SelectorUrlDialog(
                     }
                     Spacer(Modifier.width(Tokens.SpacingSm))
                     Button(
-                        onClick = { onSave(url) },
+                        onClick = { onSave(url.trim()) },
                         enabled = url.isNotBlank(),
                     ) {
                         Text(stringResource(R.string.settings_selector_url_save))
