@@ -14,11 +14,6 @@
     public void onSystemServerStarting(...);
 }
 
-# Keep Xposed detection method
--keep class eu.hxreborn.amznkiller.ui.MainActivity {
-    public static boolean isXposedEnabled();
-}
-
 # Kotlin intrinsics optimization
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
     public static void check*(...);

@@ -43,9 +43,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    companion object {
-        @JvmStatic
-        fun isXposedEnabled(): Boolean = false
-    }
 }
