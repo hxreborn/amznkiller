@@ -20,7 +20,7 @@ import java.util.Collections
 import java.util.WeakHashMap
 
 object ForceDarkHook {
-    val bottomTabIcons: MutableSet<View> =
+    private val bottomTabIcons: MutableSet<View> =
         Collections.synchronizedSet(
             Collections.newSetFromMap(WeakHashMap()),
         )
@@ -44,7 +44,7 @@ object ForceDarkHook {
         hookTabIcons(xposed, classLoader)
     }
 
-    fun applyTabIconTint(imageView: ImageView) {
+    private fun applyTabIconTint(imageView: ImageView) {
         bottomTabIcons.add(imageView)
         imageView.imageTintList = TAB_ICON_CSL
         imageView.colorFilter = PorterDuffColorFilter(TAB_ICON_TINT, PorterDuff.Mode.SRC_IN)
@@ -307,7 +307,7 @@ object ForceDarkHook {
             if (iv !in bottomTabIcons) return@hookMethod chain.proceed()
             if (!forceDarkWebview) return@hookMethod chain.proceed()
             Logger.debug { "dark tab tint guard view=${iv.hashCode()}" }
-            chain.proceed(arrayOf(ColorStateList.valueOf(Color.rgb(168, 168, 168))))
+            chain.proceed(arrayOf(TAB_ICON_CSL))
         }
     }
 }
