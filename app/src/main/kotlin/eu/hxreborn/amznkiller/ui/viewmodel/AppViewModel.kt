@@ -188,7 +188,8 @@ open class AppViewModel(
         pref: PrefSpec<T>,
         value: T,
     ) {
-        repository.save(pref, value)
+        // the remote half commits through a binder call so keep it off the main thread
+        viewModelScope.launch(Dispatchers.IO) { repository.save(pref, value) }
     }
 
     open fun setLauncherIconHidden(hidden: Boolean) {
