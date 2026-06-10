@@ -183,7 +183,10 @@ fun BottomNav(
 ) {
     val haptics = LocalHapticFeedback.current
     val buttonBounds = remember { mutableStateMapOf<Int, Rect>() }
-    val currentIndex = bottomNavItems.indexOfFirst { it.key == currentKey }.coerceAtLeast(0)
+
+    // licenses is pushed on top of settings so keep the settings tab highlighted there
+    val highlightKey: NavKey? = if (currentKey == Screen.Licenses) Screen.Settings else currentKey
+    val currentIndex = bottomNavItems.indexOfFirst { it.key == highlightKey }.coerceAtLeast(0)
     val targetRect = buttonBounds[currentIndex]
     val anchorRect = buttonBounds[0]
     val pillTargetX = (targetRect?.left ?: 0f) - (anchorRect?.left ?: 0f)
@@ -219,12 +222,12 @@ fun BottomNav(
         ) {
             CompositionLocalProvider(LocalRippleConfiguration provides null) {
                 bottomNavItems.forEachIndexed { index, item ->
-                    val selected = currentKey == item.key
+                    val selected = highlightKey == item.key
 
                     ToggleButton(
                         checked = selected,
                         onCheckedChange = {
-                            if (!selected) {
+                            if (currentKey != item.key) {
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
                                 backStack.clear()
                                 backStack.add(item.key)
