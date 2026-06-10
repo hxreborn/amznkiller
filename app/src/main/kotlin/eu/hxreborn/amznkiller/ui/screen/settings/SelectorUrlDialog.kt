@@ -28,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import eu.hxreborn.amznkiller.R
@@ -42,6 +43,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.R as AndroidR
 
+private data class TestOutcome(
+    val message: String,
+    val isFailure: Boolean,
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SelectorUrlDialog(
@@ -52,8 +58,9 @@ internal fun SelectorUrlDialog(
 ) {
     var url by remember { mutableStateOf(currentUrl) }
     var isTesting by remember { mutableStateOf(false) }
-    var testResult by remember { mutableStateOf<String?>(null) }
+    var testResult by remember { mutableStateOf<TestOutcome?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -110,15 +117,38 @@ internal fun SelectorUrlDialog(
                                         onSuccess = { mergeResult ->
                                             when (mergeResult) {
                                                 is MergeResult.Success -> {
-                                                    "${mergeResult.selectors.size} selectors found"
+                                                    TestOutcome(
+                                                        message =
+                                                            context.getString(
+                                                                R.string.settings_selector_url_test_found,
+                                                                mergeResult.selectors.size,
+                                                            ),
+                                                        isFailure = false,
+                                                    )
                                                 }
 
                                                 is MergeResult.Partial -> {
-                                                    "Failed, using ${mergeResult.selectors.size} bundled selectors"
+                                                    TestOutcome(
+                                                        message =
+                                                            context.getString(
+                                                                R.string.settings_selector_url_test_partial,
+                                                                mergeResult.selectors.size,
+                                                            ),
+                                                        isFailure = true,
+                                                    )
                                                 }
                                             }
                                         },
-                                        onFailure = { "Failed: ${it.message}" },
+                                        onFailure = {
+                                            TestOutcome(
+                                                message =
+                                                    context.getString(
+                                                        R.string.settings_selector_url_test_failed,
+                                                        it.message.orEmpty(),
+                                                    ),
+                                                isFailure = true,
+                                            )
+                                        },
                                     )
                             }
                         },
@@ -142,9 +172,9 @@ internal fun SelectorUrlDialog(
 
                     testResult?.let { result ->
                         Text(
-                            text = result,
+                            text = result.message,
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (result.startsWith("Failed")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                            color = if (result.isFailure) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
