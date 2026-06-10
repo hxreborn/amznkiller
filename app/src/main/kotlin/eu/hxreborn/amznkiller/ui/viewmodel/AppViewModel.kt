@@ -188,7 +188,6 @@ open class AppViewModel(
         pref: PrefSpec<T>,
         value: T,
     ) {
-        // the remote half commits through a binder call so keep it off the main thread
         viewModelScope.launch(Dispatchers.IO) { repository.save(pref, value) }
     }
 
