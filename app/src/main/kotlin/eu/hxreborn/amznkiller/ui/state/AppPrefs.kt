@@ -18,9 +18,5 @@ data class AppPrefs(
     val isStale: Boolean = true,
     val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
     val useDynamicColor: Boolean = Prefs.USE_DYNAMIC_COLOR.default,
-    val isXposedActive: Boolean = false,
-    val frameworkVersion: String? = null,
-    val isRefreshing: Boolean = false,
     val isRefreshFailed: Boolean = false,
-    val lastRefreshOutcome: SelectorSyncOutcome? = null,
 )
