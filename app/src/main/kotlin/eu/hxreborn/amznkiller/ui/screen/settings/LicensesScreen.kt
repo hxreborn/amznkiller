@@ -34,7 +34,7 @@ fun LicensesScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.cd_back),
                         )
                     }
                 },

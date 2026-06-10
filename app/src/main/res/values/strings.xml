@@ -29,6 +29,7 @@
     <string name="hero_error_title">Sync failed</string>
     <string name="hero_error_subtitle">Last sync failed. Tap refresh to retry</string>
 
+    <string name="cd_back">Go back</string>
     <string name="cd_refresh">Refresh selectors</string>
     <string name="cd_retry">Retry sync</string>
 
