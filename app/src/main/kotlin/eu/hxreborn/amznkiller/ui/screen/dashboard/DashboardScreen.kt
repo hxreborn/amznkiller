@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.FakeAppViewModel
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
@@ -38,12 +39,6 @@ import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Ready
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
-
-private val AMAZON_PACKAGES =
-    listOf(
-        "com.amazon.mShop.android.shopping",
-        "in.amazon.mShop.android.shopping",
-    )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +63,7 @@ fun DashboardScreen(
     val (amazonPackage, amazonInfo) =
         remember {
             val packageManager = context.packageManager
-            AMAZON_PACKAGES.firstNotNullOfOrNull { pkg ->
+            BuildConfig.TARGET_PACKAGES.firstNotNullOfOrNull { pkg ->
                 runCatching {
                     val info = packageManager.getPackageInfo(pkg, 0)
                     val icon = packageManager.getApplicationIcon(pkg).toBitmap(128, 128).asImageBitmap()

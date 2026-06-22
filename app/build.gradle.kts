@@ -4,6 +4,15 @@ plugins {
     alias(libs.plugins.serialization)
 }
 
+val cfgTargetPackages: List<String> =
+    providers.fileContents(
+        layout.projectDirectory.file("src/main/resources/META-INF/xposed/scope.list"),
+    ).asText.get()
+        .lineSequence()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .toList()
+
 android {
     namespace = "eu.hxreborn.amznkiller"
     compileSdk = 37
@@ -15,6 +24,12 @@ android {
 
         versionName = project.property("version.name").toString()
         versionCode = project.property("version.code").toString().toInt()
+
+        buildConfigField(
+            "String[]",
+            "TARGET_PACKAGES",
+            cfgTargetPackages.joinToString(prefix = "{", postfix = "}") { "\"$it\"" },
+        )
     }
 
     @Suppress("UnstableApiUsage")
