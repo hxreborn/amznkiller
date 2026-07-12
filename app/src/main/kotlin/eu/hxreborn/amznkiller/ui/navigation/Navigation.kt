@@ -201,7 +201,7 @@ fun BottomNav(
         animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
         label = "navPillWidth",
     )
-    val pillColor = MaterialTheme.colorScheme.primary
+    val pillColor = MaterialTheme.colorScheme.secondaryContainer
 
     Box(
         modifier =
@@ -214,9 +214,9 @@ fun BottomNav(
         HorizontalFloatingToolbar(
             expanded = true,
             colors =
-                FloatingToolbarDefaults.vibrantFloatingToolbarColors(
-                    toolbarContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    toolbarContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                FloatingToolbarDefaults.standardFloatingToolbarColors(
+                    toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    toolbarContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
         ) {
             CompositionLocalProvider(LocalRippleConfiguration provides null) {
@@ -258,8 +258,8 @@ fun BottomNav(
                             ToggleButtonDefaults.toggleButtonColors(
                                 containerColor = Color.Transparent,
                                 checkedContainerColor = Color.Transparent,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                checkedContentColor = MaterialTheme.colorScheme.onPrimary,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                checkedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                             ),
                         shapes =
                             ToggleButtonDefaults.shapes(
