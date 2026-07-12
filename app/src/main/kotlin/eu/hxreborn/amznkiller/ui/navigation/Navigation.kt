@@ -5,15 +5,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
@@ -23,6 +18,7 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FloatingToolbarScrollBehavior
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
@@ -180,6 +176,7 @@ fun BottomNav(
     backStack: NavBackStack<NavKey>,
     currentKey: NavKey?,
     modifier: Modifier = Modifier,
+    scrollBehavior: FloatingToolbarScrollBehavior? = null,
 ) {
     val haptics = LocalHapticFeedback.current
     val buttonBounds = remember { mutableStateMapOf<Int, Rect>() }
@@ -203,96 +200,89 @@ fun BottomNav(
     )
     val pillColor = MaterialTheme.colorScheme.secondaryContainer
 
-    Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(bottom = Tokens.FloatingBarBottomPadding),
-        contentAlignment = Alignment.BottomCenter,
+    HorizontalFloatingToolbar(
+        modifier = modifier,
+        expanded = true,
+        scrollBehavior = scrollBehavior,
+        colors =
+            FloatingToolbarDefaults.standardFloatingToolbarColors(
+                toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                toolbarContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
     ) {
-        HorizontalFloatingToolbar(
-            expanded = true,
-            colors =
-                FloatingToolbarDefaults.standardFloatingToolbarColors(
-                    toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    toolbarContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-        ) {
-            CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                bottomNavItems.forEachIndexed { index, item ->
-                    val selected = highlightKey == item.key
+        CompositionLocalProvider(LocalRippleConfiguration provides null) {
+            bottomNavItems.forEachIndexed { index, item ->
+                val selected = highlightKey == item.key
 
-                    ToggleButton(
-                        checked = selected,
-                        onCheckedChange = {
-                            if (currentKey != item.key) {
-                                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                backStack.clear()
-                                backStack.add(item.key)
-                            }
-                        },
-                        modifier =
-                            Modifier
-                                .height(Tokens.FloatingBarItemHeight)
-                                .onGloballyPositioned { coords ->
-                                    buttonBounds[index] = coords.boundsInParent()
-                                }.then(
-                                    if (index == 0) {
-                                        Modifier.drawWithContent {
-                                            if (pillAnimatedWidth > 0f) {
-                                                drawRoundRect(
-                                                    color = pillColor,
-                                                    topLeft = Offset(pillAnimatedX, 0f),
-                                                    size = Size(pillAnimatedWidth, size.height),
-                                                    cornerRadius = CornerRadius(size.height / 2f),
-                                                )
-                                            }
-                                            drawContent()
+                ToggleButton(
+                    checked = selected,
+                    onCheckedChange = {
+                        if (currentKey != item.key) {
+                            haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                            backStack.clear()
+                            backStack.add(item.key)
+                        }
+                    },
+                    modifier =
+                        Modifier
+                            .height(Tokens.FloatingBarItemHeight)
+                            .onGloballyPositioned { coords ->
+                                buttonBounds[index] = coords.boundsInParent()
+                            }.then(
+                                if (index == 0) {
+                                    Modifier.drawWithContent {
+                                        if (pillAnimatedWidth > 0f) {
+                                            drawRoundRect(
+                                                color = pillColor,
+                                                topLeft = Offset(pillAnimatedX, 0f),
+                                                size = Size(pillAnimatedWidth, size.height),
+                                                cornerRadius = CornerRadius(size.height / 2f),
+                                            )
                                         }
-                                    } else {
-                                        Modifier
-                                    },
+                                        drawContent()
+                                    }
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                    colors =
+                        ToggleButtonDefaults.toggleButtonColors(
+                            containerColor = Color.Transparent,
+                            checkedContainerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            checkedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        ),
+                    shapes =
+                        ToggleButtonDefaults.shapes(
+                            shape = CircleShape,
+                            pressedShape = CircleShape,
+                            checkedShape = CircleShape,
+                        ),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                            contentDescription = stringResource(item.titleRes),
+                        )
+                        AnimatedVisibility(
+                            visible = selected,
+                            enter =
+                                expandHorizontally(
+                                    animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
                                 ),
-                        colors =
-                            ToggleButtonDefaults.toggleButtonColors(
-                                containerColor = Color.Transparent,
-                                checkedContainerColor = Color.Transparent,
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                checkedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            ),
-                        shapes =
-                            ToggleButtonDefaults.shapes(
-                                shape = CircleShape,
-                                pressedShape = CircleShape,
-                                checkedShape = CircleShape,
-                            ),
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                contentDescription = stringResource(item.titleRes),
+                            exit =
+                                shrinkHorizontally(
+                                    animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                                ),
+                        ) {
+                            Text(
+                                text = stringResource(item.titleRes),
+                                modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
+                                style =
+                                    MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                    ),
                             )
-                            AnimatedVisibility(
-                                visible = selected,
-                                enter =
-                                    expandHorizontally(
-                                        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-                                    ),
-                                exit =
-                                    shrinkHorizontally(
-                                        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-                                    ),
-                            ) {
-                                Text(
-                                    text = stringResource(item.titleRes),
-                                    modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
-                                    style =
-                                        MaterialTheme.typography.titleSmall.copy(
-                                            fontWeight = FontWeight.Bold,
-                                        ),
-                                )
-                            }
                         }
                     }
                 }
