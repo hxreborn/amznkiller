@@ -74,7 +74,7 @@ commit_parsers = [
   { message = "^ci", skip = true },
   { message = "^test", group = "<!-- 11 -->Tests" },
   # Mute release/changelog noise only
-  { message = '^chore(\(release\))?:\s*(prepare|bump|align|v?\d+\.\d+)', skip = true },
+  { message = '^chore(\(release\))?:\s*(release|prepare|bump|align|v?\d+\.\d+)', skip = true },
   { message = '^release:\s*(bump|prepare|v?\d+\.\d+)', skip = true },
   { message = '^chore\(changelog\)', skip = true },
   # Catch-all
