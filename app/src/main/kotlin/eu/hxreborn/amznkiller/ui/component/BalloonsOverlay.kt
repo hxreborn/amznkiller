@@ -18,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -148,17 +147,8 @@ private fun Balloon(
     val density = LocalDensity.current
     val sizePx = with(density) { spec.sizeDp.toPx() }
     val swayPx = with(density) { spec.swayDp.toPx() }
-
-    val p = progress.value
     val columnCenter = columnWidthPx * (spec.column + 0.5f)
     val jitter = columnWidthPx * 0.25f * spec.horizontalJitter
-    val sway = sin(p * 2f * Math.PI.toFloat() + spec.swayPhase) * swayPx
-    val xPx = (columnCenter + jitter + sway - sizePx / 2f).coerceIn(0f, containerWidthPx - sizePx)
-    val yPx = containerHeightPx - p * (containerHeightPx + sizePx * 2f)
-
-    val fadeIn = (p * 5f).coerceAtMost(1f)
-    val fadeOut = ((1f - p) * 5f).coerceAtMost(1f)
-    val alpha = (fadeIn * fadeOut).coerceIn(0f, 1f)
 
     Image(
         painter = painterResource(R.drawable.easter_balloon),
@@ -167,9 +157,14 @@ private fun Balloon(
             Modifier
                 .size(spec.sizeDp)
                 .graphicsLayer {
-                    translationX = xPx
-                    translationY = yPx
-                    this.alpha = alpha
-                }.rotate(spec.rotationDeg + sin(p * 4f * Math.PI.toFloat() + spec.swayPhase) * 6f),
+                    val p = progress.value
+                    val sway = sin(p * 2f * Math.PI.toFloat() + spec.swayPhase) * swayPx
+                    translationX = (columnCenter + jitter + sway - sizePx / 2f).coerceIn(0f, containerWidthPx - sizePx)
+                    translationY = containerHeightPx - p * (containerHeightPx + sizePx * 2f)
+                    val fadeIn = (p * 5f).coerceAtMost(1f)
+                    val fadeOut = ((1f - p) * 5f).coerceAtMost(1f)
+                    alpha = (fadeIn * fadeOut).coerceIn(0f, 1f)
+                    rotationZ = spec.rotationDeg + sin(p * 4f * Math.PI.toFloat() + spec.swayPhase) * 6f
+                },
     )
 }
