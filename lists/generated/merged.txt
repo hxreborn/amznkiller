@@ -1,3 +1,4 @@
+#desktop-ad-btf
 #detailILM_feature_div
 #faceoutContainer:has(> [class$="sponsored-label"])
 #mobile-mshop-ad
@@ -14,8 +15,10 @@
 .AdsCard_container__K6vmo
 .a-cardui[class*="_new-detail-faceout-box_"]:has(.dynamicSponsoredLabelClass)
 .a-carousel-card:has(.p13n-sc-sponsored-label)
+.ad-center
 .amzn-safe-frame-container
 .ape-wrapper
+.celwidget[data-ref_$="displayAds"]
 .dp-widget-card-deck:has([data-ad-placement-metadata])
 .p13n-sc-unified-ad-label
 .s-result-item.AdHolder
@@ -75,6 +78,7 @@ div[id^="sims-simsContainer_feature_div_"]:has(.sp_info_link)
 div[id^="sp_detail"]
 li.gwm-window-tile:has(div[data-csa-c-painter="single-creative-card"] [data-ad-feedback-label-id])
 li.gwm-window-tile:has(div[data-csa-c-painter="single-video-card"] [data-ad-feedback-label-id])
+li[role="listitem"]:has(.hybrid-widget-sponsored-label)
 span[cel_widget_id^="MAIN-FEATURED_ASINS_LIST-"]
 span[cel_widget_id^="MAIN-loom-desktop-brand-footer-slot_hsa-id-CARDS-"]
 span[cel_widget_id^="MAIN-loom-desktop-top-slot_hsa-id-CARDS-"]
