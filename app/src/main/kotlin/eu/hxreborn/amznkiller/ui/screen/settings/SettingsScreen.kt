@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PhonelinkErase
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.TrendingUp
+import androidx.compose.material.icons.outlined.VideocamOff
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Info
@@ -242,7 +243,7 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_shopping_display)) },
                 )
 
-                val displayItemCount = 3
+                val displayItemCount = 4
                 val chartsShape = shapeForPosition(displayItemCount, 0)
                 switchPreference(
                     modifier = Modifier.preferenceModifier(surface, chartsShape),
@@ -256,7 +257,20 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
-                val hideRufusShape = shapeForPosition(displayItemCount, 1)
+                val autoplayShape = shapeForPosition(displayItemCount, 1)
+                switchPreference(
+                    modifier = Modifier.preferenceModifier(surface, autoplayShape),
+                    key = "disable_video_autoplay",
+                    value = prefs.disableVideoAutoplay,
+                    icon = { Icon(Icons.Outlined.VideocamOff, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_disable_video_autoplay) },
+                    summary = { Text(stringResource(R.string.settings_disable_video_autoplay_summary)) },
+                    onValueChange = { viewModel.savePref(Prefs.DISABLE_VIDEO_AUTOPLAY, it) },
+                )
+
+                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                val hideRufusShape = shapeForPosition(displayItemCount, 2)
                 switchPreference(
                     modifier = Modifier.preferenceModifier(surface, hideRufusShape),
                     key = "hide_rufus",
@@ -269,7 +283,7 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
-                val darkModeShape = shapeForPosition(displayItemCount, 2)
+                val darkModeShape = shapeForPosition(displayItemCount, 3)
                 preference(
                     modifier = Modifier.preferenceModifier(surface, darkModeShape),
                     key = "force_dark_mode",

@@ -20,6 +20,7 @@ object Prefs {
     val FORCE_DARK_WEBVIEW = boolPref("force_dark_webview", false)
     val FORCE_DARK_MODE = stringPref("force_dark_mode", ForceDarkMode.OFF.prefValue)
     val PRICE_CHARTS_ENABLED = boolPref("price_charts_enabled", false)
+    val DISABLE_VIDEO_AUTOPLAY = boolPref("disable_video_autoplay", true)
 
     val HIDE_RUFUS = boolPref("hide_rufus", false)
     val LAST_REFRESH_FAILED = boolPref("last_refresh_failed", false)
@@ -41,6 +42,7 @@ object Prefs {
             FORCE_DARK_WEBVIEW,
             FORCE_DARK_MODE,
             PRICE_CHARTS_ENABLED,
+            DISABLE_VIDEO_AUTOPLAY,
             AUTO_UPDATE,
             DARK_THEME_CONFIG,
             USE_DYNAMIC_COLOR,

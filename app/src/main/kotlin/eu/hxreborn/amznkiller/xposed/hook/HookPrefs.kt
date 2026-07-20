@@ -22,6 +22,8 @@ import io.github.libxposed.api.XposedInterface
 
 @Volatile internal var priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
 
+@Volatile internal var disableVideoAutoplay: Boolean = Prefs.DISABLE_VIDEO_AUTOPLAY.default
+
 @Volatile internal var hideRufus: Boolean = Prefs.HIDE_RUFUS.default
 
 @Volatile private var remotePrefs: SharedPreferences? = null
@@ -67,6 +69,7 @@ internal fun loadHookPrefs(prefs: SharedPreferences) {
         webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
         forceDarkMode = Prefs.readForceDarkMode(prefs)
         priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
+        disableVideoAutoplay = Prefs.DISABLE_VIDEO_AUTOPLAY.read(prefs)
         hideRufus = Prefs.HIDE_RUFUS.read(prefs)
     }.onFailure { Logger.log(Log.ERROR, "prefs refresh", it) }
 }

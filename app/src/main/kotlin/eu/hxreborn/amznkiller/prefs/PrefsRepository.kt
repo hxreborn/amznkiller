@@ -28,6 +28,7 @@ class PrefsRepository(
                         webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(local),
                         forceDarkMode = Prefs.readForceDarkMode(local),
                         priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(local),
+                        disableVideoAutoplay = Prefs.DISABLE_VIDEO_AUTOPLAY.read(local),
                         hideRufus = Prefs.HIDE_RUFUS.read(local),
                         autoUpdate = Prefs.AUTO_UPDATE.read(local),
                         isStale =

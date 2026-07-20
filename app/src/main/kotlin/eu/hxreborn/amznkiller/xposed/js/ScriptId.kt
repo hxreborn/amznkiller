@@ -6,4 +6,5 @@ enum class ScriptId(
     AD_BLOCK("payload/js/ad_block.js"),
     DARK_MODE("payload/js/dark_mode.js"),
     CHARTS("payload/js/charts.js"),
+    VIDEO_AUTOPLAY("payload/js/video_autoplay.js"),
 }

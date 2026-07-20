@@ -5,6 +5,7 @@ import eu.hxreborn.amznkiller.xposed.hook.forceDarkWebview
 import eu.hxreborn.amznkiller.xposed.injector.CssInjector
 import eu.hxreborn.amznkiller.xposed.injector.DarkModeInjector
 import eu.hxreborn.amznkiller.xposed.injector.PriceChartsInjector
+import eu.hxreborn.amznkiller.xposed.injector.VideoAutoplayInjector
 import eu.hxreborn.amznkiller.xposed.injector.WebViewDebuggingGate
 
 object PageRuntime {
@@ -22,6 +23,7 @@ object PageRuntime {
         WebViewDebuggingGate.tryEnable()
         DarkModeInjector.inject(webView)
         CssInjector.inject(webView, url)
+        VideoAutoplayInjector.inject(webView)
         PriceChartsInjector.inject(webView, amazon)
     }
 }

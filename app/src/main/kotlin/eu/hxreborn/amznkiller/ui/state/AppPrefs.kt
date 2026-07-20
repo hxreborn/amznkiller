@@ -13,6 +13,7 @@ data class AppPrefs(
     val webviewDebugging: Boolean = Prefs.WEBVIEW_DEBUGGING.default,
     val forceDarkMode: ForceDarkMode = ForceDarkMode.OFF,
     val priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default,
+    val disableVideoAutoplay: Boolean = Prefs.DISABLE_VIDEO_AUTOPLAY.default,
     val hideRufus: Boolean = Prefs.HIDE_RUFUS.default,
     val autoUpdate: Boolean = Prefs.AUTO_UPDATE.default,
     val isStale: Boolean = true,

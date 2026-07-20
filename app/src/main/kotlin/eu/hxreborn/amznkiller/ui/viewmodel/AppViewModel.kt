@@ -102,6 +102,7 @@ open class AppViewModel(
                 webviewDebugging = prefs.webviewDebugging,
                 forceDarkMode = prefs.forceDarkMode,
                 priceChartsEnabled = prefs.priceChartsEnabled,
+                disableVideoAutoplay = prefs.disableVideoAutoplay,
                 hideRufus = prefs.hideRufus,
                 darkThemeConfig = prefs.darkThemeConfig,
                 useDynamicColor = prefs.useDynamicColor,
