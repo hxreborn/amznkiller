@@ -32,7 +32,10 @@ object CssInjector {
         webView: WebView,
         url: String,
     ) {
-        if (!injectionEnabled) return
+        if (!injectionEnabled) {
+            Logger.debug { "css skip reason=disabled" }
+            return
+        }
         val selectors = selectors
         if (selectors.isEmpty()) {
             Logger.debug { "css skip reason=empty-selectors" }
@@ -41,7 +44,10 @@ object CssInjector {
 
         val hash = selectors.hashCode()
         lastInjectionByWebView[webView]?.let { last ->
-            if (last.url == url && last.selectorsHash == hash) return
+            if (last.url == url && last.selectorsHash == hash) {
+                Logger.debug { "css skip reason=already-injected" }
+                return
+            }
         }
 
         val css = getOrBuildCss(selectors, hash)
@@ -61,6 +67,7 @@ object CssInjector {
             )
         }\nwindow.AmznKiller.blockAds($args);"
         lastInjectionByWebView[webView] = InjectionKey(url, hash)
+        Logger.debug { "css inject rules=${selectors.size}" }
 
         WebViewJsExecutor.evaluate(webView, script, "CssInjector") { result ->
             if (result == null || result == "null" || result.contains("\"ok\":true")) {
