@@ -12,6 +12,7 @@ fun isStable(version: String): Boolean {
 }
 
 tasks.withType<DependencyUpdatesTask> {
+    notCompatibleWithConfigurationCache("gradle-versions-plugin uses Task.project at execution")
     rejectVersionIf {
         !isStable(candidate.version) && isStable(currentVersion)
     }
