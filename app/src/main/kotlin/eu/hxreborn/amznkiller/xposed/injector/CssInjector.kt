@@ -22,6 +22,10 @@ object CssInjector {
     private var cachedHash: Int = 0
     private var lastValidatedHash: Int = 0
 
+    fun onNavigation(webView: WebView) {
+        lastInjectionByWebView.remove(webView)
+    }
+
     fun inject(
         webView: WebView,
         url: String,

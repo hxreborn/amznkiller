@@ -10,6 +10,7 @@ import eu.hxreborn.amznkiller.xposed.injector.WebViewDebuggingGate
 
 object PageRuntime {
     fun onPageStarted(webView: WebView) {
+        CssInjector.onNavigation(webView)
         if (!forceDarkWebview) return
         DarkModeInjector.inject(webView)
     }
