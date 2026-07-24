@@ -93,6 +93,7 @@
     <string name="settings_selector_url_test_found">%1$d selectors found</string>
     <string name="settings_selector_url_test_partial">Failed, using %1$d bundled selectors</string>
     <string name="settings_selector_url_test_failed">Failed: %1$s</string>
+    <string name="settings_selector_url_https_required">Must start with https://</string>
 
     <string name="settings_about">About</string>
     <string name="settings_app_version">App version</string>

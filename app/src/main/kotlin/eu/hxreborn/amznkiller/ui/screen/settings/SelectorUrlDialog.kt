@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import eu.hxreborn.amznkiller.R
+import eu.hxreborn.amznkiller.http.HttpClient
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.selectors.MergeResult
 import eu.hxreborn.amznkiller.selectors.SelectorUpdater
@@ -59,6 +60,8 @@ internal fun SelectorUrlDialog(
     var url by remember { mutableStateOf(currentUrl) }
     var isTesting by remember { mutableStateOf(false) }
     var testResult by remember { mutableStateOf<TestOutcome?>(null) }
+    val isHttps = HttpClient.isHttps(url)
+    val showHttpsError = url.isNotBlank() && !isHttps
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -96,6 +99,13 @@ internal fun SelectorUrlDialog(
                     singleLine = false,
                     maxLines = 4,
                     textStyle = MaterialTheme.typography.bodySmall,
+                    isError = showHttpsError,
+                    supportingText =
+                        if (showHttpsError) {
+                            { Text(stringResource(R.string.settings_selector_url_https_required)) }
+                        } else {
+                            null
+                        },
                 )
                 Spacer(Modifier.height(Tokens.SpacingMd))
 
@@ -152,7 +162,7 @@ internal fun SelectorUrlDialog(
                                     )
                             }
                         },
-                        enabled = url.isNotBlank() && !isTesting,
+                        enabled = isHttps && !isTesting,
                     ) {
                         Text(stringResource(R.string.settings_selector_url_test))
                     }
@@ -202,7 +212,7 @@ internal fun SelectorUrlDialog(
                     Spacer(Modifier.width(Tokens.SpacingSm))
                     Button(
                         onClick = { onSave(url.trim()) },
-                        enabled = url.isNotBlank(),
+                        enabled = isHttps,
                     ) {
                         Text(stringResource(R.string.settings_selector_url_save))
                     }
