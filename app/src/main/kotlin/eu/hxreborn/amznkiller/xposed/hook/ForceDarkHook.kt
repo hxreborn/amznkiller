@@ -37,11 +37,29 @@ object ForceDarkHook {
             "dark probe device=${Build.MANUFACTURER}/${Build.MODEL} " +
                 "sdk=${Build.VERSION.SDK_INT} hw=${Build.HARDWARE}"
         }
+        probeForceDarkType()
         hookActivityOnCreate(xposed)
         hookDetermineForceDarkType(xposed)
         hookRendererSetForceDark(xposed)
         hookWebViewBackground(xposed)
         hookTabIcons(xposed, classLoader)
+    }
+
+    private fun probeForceDarkType() {
+        runCatching {
+            val fields =
+                Class
+                    .forName("android.graphics.ForceDarkType")
+                    .declaredFields
+                    .filter { it.type == Int::class.javaPrimitiveType }
+                    .joinToString(",") {
+                        it.isAccessible = true
+                        "${it.name}=${it.getInt(null)}"
+                    }
+            Logger.debug { "dark probe forcedarktype $fields" }
+        }.onFailure {
+            Logger.debug { "dark probe forcedarktype missing msg=${it.message}" }
+        }
     }
 
     private fun applyTabIconTint(imageView: ImageView) {
@@ -282,7 +300,11 @@ object ForceDarkHook {
                 Logger.debug { "hook fail target=$cls.getTabIcon msg=${it.message}" }
             }
         }
-        Logger.debug { "dark tab icons hooked=$hooked total=${controllers.size}" }
+        if (hooked < controllers.size) {
+            Logger.log(Log.WARN, "dark tab icons hooked=$hooked total=${controllers.size}")
+        } else {
+            Logger.debug { "dark tab icons hooked=$hooked total=${controllers.size}" }
+        }
         hookMethod(
             xposed,
             ImageView::class.java,
