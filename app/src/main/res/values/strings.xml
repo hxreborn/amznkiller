@@ -70,7 +70,7 @@
     <string name="settings_hide_rufus_summary">Disable Amazon\'s Rufus AI assistant. Requires force stopping Amazon to take effect</string>
     <string name="settings_dark_mode">Dark mode (experimental)</string>
     <string name="settings_dark_mode_summary">Apply dark mode to Amazon pages. Requires force stopping Amazon to take effect</string>
-    <string name="settings_dark_mode_summary_with_mode">%1$s. Requires force stopping Amazon to take effect. Requires Android 15 or higher to work properly</string>
+    <string name="settings_dark_mode_summary_with_mode">%1$s. Requires force stopping Amazon to take effect. Needs Android 15 or newer, and some non-Pixel ROMs do not support it</string>
     <string name="settings_force_dark_off">Off</string>
     <string name="settings_force_dark_follow_system">Follow system dark mode</string>
     <string name="settings_force_dark_on">On</string>
