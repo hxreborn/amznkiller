@@ -12,6 +12,8 @@ import org.json.JSONObject
 import java.util.WeakHashMap
 
 object CssInjector {
+    private const val WHITELIST_RULE_COUNT = 1
+
     private data class InjectionKey(
         val url: String,
         val selectorsHash: Int,
@@ -51,7 +53,7 @@ object CssInjector {
                 put("css", css)
                 put("hash", hash)
                 put("validate", shouldValidate)
-                put("expectedRules", selectors.size)
+                put("expectedRules", selectors.size + WHITELIST_RULE_COUNT)
             }
         val script = "${
             ScriptRepository.get(
