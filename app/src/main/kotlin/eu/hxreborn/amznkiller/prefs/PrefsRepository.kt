@@ -31,9 +31,7 @@ class PrefsRepository(
                         disableVideoAutoplay = Prefs.DISABLE_VIDEO_AUTOPLAY.read(local),
                         hideRufus = Prefs.HIDE_RUFUS.read(local),
                         autoUpdate = Prefs.AUTO_UPDATE.read(local),
-                        isStale =
-                            lastFetched == 0L ||
-                                System.currentTimeMillis() - lastFetched > Prefs.STALE_THRESHOLD_MS,
+                        isStale = isStale,
                         isRefreshFailed = Prefs.LAST_REFRESH_FAILED.read(local),
                         darkThemeConfig =
                             runCatching {
@@ -60,6 +58,13 @@ class PrefsRepository(
 
     val autoUpdate: Boolean
         get() = Prefs.AUTO_UPDATE.read(local)
+
+    val isStale: Boolean
+        get() {
+            val lastFetched = Prefs.LAST_FETCHED.read(local)
+            return lastFetched == 0L ||
+                System.currentTimeMillis() - lastFetched > Prefs.STALE_THRESHOLD_MS
+        }
 
     fun <T> save(
         pref: PrefSpec<T>,

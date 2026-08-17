@@ -169,7 +169,7 @@ open class AppViewModel(
     }
 
     open fun triggerAutoUpdateIfEnabled() {
-        if (autoUpdateTriggered || !repository.autoUpdate) return
+        if (autoUpdateTriggered || !repository.autoUpdate || !repository.isStale) return
         autoUpdateTriggered = true
         refreshAll()
     }
