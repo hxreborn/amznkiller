@@ -1,33 +1,65 @@
 package eu.hxreborn.amznkiller.xposed.hook
 
 import android.app.Activity
+import android.content.ContextWrapper
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Point
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.Drawable
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.PixelCopy
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsetsController
 import android.webkit.WebView
 import android.widget.ImageView
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.descendants
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 import java.util.Collections
 import java.util.WeakHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 object ForceDarkHook {
-    private val bottomTabIcons: MutableSet<View> =
-        Collections.synchronizedSet(
-            Collections.newSetFromMap(WeakHashMap()),
-        )
+    private const val BOTTOM_TABS_BAR = "com.amazon.mShop.rendering.BottomTabsBarV2"
+    private const val BASE_TAB_CONTROLLER = "com.amazon.mShop.chrome.bottomtabs.BaseTabController"
+    private const val NAVIGABLE = "com.amazon.platform.navigation.api.state.Navigable"
+    private const val UI_RENDERING_MODE = "com.amazon.mShop.chrome.UiRenderingMode"
+    private const val METHOD_BAR_VIEW = "getBottomTabsView"
+    private const val METHOD_PAGE_TYPE_GATE = "isDarkModeEnabledByPageType"
+    private const val METHOD_APPLY_BACKGROUND = "applyBottomTabsBackgroundResources"
+    private const val METHOD_SWITCH_COLOR_MODE = "switchColorMode"
+    private const val METHOD_UPDATE_TAB_ITEM = "updateTabItemWithMode"
+    private const val METHOD_UPDATE_UI = "updateUI"
+    private const val FIELD_TAB_ICON = "mBottomTabIcon"
+    private const val ENUM_DARK_MODE = "DarkMode"
+    private const val TAB_ICON_ID_PREFIX = "bottom_tab_button_icon"
 
-    // GPU force dark inverts this grey to near-white
-    private val TAB_ICON_TINT = Color.rgb(168, 168, 168)
-    private val TAB_ICON_CSL = ColorStateList.valueOf(TAB_ICON_TINT)
+    private const val PROBE_DELAY_MS = 600L
+    private const val EDGE_INSET = 8
+    private const val SCAN_STEP = 2
+    private const val MID_LUMINANCE = 128
+    private const val LEGIBLE_BRIGHT_RATIO = 0.05f
+
+    private val READABLE_ICON = Color.rgb(232, 232, 232)
+    private val READABLE_TINT = ColorStateList.valueOf(READABLE_ICON)
+
+    // Whether force dark reaches the bottom bar differs by device, and decides the whole approach
+    private enum class Inversion { UNKNOWN, REACHES_BAR, SKIPS_BAR }
+
+    private val probePending = AtomicBoolean(false)
+
+    private val unreadableIcons: MutableSet<ImageView> =
+        Collections.synchronizedSet(Collections.newSetFromMap(WeakHashMap()))
+
+    @Volatile
+    private var inversion = Inversion.UNKNOWN
 
     fun hook(
         xposed: XposedInterface,
@@ -42,7 +74,7 @@ object ForceDarkHook {
         hookDetermineForceDarkType(xposed)
         hookRendererSetForceDark(xposed)
         hookWebViewBackground(xposed)
-        hookTabIcons(xposed, classLoader)
+        hookBottomTabsDarkMode(xposed, classLoader)
     }
 
     private fun probeForceDarkType() {
@@ -60,13 +92,6 @@ object ForceDarkHook {
         }.onFailure {
             Logger.debug { "dark probe forcedarktype missing msg=${it.message}" }
         }
-    }
-
-    private fun applyTabIconTint(imageView: ImageView) {
-        bottomTabIcons.add(imageView)
-        imageView.imageTintList = TAB_ICON_CSL
-        imageView.colorFilter = PorterDuffColorFilter(TAB_ICON_TINT, PorterDuff.Mode.SRC_IN)
-        Logger.debug { "dark tint apply view=${imageView.hashCode()}" }
     }
 
     private fun hookMethod(
@@ -271,67 +296,203 @@ object ForceDarkHook {
         }
     }
 
-    private fun hookTabIcons(
+    // Amazon gates its own bottom bar dark mode to the Alexa companion page type. Opening that
+    // gate is only correct where force dark leaves the bar alone, so read the drawn bar first
+    private fun hookBottomTabsDarkMode(
         xposed: XposedInterface,
         classLoader: ClassLoader,
     ) {
-        val controllers =
-            listOf(
-                "com.amazon.mShop.chrome.bottomtabs.BaseTabController",
-                "com.amazon.mShop.chrome.bottomtabs.SavXTabController",
-                "com.amazon.mShop.chrome.bottomtabs.SwitcherTabController",
-            )
-        var hooked = 0
-        for (cls in controllers) {
-            runCatching {
-                val clazz = Class.forName(cls, false, classLoader)
-                xposed
-                    .hook(clazz.declaredMethods.first { it.name == "getTabIcon" })
-                    .intercept { chain ->
-                        val result = chain.proceed()
-                        if (!forceDarkWebview) return@intercept result
-                        val icon = result as? ImageView ?: return@intercept result
-                        Logger.debug { "dark tab icon class=${icon.javaClass.name} id=${icon.id}" }
-                        applyTabIconTint(icon)
-                        result
-                    }
-            }.onSuccess {
-                hooked++
-                Logger.debug { "hooked target=$cls.getTabIcon" }
-            }.onFailure {
-                Logger.debug { "hook fail target=$cls.getTabIcon msg=${it.message}" }
+        val barClass = classLoader.loadOrNull(BOTTOM_TABS_BAR) ?: return
+        val navigable = classLoader.loadOrNull(NAVIGABLE) ?: return
+        val barView =
+            runCatching { barClass.getMethod(METHOD_BAR_VIEW) }.getOrElse {
+                Logger.log(Log.ERROR, "hook fail target=$BOTTOM_TABS_BAR.$METHOD_BAR_VIEW", it)
+                return
             }
+        hookMethod(xposed, barClass, METHOD_PAGE_TYPE_GATE, String::class.java) { chain ->
+            if (forceDarkWebview && inversion == Inversion.SKIPS_BAR) true else chain.proceed()
         }
-        if (hooked < controllers.size) {
-            Logger.log(Log.WARN, "dark tab icons hooked=$hooked total=${controllers.size}")
-        } else {
-            Logger.debug { "dark tab icons hooked=$hooked total=${controllers.size}" }
+        // The gate is a one liner, so ART can inline it into its only caller and never reach the hook
+        runCatching {
+            xposed.deoptimize(barClass.declaredMethods.first { it.name == METHOD_UPDATE_UI })
+        }.onFailure {
+            Logger.debug { "dark tab bar deoptimize skip msg=${it.message}" }
         }
-        hookMethod(
-            xposed,
-            ImageView::class.java,
-            "setImageDrawable",
-            Drawable::class.java,
-        ) { chain ->
-            chain.proceed()
-            val iv = chain.thisObject as? ImageView ?: return@hookMethod null
-            if (iv !in bottomTabIcons) return@hookMethod null
-            if (!forceDarkWebview) return@hookMethod null
-            Logger.debug { "dark tab redraw view=${iv.hashCode()}" }
-            iv.post { applyTabIconTint(iv) }
-            null
+        hookMethod(xposed, barClass, METHOD_APPLY_BACKGROUND, navigable) { chain ->
+            val result = chain.proceed()
+            if (!forceDarkWebview || inversion != Inversion.UNKNOWN) return@hookMethod result
+            val owner = chain.thisObject ?: return@hookMethod result
+            val bar = runCatching { barView.invoke(owner) as? View }.getOrNull()
+            bar?.let { scheduleProbe(it) { applyDarkMode(owner, it) } }
+            result
         }
-        hookMethod(
-            xposed,
-            ImageView::class.java,
-            "setImageTintList",
-            ColorStateList::class.java,
-        ) { chain ->
-            val iv = chain.thisObject as? ImageView ?: return@hookMethod chain.proceed()
-            if (iv !in bottomTabIcons) return@hookMethod chain.proceed()
-            if (!forceDarkWebview) return@hookMethod chain.proceed()
-            Logger.debug { "dark tab tint guard view=${iv.hashCode()}" }
-            chain.proceed(arrayOf(TAB_ICON_CSL))
+        hookTabIconRetint(xposed, classLoader)
+    }
+
+    // The bar has to be laid out and drawn before it can be read back
+    private fun scheduleProbe(
+        bar: View,
+        onSkipsBar: () -> Unit,
+    ) {
+        if (!probePending.compareAndSet(false, true)) return
+        bar.postDelayed({
+            probePending.set(false)
+            if (inversion == Inversion.UNKNOWN) probeBar(bar, onSkipsBar)
+        }, PROBE_DELAY_MS)
+    }
+
+    // Amazon still paints the bar light here, so a dark readback means force dark reached it
+    private fun probeBar(
+        bar: View,
+        onSkipsBar: () -> Unit,
+    ) {
+        val window = bar.activity?.window
+        val handler = bar.handler
+        if (window == null || handler == null || bar.width <= 0 || bar.height <= 0) {
+            Logger.debug {
+                "dark tab bar probe skip window=${window != null} size=${bar.width}x${bar.height}"
+            }
+            return
+        }
+        val origin = bar.locationInWindow
+        val shot = Bitmap.createBitmap(bar.width, bar.height, Bitmap.Config.ARGB_8888)
+        val rect = Rect(origin.x, origin.y, origin.x + bar.width, origin.y + bar.height)
+        PixelCopy.request(window, rect, shot, { status ->
+            if (status != PixelCopy.SUCCESS) {
+                Logger.debug { "dark tab bar probe status=$status" }
+                return@request
+            }
+            val barLuminance = luminance(shot.getPixel(EDGE_INSET, shot.height / 2))
+            inversion =
+                if (barLuminance < MID_LUMINANCE) Inversion.REACHES_BAR else Inversion.SKIPS_BAR
+            Logger.debug { "dark tab bar probe luminance=$barLuminance result=$inversion" }
+            if (inversion ==
+                Inversion.SKIPS_BAR
+            ) {
+                onSkipsBar()
+            } else {
+                lightenUnreadableIcons(bar, shot, origin)
+            }
+        }, handler)
+    }
+
+    // Force dark leaves real artwork alone, so an icon shipped as a bitmap stays dark on a dark bar
+    private fun lightenUnreadableIcons(
+        bar: View,
+        shot: Bitmap,
+        origin: Point,
+    ) {
+        bar.tabIcons().filterNot { it.isLegibleIn(shot, origin) }.forEach { icon ->
+            unreadableIcons += icon
+            icon.applyReadableTint()
+            Logger.debug { "dark tab icon lighten id=${icon.idName}" }
         }
     }
+
+    // A legible glyph paints a good share of its own box bright, whatever a sibling badge does
+    private fun ImageView.isLegibleIn(
+        shot: Bitmap,
+        origin: Point,
+    ): Boolean {
+        val at = locationInWindow
+        var bright = 0
+        var scanned = 0
+        for (x in at.x - origin.x until at.x - origin.x + width step SCAN_STEP) {
+            for (y in at.y - origin.y until at.y - origin.y + height step SCAN_STEP) {
+                if (x !in 0 until shot.width || y !in 0 until shot.height) continue
+                scanned++
+                if (luminance(shot.getPixel(x, y)) >= MID_LUMINANCE) bright++
+            }
+        }
+        return scanned == 0 || bright.toFloat() / scanned >= LEGIBLE_BRIGHT_RATIO
+    }
+
+    // A color filter survives what force dark does to a tint, so the glyph stays readable either way
+    private fun ImageView.applyReadableTint() {
+        imageTintList = READABLE_TINT
+        colorFilter = PorterDuffColorFilter(READABLE_ICON, PorterDuff.Mode.SRC_IN)
+    }
+
+    // Amazon repaints its icons whenever a tab reloads, which drops the filter we put there
+    private fun hookTabIconRetint(
+        xposed: XposedInterface,
+        classLoader: ClassLoader,
+    ) {
+        val controller = classLoader.loadOrNull(BASE_TAB_CONTROLLER) ?: return
+        val iconField =
+            runCatching {
+                controller.getDeclaredField(FIELD_TAB_ICON).apply { isAccessible = true }
+            }.getOrElse {
+                Logger.log(Log.ERROR, "hook fail target=$BASE_TAB_CONTROLLER.$FIELD_TAB_ICON", it)
+                return
+            }
+        runCatching {
+            val method = controller.declaredMethods.first { it.name == METHOD_UPDATE_TAB_ITEM }
+            xposed.hook(method).intercept { chain ->
+                val result = chain.proceed()
+                if (!forceDarkWebview) return@intercept result
+                val icon = runCatching { iconField.get(chain.thisObject) as? ImageView }.getOrNull()
+                if (icon != null && icon in unreadableIcons) icon.applyReadableTint()
+                result
+            }
+        }.onSuccess {
+            Logger.debug { "hooked target=$BASE_TAB_CONTROLLER.$METHOD_UPDATE_TAB_ITEM" }
+        }.onFailure {
+            Logger.log(
+                Log.ERROR,
+                "hook fail target=$BASE_TAB_CONTROLLER.$METHOD_UPDATE_TAB_ITEM",
+                it,
+            )
+        }
+    }
+
+    // Amazon only repaints on navigation, so ask for the dark pass now that the probe called for it
+    private fun applyDarkMode(
+        owner: Any,
+        bar: View,
+    ) {
+        runCatching {
+            val modes = owner.javaClass.classLoader?.loadOrNull(UI_RENDERING_MODE) ?: return
+            val darkMode = modes.enumConstants?.first { (it as Enum<*>).name == ENUM_DARK_MODE }
+            owner.javaClass.declaredMethods
+                .first { it.name == METHOD_SWITCH_COLOR_MODE }
+                .apply { isAccessible = true }
+                .invoke(owner, darkMode, null)
+            bar.invalidate()
+            Logger.debug { "dark tab bar dark mode applied" }
+        }.onFailure {
+            Logger.log(Log.ERROR, "dark tab bar dark mode fail", it)
+        }
+    }
+
+    private fun ClassLoader.loadOrNull(name: String): Class<*>? =
+        runCatching { Class.forName(name, false, this) }
+            .onFailure {
+                Logger.log(
+                    Log.ERROR,
+                    "hook fail target=$name reason=class-not-found",
+                    it,
+                )
+            }.getOrNull()
+
+    private fun View.tabIcons(): Sequence<ImageView> =
+        ((this as? ViewGroup)?.descendants ?: emptySequence())
+            .filterIsInstance<ImageView>()
+            .filter { it.width > 0 && it.drawable != null }
+            .filter { it.idName?.startsWith(TAB_ICON_ID_PREFIX) == true }
+
+    private val View.idName: String?
+        get() = runCatching { resources.getResourceEntryName(id) }.getOrNull()
+
+    private val View.locationInWindow: Point
+        get() = IntArray(2).also { getLocationInWindow(it) }.let { Point(it[0], it[1]) }
+
+    private val View.activity: Activity?
+        get() =
+            generateSequence(context) { (it as? ContextWrapper)?.baseContext }
+                .filterIsInstance<Activity>()
+                .firstOrNull()
+
+    private fun luminance(color: Int): Int =
+        (Color.red(color) * 2 + Color.green(color) * 5 + Color.blue(color)) / 8
 }
