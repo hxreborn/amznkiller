@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.DarkMode
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PhonelinkErase
 import androidx.compose.material.icons.outlined.SmartToy
-import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.VideocamOff
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.DeveloperMode
@@ -249,7 +249,7 @@ fun SettingsScreen(
                     modifier = Modifier.preferenceModifier(surface, chartsShape),
                     key = "price_charts",
                     value = prefs.priceChartsEnabled,
-                    icon = { Icon(Icons.Outlined.TrendingUp, contentDescription = null) },
+                    icon = { Icon(Icons.AutoMirrored.Outlined.TrendingUp, contentDescription = null) },
                     title = { PreferenceTitle(R.string.settings_marketplace_insights) },
                     summary = { Text(stringResource(R.string.settings_marketplace_insights_summary)) },
                     onValueChange = { viewModel.savePref(Prefs.PRICE_CHARTS_ENABLED, it) },
