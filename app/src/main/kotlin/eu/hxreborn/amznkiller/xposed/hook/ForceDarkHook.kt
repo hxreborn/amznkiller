@@ -85,6 +85,8 @@ object ForceDarkHook {
         }
     }
 
+    // Bar colors are no-ops under enforced edge to edge, still needed below API 35
+    @Suppress("DEPRECATION")
     private fun hookActivityOnCreate(xposed: XposedInterface) {
         hookMethod(
             xposed,
