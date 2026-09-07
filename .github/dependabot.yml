@@ -9,7 +9,7 @@ updates:
     labels:
       - "dependencies"
     commit-message:
-      prefix: "build(deps)"
+      prefix: "ci(deps)"
     groups:
       androidx:
         patterns:
