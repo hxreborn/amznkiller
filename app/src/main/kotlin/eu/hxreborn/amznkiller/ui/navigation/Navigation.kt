@@ -247,7 +247,7 @@ fun BottomNav(
                                 },
                             ),
                     colors =
-                        ToggleButtonDefaults.toggleButtonColors(
+                        ToggleButtonDefaults.colors(
                             containerColor = Color.Transparent,
                             checkedContainerColor = Color.Transparent,
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
