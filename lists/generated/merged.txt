@@ -12,11 +12,13 @@
 #typ-recommendations-stripe-1
 #typ-recommendations-stripe-2
 #widget-rightUpsellSlot
+.AdHolder
 .AdsCard_container__K6vmo
 .a-cardui[class*="_new-detail-faceout-box_"]:has(.dynamicSponsoredLabelClass)
 .a-carousel-card:has(.p13n-sc-sponsored-label)
 .ad-center
 .amzn-safe-frame-container
+.ape-placement
 .ape-wrapper
 .celwidget[data-ref_$="displayAds"]
 .dp-widget-card-deck:has([data-ad-placement-metadata])
