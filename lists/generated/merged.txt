@@ -1,6 +1,10 @@
+#cm_cr-rvw_summary-ads
 #desktop-ad-btf
 #detailILM_feature_div
 #faceoutContainer:has(> [class$="sponsored-label"])
+#hero-quick-promo_feature_div
+#mobile-ads-bottom-dramabot_feature_div
+#mobile-ads-middle-dramabot_feature_div
 #mobile-mshop-ad
 #nav-swmslot
 #sc-rec-bottom
@@ -24,6 +28,7 @@
 .dp-widget-card-deck:has([data-ad-placement-metadata])
 .gwm-window-wrapper:has(> [data-ref_$="_displayAds"])
 .p13n-sc-unified-ad-label
+.p13n-uf:has(> #faceoutContainer > [class$="sponsored-label"])
 .s-result-item.AdHolder
 .s-result-item:has(.puis-sponsored-label-text)
 .s-result-item:has([data-ad-feedback-label-id])
@@ -38,6 +43,7 @@
 [data-component-type^="aspa-asin-ajax"]
 [id^="ape_"]
 [id^="mobile-dp-ilm"]
+[id^="sponsoredProducts"][id$="_feature_div"]
 div.s-inner-result-item > div.sg-col-inner:has(a.puis-sponsored-label-text)
 div[cel_widget_id*="Deals3Ads"]
 div[cel_widget_id*="_ad-placements-"]
