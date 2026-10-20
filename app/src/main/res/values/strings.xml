@@ -75,7 +75,7 @@
     <string name="settings_force_dark_follow_system">System</string>
     <string name="settings_force_dark_on">On</string>
     <string name="settings_webview_debugging">WebView debugging</string>
-    <string name="settings_webview_debugging_summary">Connect DevTools to Amazon Shopping WebViews. Force stop Amazon Shopping to apply</string>
+    <string name="settings_webview_debugging_summary">Connect DevTools to Amazon Shopping WebViews</string>
     <string name="settings_debug_logs_summary">Record detailed debug logs. Turn off when you\'re done debugging</string>
     <string name="settings_hide_launcher_icon">Hide launcher icon</string>
     <string name="settings_hide_launcher_icon_summary">Hide AmznKiller from your launcher. Open it from the LSPosed manager</string>
