@@ -14,8 +14,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,18 +64,18 @@ internal fun TargetAppsCard(
     ) {
         TargetRow(amazonInfo, Modifier.groupedItem(color, count = 2, index = 0)) {
             if (amazonInfo != null) {
-                IconButton(
+                FilledTonalIconButton(
                     onClick = {
                         amazonPackage?.let { context.packageManager.getLaunchIntentForPackage(it) }?.let {
                             it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             context.startActivity(it)
                         }
                     },
+                    shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
                         contentDescription = stringResource(R.string.dashboard_launch),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
