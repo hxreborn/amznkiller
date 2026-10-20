@@ -30,8 +30,7 @@ import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -136,22 +135,8 @@ fun SettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            LargeTopAppBar(
-                title = {
-                    val isExpandedSlot = LocalTextStyle.current.fontSize >= MaterialTheme.typography.headlineMedium.fontSize
-                    Text(
-                        text = stringResource(R.string.tab_settings),
-                        style =
-                            if (isExpandedSlot) {
-                                MaterialTheme.typography.headlineLarge.copy(
-                                    lineHeight = Tokens.ExpandedTitleLineHeight,
-                                )
-                            } else {
-                                LocalTextStyle.current
-                            },
-                        maxLines = if (isExpandedSlot) Tokens.EXPANDED_TITLE_MAX_LINES else 1,
-                    )
-                },
+            LargeFlexibleTopAppBar(
+                title = { Text(stringResource(R.string.tab_settings)) },
                 scrollBehavior = scrollBehavior,
             )
         },
