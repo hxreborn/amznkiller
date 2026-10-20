@@ -68,6 +68,7 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Ready
 import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
+import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
@@ -97,7 +98,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var showUrlDialog by remember { mutableStateOf(false) }
-    var showForceDarkModeDialog by remember { mutableStateOf(false) }
     val shareholderEgg = rememberShareholderEgg()
 
     if (showUrlDialog) {
@@ -108,17 +108,6 @@ fun SettingsScreen(
                 showUrlDialog = false
             },
             onDismiss = { showUrlDialog = false },
-        )
-    }
-
-    if (showForceDarkModeDialog) {
-        ForceDarkModeDialog(
-            currentMode = prefs.forceDarkMode,
-            onSelect = { mode ->
-                viewModel.savePref(Prefs.FORCE_DARK_MODE, mode.prefValue)
-                showForceDarkModeDialog = false
-            },
-            onDismiss = { showForceDarkModeDialog = false },
         )
     }
 
@@ -156,16 +145,18 @@ fun SettingsScreen(
 
                 val appearanceItemCount = 2
                 val themeShape = shapeForPosition(appearanceItemCount, 0)
-                item(key = "theme", contentType = "ThemePreference") {
+                item(key = "theme", contentType = "ChoicePreference") {
                     Column(modifier = Modifier.preferenceModifier(surface, themeShape)) {
                         Preference(
                             icon = { Icon(Icons.Outlined.Palette, contentDescription = null) },
                             title = { PreferenceTitle(R.string.settings_theme) },
                         )
-                        ThemePicker(
-                            currentConfig = prefs.darkThemeConfig,
+                        ChoiceButtonGroup(
+                            options = DarkThemeConfig.entries,
+                            selected = prefs.darkThemeConfig,
                             onSelect = { viewModel.savePref(Prefs.DARK_THEME_CONFIG, it.name.lowercase()) },
-                            modifier = Modifier.padding(start = Tokens.SpacingLg, end = Tokens.SpacingLg, bottom = Tokens.SpacingLg),
+                            label = { themeLabel(it) },
+                            modifier = choiceButtonGroupModifier,
                         )
                     }
                 }
@@ -271,14 +262,22 @@ fun SettingsScreen(
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
                 val darkModeShape = shapeForPosition(displayItemCount, 3)
-                preference(
-                    modifier = Modifier.preferenceModifier(surface, darkModeShape),
-                    key = "force_dark_mode",
-                    icon = { Icon(Icons.Outlined.DarkMode, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_dark_mode) },
-                    summary = { Text(forceDarkModeSummary(prefs.forceDarkMode)) },
-                    onClick = { showForceDarkModeDialog = true },
-                )
+                item(key = "force_dark_mode", contentType = "ChoicePreference") {
+                    Column(modifier = Modifier.preferenceModifier(surface, darkModeShape)) {
+                        Preference(
+                            icon = { Icon(Icons.Outlined.DarkMode, contentDescription = null) },
+                            title = { PreferenceTitle(R.string.settings_dark_mode) },
+                            summary = { Text(stringResource(R.string.settings_dark_mode_summary)) },
+                        )
+                        ChoiceButtonGroup(
+                            options = ForceDarkMode.entries,
+                            selected = prefs.forceDarkMode,
+                            onSelect = { viewModel.savePref(Prefs.FORCE_DARK_MODE, it.prefValue) },
+                            label = { forceDarkModeLabel(it) },
+                            modifier = choiceButtonGroupModifier,
+                        )
+                    }
+                }
 
                 preferenceCategory(
                     key = "category_advanced",
@@ -459,16 +458,28 @@ private fun PreferenceTitle(resId: Int) {
     )
 }
 
+private val choiceButtonGroupModifier =
+    Modifier.padding(start = Tokens.SpacingLg, end = Tokens.SpacingLg, bottom = Tokens.SpacingLg)
+
 @Composable
-private fun forceDarkModeSummary(mode: ForceDarkMode): String {
-    val modeLabel =
+private fun themeLabel(config: DarkThemeConfig): String =
+    stringResource(
+        when (config) {
+            DarkThemeConfig.FOLLOW_SYSTEM -> R.string.settings_theme_system
+            DarkThemeConfig.LIGHT -> R.string.settings_theme_light
+            DarkThemeConfig.DARK -> R.string.settings_theme_dark
+        },
+    )
+
+@Composable
+private fun forceDarkModeLabel(mode: ForceDarkMode): String =
+    stringResource(
         when (mode) {
-            ForceDarkMode.OFF -> stringResource(R.string.settings_force_dark_off)
-            ForceDarkMode.FOLLOW_SYSTEM -> stringResource(R.string.settings_force_dark_follow_system)
-            ForceDarkMode.ON -> stringResource(R.string.settings_force_dark_on)
-        }
-    return stringResource(R.string.settings_dark_mode_summary_with_mode, modeLabel)
-}
+            ForceDarkMode.OFF -> R.string.settings_force_dark_off
+            ForceDarkMode.FOLLOW_SYSTEM -> R.string.settings_force_dark_follow_system
+            ForceDarkMode.ON -> R.string.settings_force_dark_on
+        },
+    )
 
 private fun Modifier.preferenceModifier(
     surface: Color,

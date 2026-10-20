@@ -12,30 +12,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
-import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun ThemePicker(
-    currentConfig: DarkThemeConfig,
-    onSelect: (DarkThemeConfig) -> Unit,
+internal fun <T> ChoiceButtonGroup(
+    options: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    label: @Composable (T) -> String,
     modifier: Modifier = Modifier,
 ) {
-    val options = DarkThemeConfig.entries
     Row(
         modifier = modifier.fillMaxWidth().selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
     ) {
         options.forEachIndexed { index, option ->
             ToggleButton(
-                checked = option == currentConfig,
+                checked = option == selected,
                 onCheckedChange = { onSelect(option) },
                 modifier = Modifier.weight(1f).semantics { role = Role.RadioButton },
                 shapes =
@@ -46,14 +44,7 @@ internal fun ThemePicker(
                     },
             ) {
                 Text(
-                    text =
-                        stringResource(
-                            when (option) {
-                                DarkThemeConfig.FOLLOW_SYSTEM -> R.string.settings_theme_system
-                                DarkThemeConfig.LIGHT -> R.string.settings_theme_light
-                                DarkThemeConfig.DARK -> R.string.settings_theme_dark
-                            },
-                        ),
+                    text = label(option),
                     maxLines = 1,
                     autoSize = TextAutoSize.StepBased(maxFontSize = LocalTextStyle.current.fontSize),
                 )
@@ -64,11 +55,13 @@ internal fun ThemePicker(
 
 @PreviewLightDark
 @Composable
-private fun ThemePickerPreview() {
+private fun ChoiceButtonGroupPreview() {
     PreviewWrapper {
-        ThemePicker(
-            currentConfig = DarkThemeConfig.FOLLOW_SYSTEM,
+        ChoiceButtonGroup(
+            options = listOf("Off", "System", "On"),
+            selected = "System",
             onSelect = {},
+            label = { it },
         )
     }
 }
