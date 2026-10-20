@@ -2,7 +2,7 @@ package eu.hxreborn.amznkiller.ui.screen.dashboard
 
 import android.content.Intent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +34,7 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
 import eu.hxreborn.amznkiller.ui.theme.Tokens
+import eu.hxreborn.amznkiller.ui.util.groupedItem
 
 @Immutable
 internal data class TargetAppData(
@@ -56,16 +56,12 @@ internal fun TargetAppsCard(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val shape = Tokens.CardShape
+    val color = AmznKillerSurfaceDefaults.cardContainerColor
     Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .background(color = AmznKillerSurfaceDefaults.cardContainerColor, shape = shape)
-                .padding(16.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(Tokens.PreferenceItemGap),
     ) {
-        TargetRow(amazonInfo) {
+        TargetRow(amazonInfo, Modifier.groupedItem(color, count = 2, index = 0)) {
             if (amazonInfo != null) {
                 IconButton(
                     onClick = {
@@ -83,21 +79,21 @@ internal fun TargetAppsCard(
                 }
             }
         }
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 12.dp),
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
-        TargetRow(webViewInfo, isGrayscale = true)
+        TargetRow(webViewInfo, Modifier.groupedItem(color, count = 2, index = 1), isGrayscale = true)
     }
 }
 
 @Composable
 internal fun TargetRow(
     info: TargetAppData?,
+    modifier: Modifier = Modifier,
     isGrayscale: Boolean = false,
     trailing: @Composable () -> Unit = {},
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier.fillMaxWidth().padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         if (info != null) {
             Image(
                 bitmap = info.icon,

@@ -1,7 +1,7 @@
 package eu.hxreborn.amznkiller.ui.screen.dashboard
 
 import android.os.Build
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Android
 import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.PhoneAndroid
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +26,7 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
 import eu.hxreborn.amznkiller.ui.theme.Tokens
+import eu.hxreborn.amznkiller.ui.util.groupedItem
 
 @Composable
 internal fun SystemEnvironmentCard(
@@ -34,16 +34,15 @@ internal fun SystemEnvironmentCard(
     frameworkVersion: String?,
     modifier: Modifier = Modifier,
 ) {
-    val shape = Tokens.CardShape
+    val color = AmznKillerSurfaceDefaults.cardContainerColor
     Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .background(color = AmznKillerSurfaceDefaults.cardContainerColor, shape = shape)
-                .padding(16.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(Tokens.PreferenceItemGap),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth().groupedItem(color, count = 3, index = 0).padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Icon(
                 imageVector = Icons.Outlined.Extension,
                 contentDescription = null,
@@ -68,11 +67,10 @@ internal fun SystemEnvironmentCard(
                 )
             }
         }
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 12.dp),
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth().groupedItem(color, count = 3, index = 1).padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Icon(
                 imageVector = Icons.Outlined.PhoneAndroid,
                 contentDescription = null,
@@ -92,11 +90,10 @@ internal fun SystemEnvironmentCard(
                 )
             }
         }
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 12.dp),
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth().groupedItem(color, count = 3, index = 2).padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Icon(
                 imageVector = Icons.Outlined.Android,
                 contentDescription = null,

@@ -1,6 +1,9 @@
 package eu.hxreborn.amznkiller.ui.util
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 
 fun shapeForPosition(
@@ -37,3 +40,9 @@ fun shapeForPosition(
         }
     }
 }
+
+fun Modifier.groupedItem(
+    color: Color,
+    count: Int,
+    index: Int,
+): Modifier = background(color = color, shape = shapeForPosition(count, index))
