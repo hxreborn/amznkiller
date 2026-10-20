@@ -14,10 +14,7 @@ object Tokens {
     val SectionVerticalSpacing = SpacingLg
     val CardInnerPadding = SpacingLg
 
-    val IconSm = 16.dp
     val IconLg = 32.dp
-
-    val ProgressStroke = 2.dp
 
     val CardShape = RoundedCornerShape(SpacingXl)
     val ThumbnailShape = RoundedCornerShape(6.dp)
