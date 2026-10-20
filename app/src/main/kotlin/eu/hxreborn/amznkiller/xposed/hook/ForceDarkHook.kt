@@ -24,7 +24,6 @@ import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
 import java.util.Collections
 import java.util.WeakHashMap
-import java.util.concurrent.atomic.AtomicBoolean
 
 object ForceDarkHook {
     private const val BOTTOM_TABS_BAR = "com.amazon.mShop.rendering.BottomTabsBarV2"
@@ -53,7 +52,9 @@ object ForceDarkHook {
     // Whether force dark reaches the bottom bar differs by device, and decides the whole approach
     private enum class Inversion { UNKNOWN, REACHES_BAR, SKIPS_BAR }
 
-    private val probePending = AtomicBoolean(false)
+    private val pendingBars: MutableSet<View> = Collections.newSetFromMap(WeakHashMap())
+
+    private val checkedIcons: MutableSet<ImageView> = Collections.newSetFromMap(WeakHashMap())
 
     private val unreadableIcons: MutableSet<ImageView> =
         Collections.synchronizedSet(Collections.newSetFromMap(WeakHashMap()))
@@ -320,24 +321,29 @@ object ForceDarkHook {
         }
         hookMethod(xposed, barClass, METHOD_APPLY_BACKGROUND, navigable) { chain ->
             val result = chain.proceed()
-            if (!forceDarkWebview || inversion != Inversion.UNKNOWN) return@hookMethod result
+            if (!forceDarkWebview || inversion == Inversion.SKIPS_BAR) return@hookMethod result
             val owner = chain.thisObject ?: return@hookMethod result
             val bar = runCatching { barView.invoke(owner) as? View }.getOrNull()
-            bar?.let { scheduleProbe(it) { applyDarkMode(owner, it) } }
+            if (bar != null && (inversion == Inversion.UNKNOWN || bar.hasUncheckedIcons())) {
+                scheduleProbe(bar) { applyDarkMode(owner, bar) }
+            }
             result
         }
         hookTabIconRetint(xposed, classLoader)
     }
+
+    private fun View.hasUncheckedIcons(): Boolean =
+        tabIcons().let { icons -> icons.none() || icons.any { it !in checkedIcons } }
 
     // The bar has to be laid out and drawn before it can be read back
     private fun scheduleProbe(
         bar: View,
         onSkipsBar: () -> Unit,
     ) {
-        if (!probePending.compareAndSet(false, true)) return
+        if (!pendingBars.add(bar)) return
         bar.postDelayed({
-            probePending.set(false)
-            if (inversion == Inversion.UNKNOWN) probeBar(bar, onSkipsBar)
+            pendingBars.remove(bar)
+            if (inversion != Inversion.SKIPS_BAR) probeBar(bar, onSkipsBar)
         }, PROBE_DELAY_MS)
     }
 
@@ -357,23 +363,27 @@ object ForceDarkHook {
         val origin = bar.locationInWindow
         val shot = Bitmap.createBitmap(bar.width, bar.height, Bitmap.Config.ARGB_8888)
         val rect = Rect(origin.x, origin.y, origin.x + bar.width, origin.y + bar.height)
-        PixelCopy.request(window, rect, shot, { status ->
-            if (status != PixelCopy.SUCCESS) {
-                Logger.debug { "dark tab bar probe status=$status" }
-                return@request
-            }
-            val barLuminance = luminance(shot.getPixel(EDGE_INSET, shot.height / 2))
-            inversion =
-                if (barLuminance < MID_LUMINANCE) Inversion.REACHES_BAR else Inversion.SKIPS_BAR
-            Logger.debug { "dark tab bar probe luminance=$barLuminance result=$inversion" }
-            if (inversion ==
-                Inversion.SKIPS_BAR
-            ) {
-                onSkipsBar()
-            } else {
-                lightenUnreadableIcons(bar, shot, origin)
-            }
-        }, handler)
+        runCatching {
+            PixelCopy.request(window, rect, shot, { status ->
+                if (status != PixelCopy.SUCCESS) {
+                    Logger.debug { "dark tab bar probe status=$status" }
+                    return@request
+                }
+                if (inversion == Inversion.UNKNOWN) {
+                    val barLuminance = luminance(shot.getPixel(EDGE_INSET, shot.height / 2))
+                    val reachesBar = barLuminance < MID_LUMINANCE
+                    inversion = if (reachesBar) Inversion.REACHES_BAR else Inversion.SKIPS_BAR
+                    Logger.debug { "dark tab bar probe luminance=$barLuminance result=$inversion" }
+                }
+                if (inversion == Inversion.SKIPS_BAR) {
+                    onSkipsBar()
+                } else {
+                    lightenUnreadableIcons(bar, shot, origin)
+                }
+            }, handler)
+        }.onFailure {
+            Logger.debug { "dark tab bar probe fail msg=${it.message}" }
+        }
     }
 
     // Force dark leaves real artwork alone, so an icon shipped as a bitmap stays dark on a dark bar
@@ -382,7 +392,9 @@ object ForceDarkHook {
         shot: Bitmap,
         origin: Point,
     ) {
-        bar.tabIcons().filterNot { it.isLegibleIn(shot, origin) }.forEach { icon ->
+        val icons = bar.tabIcons().filterNot { it in checkedIcons }.toList()
+        checkedIcons += icons
+        icons.filterNot { it.isLegibleIn(shot, origin) }.forEach { icon ->
             unreadableIcons += icon
             icon.applyReadableTint()
             Logger.debug { "dark tab icon lighten id=${icon.idName}" }
