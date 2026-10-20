@@ -1,6 +1,7 @@
 package eu.hxreborn.amznkiller.ui.screen.dashboard
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -9,10 +10,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,16 +26,21 @@ import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LoadingIndicatorDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,14 +49,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.state.SelectorSyncEvent
 import eu.hxreborn.amznkiller.ui.state.SelectorSyncOutcome
 import eu.hxreborn.amznkiller.ui.state.resolveMessage
-import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.relativeTime
 
@@ -78,8 +84,8 @@ private data class UpdateStatusUi(
     val title: String,
     val subtitle: String,
     val iconKey: StatusIconKey,
-    val iconTint: Color,
-    val subtitleColor: Color,
+    val containerColor: Color,
+    val accentColor: Color,
 )
 
 @Composable
@@ -91,14 +97,15 @@ private fun updateStatusUi(
 ): UpdateStatusUi {
     val lastChecked = if (lastFetched > 0L) lastCheckedLine(lastFetched) else null
     val context = LocalContext.current
+    val colors = MaterialTheme.colorScheme
     return when (status) {
         UpdateStatus.Refreshing -> {
             UpdateStatusUi(
                 title = stringResource(R.string.hero_checking_title),
                 subtitle = stringResource(R.string.hero_checking_subtitle),
                 iconKey = StatusIconKey.Refreshing,
-                iconTint = MaterialTheme.colorScheme.primary,
-                subtitleColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                containerColor = colors.secondaryContainer,
+                accentColor = colors.secondary,
             )
         }
 
@@ -109,8 +116,8 @@ private fun updateStatusUi(
                     errorEvent?.resolveMessage(context::getString)
                         ?: stringResource(R.string.hero_error_subtitle),
                 iconKey = StatusIconKey.Error,
-                iconTint = MaterialTheme.colorScheme.error,
-                subtitleColor = MaterialTheme.colorScheme.error,
+                containerColor = colors.errorContainer,
+                accentColor = colors.error,
             )
         }
 
@@ -123,8 +130,8 @@ private fun updateStatusUi(
                         lastChecked,
                     ).joinToString("\n"),
                 iconKey = if (hasUpdatedDelta) StatusIconKey.UpdatedDelta else StatusIconKey.UpToDate,
-                iconTint = MaterialTheme.colorScheme.primary,
-                subtitleColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                containerColor = colors.primaryContainer,
+                accentColor = colors.primary,
             )
         }
 
@@ -137,8 +144,8 @@ private fun updateStatusUi(
                         lastChecked,
                     ).joinToString("\n"),
                 iconKey = StatusIconKey.Stale,
-                iconTint = MaterialTheme.colorScheme.tertiary,
-                subtitleColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                containerColor = colors.tertiaryContainer,
+                accentColor = colors.tertiary,
             )
         }
     }
@@ -177,6 +184,9 @@ internal fun UpdatesCard(
             hasUpdatedDelta = chipsVisible,
             lastFetched = lastFetched,
         )
+    val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+    val containerColor by animateColorAsState(ui.containerColor, colorSpec)
+    val contentColor by animateColorAsState(contentColorFor(ui.containerColor), colorSpec)
 
     Surface(
         modifier =
@@ -184,25 +194,21 @@ internal fun UpdatesCard(
                 .fillMaxWidth()
                 .padding(horizontal = Tokens.SpacingSm),
         shape = Tokens.CardShape,
-        color = AmznKillerSurfaceDefaults.cardContainerColor,
-        tonalElevation = 0.dp,
+        color = containerColor,
+        contentColor = contentColor,
     ) {
         Row(
             modifier = Modifier.padding(Tokens.CardInnerPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Tokens.SpacingLg),
         ) {
-            StatusIcon(
+            StatusBadge(
                 ui = ui,
                 pulseKey = lastRefreshOutcome?.id?.takeIf { chipsVisible },
             )
             Column(modifier = Modifier.weight(1f)) {
-                Text(ui.title, style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    text = ui.subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = ui.subtitleColor,
-                )
+                Text(ui.title, style = MaterialTheme.typography.titleMediumEmphasized)
+                Text(ui.subtitle, style = MaterialTheme.typography.bodyMedium)
                 val outcomeId = lastRefreshOutcome?.id
                 if (updatedEvent != null && outcomeId != null) {
                     key(outcomeId) {
@@ -216,19 +222,18 @@ internal fun UpdatesCard(
                 }
             }
             val isErrorState = status == UpdateStatus.Error
-            IconButton(onClick = onRefresh, enabled = !isRefreshing) {
+            FilledIconButton(
+                onClick = onRefresh,
+                shapes = IconButtonDefaults.shapes(),
+                enabled = !isRefreshing,
+                colors = IconButtonDefaults.filledIconButtonColors(containerColor = ui.accentColor),
+            ) {
                 Icon(
                     imageVector = if (isErrorState) Icons.Rounded.Replay else Icons.Rounded.Refresh,
                     contentDescription =
                         stringResource(
                             if (isErrorState) R.string.cd_retry else R.string.cd_refresh,
                         ),
-                    tint =
-                        if (isErrorState) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            LocalContentColor.current
-                        },
                 )
             }
         }
@@ -237,7 +242,7 @@ internal fun UpdatesCard(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun StatusIcon(
+private fun StatusBadge(
     ui: UpdateStatusUi,
     pulseKey: Any?,
 ) {
@@ -257,45 +262,49 @@ private fun StatusIcon(
     }
     val fadeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     val scaleSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-    Box(
+    AnimatedContent(
+        targetState = ui,
         modifier =
             Modifier
-                .size(Tokens.IconMd)
+                .size(LoadingIndicatorDefaults.ContainerWidth)
                 .graphicsLayer {
                     scaleX = pulse.value
                     scaleY = pulse.value
                 },
-        contentAlignment = Alignment.Center,
-    ) {
-        AnimatedContent(
-            targetState = ui.iconKey,
-            transitionSpec = {
-                (
-                    fadeIn(animationSpec = fadeSpec) +
-                        scaleIn(animationSpec = scaleSpec, initialScale = 0.8f)
-                ).togetherWith(
-                    fadeOut(animationSpec = fadeSpec) +
-                        scaleOut(animationSpec = scaleSpec, targetScale = 0.8f),
-                )
-            },
-            label = "statusIcon",
-        ) { key ->
-            val image =
-                when (key) {
-                    StatusIconKey.Refreshing -> null
-                    StatusIconKey.Error -> Icons.Outlined.ErrorOutline
-                    StatusIconKey.UpToDate -> Icons.Rounded.CloudDone
-                    StatusIconKey.UpdatedDelta -> Icons.Rounded.CloudSync
-                    StatusIconKey.Stale -> Icons.Rounded.SystemUpdate
-                }
-            if (image == null) {
-                LoadingIndicator(modifier = Modifier.size(Tokens.IconMd))
-            } else {
+        transitionSpec = {
+            (
+                fadeIn(animationSpec = fadeSpec) +
+                    scaleIn(animationSpec = scaleSpec, initialScale = 0.8f)
+            ).togetherWith(
+                fadeOut(animationSpec = fadeSpec) +
+                    scaleOut(animationSpec = scaleSpec, targetScale = 0.8f),
+            )
+        },
+        contentKey = { it.iconKey },
+        label = "statusBadge",
+    ) { target ->
+        val image =
+            when (target.iconKey) {
+                StatusIconKey.Refreshing -> null
+                StatusIconKey.Error -> Icons.Outlined.ErrorOutline
+                StatusIconKey.UpToDate -> Icons.Rounded.CloudDone
+                StatusIconKey.UpdatedDelta -> Icons.Rounded.CloudSync
+                StatusIconKey.Stale -> Icons.Rounded.SystemUpdate
+            }
+        if (image == null) {
+            ContainedLoadingIndicator(
+                containerColor = target.accentColor,
+                indicatorColor = contentColorFor(target.accentColor),
+            )
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize().background(target.accentColor, MaterialShapes.Cookie9Sided.toShape()),
+                contentAlignment = Alignment.Center,
+            ) {
                 Icon(
                     imageVector = image,
                     contentDescription = null,
-                    tint = ui.iconTint,
-                    modifier = Modifier.size(Tokens.IconMd),
+                    tint = contentColorFor(target.accentColor),
                 )
             }
         }

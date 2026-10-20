@@ -15,7 +15,6 @@ object Tokens {
     val CardInnerPadding = SpacingLg
 
     val IconSm = 16.dp
-    val IconMd = 24.dp
     val IconLg = 32.dp
 
     val ProgressStroke = 2.dp
