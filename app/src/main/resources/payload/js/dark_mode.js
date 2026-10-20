@@ -19,6 +19,9 @@
 //    '.a-cardui-body:has([class*=asin-container]){background-color:#e0e0e0!important}' +
     // Deal badges: transparent bg so HW renderer has nothing to darken
     '[class*=badgeMessage]{background-color:transparent!important}' +
+    '#wd-color-image-backdrop,#wd-backdrop-overscroll{filter:brightness(.3)!important}' +
+    '#wd-backdrop-gradient{background-image:linear-gradient(to top,#1a1a1a 10%,rgba(26,26,26,.5) 24%,' +
+    'rgba(26,26,26,.33) 75%,rgba(26,26,26,0) 98%)!important}' +
     // Buy buttons
     '.a-button-primary,.a-button-oneclick{color-scheme:only light!important}';
 
