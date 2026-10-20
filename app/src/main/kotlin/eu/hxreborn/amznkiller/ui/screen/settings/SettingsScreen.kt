@@ -3,6 +3,7 @@ package eu.hxreborn.amznkiller.ui.screen.settings
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -70,6 +71,7 @@ import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
+import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.preference
@@ -93,7 +95,6 @@ fun SettingsScreen(
         }
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    var showThemeDialog by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
     var showForceDarkModeDialog by remember { mutableStateOf(false) }
     val shareholderEgg = rememberShareholderEgg()
@@ -106,17 +107,6 @@ fun SettingsScreen(
                 showUrlDialog = false
             },
             onDismiss = { showUrlDialog = false },
-        )
-    }
-
-    if (showThemeDialog) {
-        ThemeDialog(
-            currentConfig = prefs.darkThemeConfig,
-            onSelect = { config ->
-                viewModel.savePref(Prefs.DARK_THEME_CONFIG, config.name.lowercase())
-                showThemeDialog = false
-            },
-            onDismiss = { showThemeDialog = false },
         )
     }
 
@@ -159,14 +149,19 @@ fun SettingsScreen(
 
                 val appearanceItemCount = 2
                 val themeShape = shapeForPosition(appearanceItemCount, 0)
-                preference(
-                    modifier = Modifier.preferenceModifier(surface, themeShape),
-                    key = "theme",
-                    icon = { Icon(Icons.Outlined.Palette, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_theme) },
-                    summary = { Text(stringResource(R.string.settings_theme_summary)) },
-                    onClick = { showThemeDialog = true },
-                )
+                item(key = "theme", contentType = "ThemePreference") {
+                    Column(modifier = Modifier.preferenceModifier(surface, themeShape)) {
+                        Preference(
+                            icon = { Icon(Icons.Outlined.Palette, contentDescription = null) },
+                            title = { PreferenceTitle(R.string.settings_theme) },
+                        )
+                        ThemePicker(
+                            currentConfig = prefs.darkThemeConfig,
+                            onSelect = { viewModel.savePref(Prefs.DARK_THEME_CONFIG, it.name.lowercase()) },
+                            modifier = Modifier.padding(start = Tokens.SpacingLg, end = Tokens.SpacingLg, bottom = Tokens.SpacingLg),
+                        )
+                    }
+                }
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 

@@ -58,7 +58,6 @@
     <string name="settings_ad_blocking">Ad Blocking</string>
     <string name="settings_advanced">Advanced</string>
     <string name="settings_debug_logs">Debug logs</string>
-    <string name="settings_theme_summary">Choose light, dark, or system default</string>
     <string name="settings_dynamic_color_summary">Use Material You colors from wallpaper</string>
     <string name="settings_content_filtering">Remove ads</string>
     <string name="settings_content_filtering_summary">Inject CSS rules into Amazon app to hide ads and sponsored junk</string>
