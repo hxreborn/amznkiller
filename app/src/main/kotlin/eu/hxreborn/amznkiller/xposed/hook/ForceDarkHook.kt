@@ -46,6 +46,10 @@ object ForceDarkHook {
     private const val SCAN_STEP = 2
     private const val MID_LUMINANCE = 128
     private const val LEGIBLE_BRIGHT_RATIO = 0.05f
+    private const val INSETS_HOST = "android.view.ViewRootInsetsControllerHost"
+    private const val LIGHT_BARS =
+        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
+            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
 
     private val READABLE_ICON = Color.rgb(232, 232, 232)
     private val READABLE_TINT = ColorStateList.valueOf(READABLE_ICON)
@@ -76,7 +80,19 @@ object ForceDarkHook {
         hookDetermineForceDarkType(xposed)
         hookRendererSetForceDark(xposed)
         hookWebViewBackground(xposed)
+        hookSystemBarsAppearance(xposed)
         hookBottomTabsDarkMode(xposed, classLoader)
+    }
+
+    private fun hookSystemBarsAppearance(xposed: XposedInterface) {
+        val host = runCatching { Class.forName(INSETS_HOST) }.getOrNull() ?: return
+        val int = Int::class.javaPrimitiveType!!
+        hookMethod(xposed, host, "setSystemBarsAppearance", int, int) { chain ->
+            val appearance = chain.getArg(0) as Int
+            val requestsLightBars = appearance and LIGHT_BARS != 0
+            if (!forceDarkWebview || !requestsLightBars) return@hookMethod chain.proceed()
+            chain.proceed(arrayOf(appearance and LIGHT_BARS.inv(), chain.getArg(1)))
+        }
     }
 
     private fun probeForceDarkType() {
