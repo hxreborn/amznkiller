@@ -53,7 +53,7 @@ fun UpdateCard(
 ) {
     val scheme = MaterialTheme.colorScheme
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val total = release.notesNew.size + release.notesFixed.size + release.notesOther.size
+    val total = release.notes.size
     Surface(
         shape = MaterialTheme.shapes.largeIncreased,
         color = scheme.primaryContainer,
