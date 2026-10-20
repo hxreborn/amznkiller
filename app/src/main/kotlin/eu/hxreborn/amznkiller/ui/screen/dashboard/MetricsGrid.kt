@@ -19,20 +19,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 
 @Composable
 internal fun MetricsGrid(
     injectionEnabled: Boolean,
     selectorCount: Int,
-    surface: Color,
     modifier: Modifier = Modifier,
 ) {
     val shape = Tokens.CardShape
@@ -44,7 +43,7 @@ internal fun MetricsGrid(
             modifier =
                 Modifier
                     .weight(1f)
-                    .background(color = surface, shape = shape)
+                    .background(color = AmznKillerSurfaceDefaults.cardContainerColor, shape = shape)
                     .padding(16.dp),
         ) {
             Icon(
@@ -74,7 +73,7 @@ internal fun MetricsGrid(
             modifier =
                 Modifier
                     .weight(1f)
-                    .background(color = surface, shape = shape)
+                    .background(color = AmznKillerSurfaceDefaults.cardContainerColor, shape = shape)
                     .padding(16.dp)
                     .then(if (injectionEnabled) Modifier else Modifier.alpha(0.38f)),
         ) {
@@ -110,7 +109,6 @@ private fun MetricsGridPreview() {
         MetricsGrid(
             injectionEnabled = true,
             selectorCount = 42,
-            surface = MaterialTheme.colorScheme.surfaceVariant,
         )
     }
 }

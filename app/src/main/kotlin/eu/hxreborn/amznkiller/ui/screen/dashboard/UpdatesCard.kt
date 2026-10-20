@@ -48,6 +48,7 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.state.SelectorSyncEvent
 import eu.hxreborn.amznkiller.ui.state.SelectorSyncOutcome
 import eu.hxreborn.amznkiller.ui.state.resolveMessage
+import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.relativeTime
 
@@ -183,7 +184,7 @@ internal fun UpdatesCard(
                 .fillMaxWidth()
                 .padding(horizontal = Tokens.SpacingSm),
         shape = Tokens.CardShape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = AmznKillerSurfaceDefaults.cardContainerColor,
         tonalElevation = 0.dp,
     ) {
         Row(

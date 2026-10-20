@@ -24,7 +24,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 
 @Immutable
@@ -53,7 +53,6 @@ internal fun TargetAppsCard(
     amazonPackage: String?,
     amazonInfo: TargetAppData?,
     webViewInfo: TargetAppData?,
-    surface: Color,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -63,7 +62,7 @@ internal fun TargetAppsCard(
             modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .background(color = surface, shape = shape)
+                .background(color = AmznKillerSurfaceDefaults.cardContainerColor, shape = shape)
                 .padding(16.dp),
     ) {
         TargetRow(amazonInfo) {
@@ -143,7 +142,6 @@ private fun TargetAppsCardNotInstalledPreview() {
             amazonPackage = null,
             amazonInfo = null,
             webViewInfo = null,
-            surface = MaterialTheme.colorScheme.surfaceVariant,
         )
     }
 }

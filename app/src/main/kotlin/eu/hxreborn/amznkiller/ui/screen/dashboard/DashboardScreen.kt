@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeFlexibleTopAppBar
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -97,8 +96,6 @@ fun DashboardScreen(
             )
         },
     ) { innerPadding ->
-        val surface = MaterialTheme.colorScheme.surfaceVariant
-
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
             contentPadding =
@@ -125,7 +122,6 @@ fun DashboardScreen(
                     amazonPackage = amazonPackage,
                     amazonInfo = amazonInfo,
                     webViewInfo = webViewInfo,
-                    surface = surface,
                 )
             }
 
@@ -135,7 +131,6 @@ fun DashboardScreen(
                 MetricsGrid(
                     injectionEnabled = state.injectionEnabled,
                     selectorCount = state.selectorCount,
-                    surface = surface,
                 )
             }
 
@@ -145,7 +140,6 @@ fun DashboardScreen(
                 SystemEnvironmentCard(
                     isXposedActive = state.isXposedActive,
                     frameworkVersion = state.frameworkVersion,
-                    surface = surface,
                 )
             }
         }
