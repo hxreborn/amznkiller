@@ -5,9 +5,7 @@
   // CSS fixes for Android's native force dark algorithm
   var DARK_FIX_CSS =
     // Kill mix-blend-mode that makes product images and metadata unreadable
-    '[class*=image-container] img{mix-blend-mode:normal!important}' +
-    'img[style*="mix-blend-mode"]{mix-blend-mode:normal!important}' +
-    '[class*=asin-metadata]{mix-blend-mode:normal!important}' +
+    '*{mix-blend-mode:normal!important}' +
     // TODO:
     // Prevent white flash on navigation(WIP)
     'html{background-color:#1a1a1a!important}' +
