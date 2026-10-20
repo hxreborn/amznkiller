@@ -26,6 +26,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import java.io.File
 import java.net.HttpURLConnection
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
 @Immutable
@@ -109,7 +110,7 @@ class UpdateViewModel(
     fun checkRelease(force: Boolean) {
         if (!force && !autoCheck.value) return
         val last = prefs.getLong(RELEASE_CHECKED_AT, 0)
-        if (!force && System.currentTimeMillis() - last < CHECK_INTERVAL_MS) return
+        if (!force && System.currentTimeMillis() - last < CHECK_INTERVAL.inWholeMilliseconds) return
         if (!force && System.currentTimeMillis() < prefs.getLong(RELEASE_RETRY_AT, 0)) return
         if (releaseCheck.value is ReleaseCheck.Checking) return
         val previous = releaseCheck.value
@@ -131,8 +132,8 @@ class UpdateViewModel(
 
                     else -> {
                         Log.w(TAG, "release check failed reason=$reply")
-                        (reply as? ApiResponse.Retryable)?.afterSeconds?.let { seconds ->
-                            prefs.edit { putLong(RELEASE_RETRY_AT, System.currentTimeMillis() + seconds * MILLIS) }
+                        (reply as? ApiResponse.Retryable)?.afterSeconds?.let { retryAfter ->
+                            prefs.edit { putLong(RELEASE_RETRY_AT, System.currentTimeMillis() + retryAfter.seconds.inWholeMilliseconds) }
                         }
                         if (force) {
                             ReleaseCheck.Failed(last.takeIf { it > 0 }, previous.known)
@@ -306,7 +307,6 @@ class UpdateViewModel(
         private const val RELEASE_RETRY_AT = "releaseRetryAt"
         private const val POSTPONED_VERSION = "postponedVersion"
         private const val LAST_RUN_VERSION = "lastRunVersion"
-        private const val CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L
-        private const val MILLIS = 1000L
+        private val CHECK_INTERVAL = 6.hours
     }
 }

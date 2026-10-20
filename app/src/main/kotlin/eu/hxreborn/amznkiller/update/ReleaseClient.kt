@@ -4,6 +4,7 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.Instant
 
 sealed interface ApiResponse {
     data class Ok(
@@ -55,7 +56,6 @@ object ReleaseClient {
     private const val HTTP_TIMEOUT = 408
     private const val HTTP_TOO_MANY = 429
     private const val HTTP_SERVER_ERRORS = 500
-    private const val MILLIS = 1000
     private const val CHANGELOG_PAGE = 100
 
     fun fetchLatest(etag: String?): ApiResponse = request("$API/latest", etag)
@@ -91,7 +91,7 @@ object ReleaseClient {
                     ApiResponse.Retryable(
                         "rate limited",
                         connection.getHeaderField("X-RateLimit-Reset")?.toLongOrNull()?.let {
-                            (it - System.currentTimeMillis() / MILLIS).coerceAtLeast(0)
+                            (it - Instant.now().epochSecond).coerceAtLeast(0)
                         },
                     )
                 }
