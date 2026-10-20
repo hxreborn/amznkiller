@@ -97,7 +97,6 @@
     <string name="settings_selector_url_test_failed">Failed: %1$s</string>
     <string name="settings_selector_url_https_required">Must start with https://</string>
 
-    <string name="dashboard_module_inactive">Not active</string>
     <string name="settings_about">About</string>
     <string name="settings_diagnostics">Diagnostics</string>
     <string name="settings_diagnostics_summary">Versions to include in a bug report</string>

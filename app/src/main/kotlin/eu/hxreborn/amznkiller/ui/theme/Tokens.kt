@@ -23,7 +23,6 @@ object Tokens {
     val FloatingBarItemHeight = 56.dp
     val FloatingBarBottomPadding = SpacingXl
 
-    val ListRowHeight = 56.dp
     val DialogWidth = 320.dp
 
     val GroupedShapeCornerLarge = 24.dp

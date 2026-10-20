@@ -106,7 +106,6 @@ fun SettingsScreen(
             Loading -> return
             is Ready -> s
         }
-    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var showUrlDialog by rememberSaveable { mutableStateOf(false) }
 
