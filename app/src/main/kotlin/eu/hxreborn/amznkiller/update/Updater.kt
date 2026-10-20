@@ -87,12 +87,15 @@ data class Release(
             Regex("""^(?:\[`?[0-9a-f]{7,40}`?]\([^)]*\)\s*)?\*\(([^)]+)\)\*""")
         private val bulletCommit =
             Regex("""^\[`?[0-9a-f]{7,40}`?]\((https://[^)]+/commit/[0-9a-f]{7,40})\)""")
+        private val sectionHeading = Regex("""^###\s+(.+?)\s*$""")
+        private val outerHeading = Regex("""^#{1,2}\s""")
+        private val bulletLine = Regex("""^\s*[*-]\s+(.+)$""")
 
         fun parseNotes(body: String): List<Note> {
             val notes = mutableListOf<Note>()
             var section: Pair<Note.Kind, String>? = null
             body.lines().forEach { line ->
-                val heading = Regex("""^###\s+(.+?)\s*$""").find(line)
+                val heading = sectionHeading.find(line)
                 if (heading != null) {
                     val title = heading.groupValues[1]
                     val kind =
@@ -104,10 +107,9 @@ data class Release(
                     section = kind to title
                     return@forEach
                 }
-                if (Regex("""^#{1,2}\s""").containsMatchIn(line)) section = null
+                if (outerHeading.containsMatchIn(line)) section = null
                 val (kind, title) = section ?: return@forEach
-                val bullet =
-                    Regex("""^\s*[*-]\s+(.+)$""").find(line)?.groupValues?.get(1) ?: return@forEach
+                val bullet = bulletLine.find(line)?.groupValues?.get(1) ?: return@forEach
                 notes +=
                     Note(
                         kind = kind,
