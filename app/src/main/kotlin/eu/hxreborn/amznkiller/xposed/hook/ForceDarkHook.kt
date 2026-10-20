@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.view.WindowInsetsController
 import android.webkit.WebView
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.descendants
 import eu.hxreborn.amznkiller.util.Logger
@@ -394,7 +395,8 @@ object ForceDarkHook {
     ) {
         val icons = bar.tabIcons().filterNot { it in checkedIcons }.toList()
         checkedIcons += icons
-        icons.filterNot { it.isLegibleIn(shot, origin) }.forEach { icon ->
+        val badges = bar.badgeRects(origin)
+        icons.filterNot { it.isLegibleIn(shot, origin, badges) }.forEach { icon ->
             unreadableIcons += icon
             icon.applyReadableTint()
             Logger.debug { "dark tab icon lighten id=${icon.idName}" }
@@ -405,6 +407,7 @@ object ForceDarkHook {
     private fun ImageView.isLegibleIn(
         shot: Bitmap,
         origin: Point,
+        badges: List<Rect>,
     ): Boolean {
         val at = locationInWindow
         var bright = 0
@@ -412,6 +415,7 @@ object ForceDarkHook {
         for (x in at.x - origin.x until at.x - origin.x + width step SCAN_STEP) {
             for (y in at.y - origin.y until at.y - origin.y + height step SCAN_STEP) {
                 if (x !in 0 until shot.width || y !in 0 until shot.height) continue
+                if (badges.any { it.contains(x, y) }) continue
                 scanned++
                 if (luminance(shot.getPixel(x, y)) >= MID_LUMINANCE) bright++
             }
@@ -492,6 +496,20 @@ object ForceDarkHook {
             .filterIsInstance<ImageView>()
             .filter { it.width > 0 && it.drawable != null }
             .filter { it.idName?.startsWith(TAB_ICON_ID_PREFIX) == true }
+
+    private fun View.badgeRects(origin: Point): List<Rect> =
+        ((this as? ViewGroup)?.descendants ?: emptySequence())
+            .filterIsInstance<TextView>()
+            .filter { it.isShown && it.width > 0 }
+            .map { badge ->
+                val at = badge.locationInWindow
+                Rect(
+                    at.x - origin.x,
+                    at.y - origin.y,
+                    at.x - origin.x + badge.width,
+                    at.y - origin.y + badge.height,
+                )
+            }.toList()
 
     private val View.idName: String?
         get() = runCatching { resources.getResourceEntryName(id) }.getOrNull()
