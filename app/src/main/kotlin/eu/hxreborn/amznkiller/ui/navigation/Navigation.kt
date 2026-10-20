@@ -157,6 +157,10 @@ fun MainNavDisplay(
     val sheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    val openUpdate: () -> Unit = {
+        updates.resetInstall()
+        backStack.add(Screen.Update)
+    }
 
     NavDisplay(
         backStack = backStack,
@@ -198,10 +202,7 @@ fun MainNavDisplay(
                                     release = release,
                                     onLater = { updates.postponeUpdate(release.versionCode) },
                                     modifier = Modifier.padding(bottom = 16.dp),
-                                    onUpdate = {
-                                        updates.resetInstall()
-                                        backStack.add(Screen.Update)
-                                    },
+                                    onUpdate = openUpdate,
                                 )
                             }
                         },
@@ -216,10 +217,7 @@ fun MainNavDisplay(
                         updateActions =
                             UpdateSettingsActions(
                                 onCheck = { updates.checkRelease(force = true) },
-                                onUpdate = {
-                                    updates.resetInstall()
-                                    backStack.add(Screen.Update)
-                                },
+                                onUpdate = openUpdate,
                                 onAutoCheck = updates::setAutoCheckUpdates,
                             ),
                     )
