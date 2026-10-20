@@ -202,9 +202,9 @@ fun AboutScreen(
                         LinkTile(
                             shape,
                             Icons.Outlined.Lightbulb,
-                            stringResource(R.string.suggest_feature),
-                            stringResource(R.string.suggest_feature_summary),
-                            { actions.onOpenUrl("$REPO_URL/issues/new?template=feature_request.yml") },
+                            stringResource(R.string.open_issue),
+                            stringResource(R.string.open_issue_summary),
+                            { actions.onOpenUrl("$REPO_URL/issues/new/choose") },
                             external = true,
                         )
                     }
