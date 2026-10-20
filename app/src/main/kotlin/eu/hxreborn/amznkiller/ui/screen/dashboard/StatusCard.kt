@@ -161,6 +161,7 @@ internal fun StatusCard(
     selectorCount: Int,
     lastFetched: Long,
     lastRefreshOutcome: SelectorSyncOutcome?,
+    pullProgress: () -> Float,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -187,7 +188,7 @@ internal fun StatusCard(
             horizontalArrangement = Arrangement.spacedBy(Tokens.SpacingLg),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            StatusBadge(status = status, accent = accent, onAccent = onAccent)
+            StatusBadge(status = status, accent = accent, onAccent = onAccent, pullProgress = pullProgress)
             transition.AnimatedContent(
                 modifier = Modifier.weight(1f),
                 transitionSpec = {
@@ -248,6 +249,7 @@ private val DashboardStatus.restIndex: Int
     get() = if (this == DashboardStatus.Blocking) BadgePolygons.indexOf(MaterialShapes.Sunny) else 0
 private const val MORPH_INTERVAL_MILLIS = 650L
 private const val STEP_TURN_DEGREES = 60f
+private const val PULL_TURN_DEGREES = 90f
 private const val ICON_ENTER_SCALE = 0.92f
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -256,6 +258,7 @@ private fun StatusBadge(
     status: DashboardStatus,
     accent: Color,
     onAccent: Color,
+    pullProgress: () -> Float,
 ) {
     val morphs =
         remember {
@@ -296,7 +299,7 @@ private fun StatusBadge(
             Modifier.size(Tokens.StatusBadgeSize).drawBehind {
                 val whole = floor(progress)
                 val index = Math.floorMod(whole.toInt(), morphs.size)
-                rotate(progress * STEP_TURN_DEGREES) {
+                rotate(progress * STEP_TURN_DEGREES + pullProgress() * PULL_TURN_DEGREES) {
                     drawPath(fitted(morphs[index].toPath(progress - whole, path), size, scaleFactor, scaleMatrix), accent)
                 }
             },
@@ -349,6 +352,7 @@ private fun StatusCardBlockingPreview() {
             selectorCount = 90,
             lastFetched = System.currentTimeMillis() - 7_200_000,
             lastRefreshOutcome = SelectorSyncOutcome(SelectorSyncEvent.Updated(added = 12, removed = 3)),
+            pullProgress = { 0f },
             onAction = {},
         )
     }
@@ -363,6 +367,7 @@ private fun StatusCardStalePreview() {
             selectorCount = 90,
             lastFetched = System.currentTimeMillis() - 259_200_000,
             lastRefreshOutcome = null,
+            pullProgress = { 0f },
             onAction = {},
         )
     }
@@ -377,6 +382,7 @@ private fun StatusCardInactivePreview() {
             selectorCount = 0,
             lastFetched = 0L,
             lastRefreshOutcome = null,
+            pullProgress = { 0f },
             onAction = {},
         )
     }
@@ -391,6 +397,7 @@ private fun StatusCardRefreshingPreview() {
             selectorCount = 90,
             lastFetched = 0L,
             lastRefreshOutcome = null,
+            pullProgress = { 0f },
             onAction = {},
         )
     }

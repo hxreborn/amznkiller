@@ -24,15 +24,22 @@ import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,10 +62,13 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState.Ready
+import eu.hxreborn.amznkiller.ui.state.SelectorSyncEvent
 import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preferenceCategory
@@ -111,10 +121,25 @@ private fun DashboardContent(
     val resources = LocalResources.current
     val tagline = rememberSaveable { resources.getStringArray(R.array.taglines).random() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val pullState = rememberPullToRefreshState()
     val status = resolveDashboardStatus(state, isAmazonInstalled)
+    val haptics = LocalHapticFeedback.current
+    val refreshing by rememberUpdatedState(state.isRefreshing)
+    var pullRefreshPending by remember { mutableStateOf(false) }
+    LaunchedEffect(pullState) {
+        snapshotFlow { !refreshing && pullState.distanceFraction > 1f }
+            .distinctUntilChanged()
+            .filter { it }
+            .collect { haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate) }
+    }
+    LaunchedEffect(state.isRefreshing) {
+        if (state.isRefreshing || !pullRefreshPending) return@LaunchedEffect
+        pullRefreshPending = false
+        val failed = state.lastRefreshOutcome?.event is SelectorSyncEvent.Error
+        haptics.performHapticFeedback(if (failed) HapticFeedbackType.Reject else HapticFeedbackType.Confirm)
+    }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             MediumFlexibleTopAppBar(
@@ -124,114 +149,126 @@ private fun DashboardContent(
             )
         },
     ) { innerPadding ->
-        val surface = AmznKillerSurfaceDefaults.cardContainerColor
-        ProvidePreferenceLocals(theme = sectionPreferenceTheme()) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding =
-                    PaddingValues(
-                        top = innerPadding.calculateTopPadding() + Tokens.SpacingSm,
-                        bottom = contentPadding.calculateBottomPadding() + Tokens.SpacingLg,
-                    ),
-            ) {
-                item(key = "update") { updateCard() }
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = {
+                pullRefreshPending = true
+                onRefresh()
+            },
+            state = pullState,
+            modifier = Modifier.fillMaxSize().padding(top = innerPadding.calculateTopPadding()),
+            indicator = {},
+        ) {
+            val surface = AmznKillerSurfaceDefaults.cardContainerColor
+            ProvidePreferenceLocals(theme = sectionPreferenceTheme()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+                    contentPadding =
+                        PaddingValues(
+                            top = Tokens.SpacingSm,
+                            bottom = contentPadding.calculateBottomPadding() + Tokens.SpacingLg,
+                        ),
+                ) {
+                    item(key = "update") { updateCard() }
 
-                item(key = "status") {
-                    StatusCard(
-                        status = status,
-                        selectorCount = state.selectorCount,
-                        lastFetched = state.lastFetched,
-                        lastRefreshOutcome = state.lastRefreshOutcome,
-                        onAction = {
-                            when (status) {
-                                DashboardStatus.AmazonMissing -> onGetAmazon()
-                                DashboardStatus.Blocking -> onOpenAmazon()
-                                else -> onRefresh()
-                            }
-                        },
-                    )
-                }
-
-                preferenceCategory(
-                    key = "category_ad_blocking",
-                    title = { Text(stringResource(R.string.settings_ad_blocking)) },
-                )
-
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, shapeForPosition(1, 0)),
-                    key = "remove_ads",
-                    value = state.injectionEnabled,
-                    icon = { Icon(Icons.Outlined.Block, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_content_filtering) },
-                    summary = { Text(stringResource(R.string.settings_content_filtering_summary)) },
-                    onValueChange = { onSwitch(Prefs.INJECTION_ENABLED, it) },
-                )
-
-                preferenceCategory(
-                    key = "category_shopping",
-                    title = { Text(stringResource(R.string.dashboard_shopping)) },
-                )
-
-                val shoppingItemCount = 4
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, shapeForPosition(shoppingItemCount, 0)),
-                    key = "price_chart_keepa",
-                    value = state.priceChartKeepa,
-                    icon = { Icon(Icons.AutoMirrored.Outlined.TrendingUp, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_price_chart_keepa) },
-                    summary = { Text(stringResource(R.string.settings_price_chart_keepa_summary)) },
-                    onValueChange = { onSwitch(Prefs.PRICE_CHART_KEEPA, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, shapeForPosition(shoppingItemCount, 1)),
-                    key = "price_chart_camel",
-                    value = state.priceChartCamel,
-                    icon = { Icon(Icons.AutoMirrored.Outlined.ShowChart, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_price_chart_camel) },
-                    summary = { Text(stringResource(R.string.settings_price_chart_camel_summary)) },
-                    onValueChange = { onSwitch(Prefs.PRICE_CHART_CAMEL, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, shapeForPosition(shoppingItemCount, 2)),
-                    key = "hide_rufus",
-                    value = state.hideRufus,
-                    icon = { Icon(Icons.Outlined.SmartToy, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_hide_rufus) },
-                    summary = { Text(stringResource(R.string.settings_hide_rufus_summary)) },
-                    onValueChange = { onSwitch(Prefs.HIDE_RUFUS, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, shapeForPosition(shoppingItemCount, 3)),
-                    key = "disable_video_autoplay",
-                    value = state.disableVideoAutoplay,
-                    icon = { Icon(Icons.Outlined.VideocamOff, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_disable_video_autoplay) },
-                    summary = { Text(stringResource(R.string.settings_disable_video_autoplay_summary)) },
-                    onValueChange = { onSwitch(Prefs.DISABLE_VIDEO_AUTOPLAY, it) },
-                )
-
-                preferenceCategory(
-                    key = "category_amazon_appearance",
-                    title = { Text(stringResource(R.string.dashboard_amazon_appearance)) },
-                )
-
-                item(key = "force_dark_mode", contentType = "ChoicePreference") {
-                    Column(modifier = Modifier.groupedPreference(surface, shapeForPosition(1, 0))) {
-                        Preference(
-                            icon = { Icon(Icons.Outlined.DarkMode, contentDescription = null) },
-                            title = { PreferenceTitle(R.string.settings_dark_mode) },
-                            summary = { Text(stringResource(R.string.settings_dark_mode_summary)) },
+                    item(key = "status") {
+                        StatusCard(
+                            status = status,
+                            selectorCount = state.selectorCount,
+                            lastFetched = state.lastFetched,
+                            lastRefreshOutcome = state.lastRefreshOutcome,
+                            pullProgress = { pullState.distanceFraction },
+                            onAction = {
+                                when (status) {
+                                    DashboardStatus.AmazonMissing -> onGetAmazon()
+                                    DashboardStatus.Blocking -> onOpenAmazon()
+                                    else -> onRefresh()
+                                }
+                            },
                         )
-                        ForceDarkModeButtons(selected = state.forceDarkMode, onSelect = onForceDarkMode)
+                    }
+
+                    preferenceCategory(
+                        key = "category_ad_blocking",
+                        title = { Text(stringResource(R.string.settings_ad_blocking)) },
+                    )
+
+                    switchPreference(
+                        modifier = Modifier.groupedPreference(surface, shapeForPosition(1, 0)),
+                        key = "remove_ads",
+                        value = state.injectionEnabled,
+                        icon = { Icon(Icons.Outlined.Block, contentDescription = null) },
+                        title = { PreferenceTitle(R.string.settings_content_filtering) },
+                        summary = { Text(stringResource(R.string.settings_content_filtering_summary)) },
+                        onValueChange = { onSwitch(Prefs.INJECTION_ENABLED, it) },
+                    )
+
+                    preferenceCategory(
+                        key = "category_shopping",
+                        title = { Text(stringResource(R.string.dashboard_shopping)) },
+                    )
+
+                    val shoppingItemCount = 4
+                    switchPreference(
+                        modifier = Modifier.groupedPreference(surface, shapeForPosition(shoppingItemCount, 0)),
+                        key = "price_chart_keepa",
+                        value = state.priceChartKeepa,
+                        icon = { Icon(Icons.AutoMirrored.Outlined.TrendingUp, contentDescription = null) },
+                        title = { PreferenceTitle(R.string.settings_price_chart_keepa) },
+                        summary = { Text(stringResource(R.string.settings_price_chart_keepa_summary)) },
+                        onValueChange = { onSwitch(Prefs.PRICE_CHART_KEEPA, it) },
+                    )
+
+                    item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                    switchPreference(
+                        modifier = Modifier.groupedPreference(surface, shapeForPosition(shoppingItemCount, 1)),
+                        key = "price_chart_camel",
+                        value = state.priceChartCamel,
+                        icon = { Icon(Icons.AutoMirrored.Outlined.ShowChart, contentDescription = null) },
+                        title = { PreferenceTitle(R.string.settings_price_chart_camel) },
+                        summary = { Text(stringResource(R.string.settings_price_chart_camel_summary)) },
+                        onValueChange = { onSwitch(Prefs.PRICE_CHART_CAMEL, it) },
+                    )
+
+                    item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                    switchPreference(
+                        modifier = Modifier.groupedPreference(surface, shapeForPosition(shoppingItemCount, 2)),
+                        key = "hide_rufus",
+                        value = state.hideRufus,
+                        icon = { Icon(Icons.Outlined.SmartToy, contentDescription = null) },
+                        title = { PreferenceTitle(R.string.settings_hide_rufus) },
+                        summary = { Text(stringResource(R.string.settings_hide_rufus_summary)) },
+                        onValueChange = { onSwitch(Prefs.HIDE_RUFUS, it) },
+                    )
+
+                    item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                    switchPreference(
+                        modifier = Modifier.groupedPreference(surface, shapeForPosition(shoppingItemCount, 3)),
+                        key = "disable_video_autoplay",
+                        value = state.disableVideoAutoplay,
+                        icon = { Icon(Icons.Outlined.VideocamOff, contentDescription = null) },
+                        title = { PreferenceTitle(R.string.settings_disable_video_autoplay) },
+                        summary = { Text(stringResource(R.string.settings_disable_video_autoplay_summary)) },
+                        onValueChange = { onSwitch(Prefs.DISABLE_VIDEO_AUTOPLAY, it) },
+                    )
+
+                    preferenceCategory(
+                        key = "category_amazon_appearance",
+                        title = { Text(stringResource(R.string.dashboard_amazon_appearance)) },
+                    )
+
+                    item(key = "force_dark_mode", contentType = "ChoicePreference") {
+                        Column(modifier = Modifier.groupedPreference(surface, shapeForPosition(1, 0))) {
+                            Preference(
+                                icon = { Icon(Icons.Outlined.DarkMode, contentDescription = null) },
+                                title = { PreferenceTitle(R.string.settings_dark_mode) },
+                                summary = { Text(stringResource(R.string.settings_dark_mode_summary)) },
+                            )
+                            ForceDarkModeButtons(selected = state.forceDarkMode, onSelect = onForceDarkMode)
+                        }
                     }
                 }
             }
