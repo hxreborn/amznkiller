@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.Block
@@ -27,6 +30,8 @@ import androidx.compose.material.icons.outlined.PhonelinkErase
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.VideocamOff
 import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +39,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -51,9 +58,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,9 +81,9 @@ import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
+import me.zhanghai.compose.preference.LocalPreferenceTheme
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.preferenceTheme
@@ -497,14 +506,35 @@ internal inline fun LazyListScope.switchPreference(
     noinline onValueChange: (Boolean) -> Unit,
 ) {
     item(key = key, contentType = "SwitchPreference") {
-        SwitchPreference(
-            value = value,
+        val isEnabled = enabled(value)
+        Preference(
             title = { title(value) },
-            modifier = modifier,
-            enabled = enabled(value),
+            modifier = modifier.toggleable(value, isEnabled, Role.Switch, onValueChange = onValueChange),
+            enabled = isEnabled,
             icon = icon?.let { { it(value) } },
             summary = summary?.let { { it(value) } },
-            onValueChange = onValueChange,
+            widgetContainer = {
+                val theme = LocalPreferenceTheme.current
+                Switch(
+                    checked = value,
+                    onCheckedChange = null,
+                    modifier =
+                        Modifier.padding(
+                            start = theme.horizontalSpacing,
+                            top = theme.padding.calculateTopPadding(),
+                            end = theme.padding.calculateEndPadding(LocalLayoutDirection.current),
+                            bottom = theme.padding.calculateBottomPadding(),
+                        ),
+                    enabled = isEnabled,
+                    thumbContent = {
+                        Icon(
+                            imageVector = if (value) Icons.Rounded.Check else Icons.Rounded.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(SwitchDefaults.IconSize),
+                        )
+                    },
+                )
+            },
         )
     }
 }
