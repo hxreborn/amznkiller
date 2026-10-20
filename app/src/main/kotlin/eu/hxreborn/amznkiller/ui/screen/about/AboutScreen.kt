@@ -1,11 +1,15 @@
 package eu.hxreborn.amznkiller.ui.screen.about
 
-import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -68,22 +72,28 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -99,12 +109,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
-import eu.hxreborn.amznkiller.ui.component.BalloonsOverlay
+import eu.hxreborn.amznkiller.prefs.Prefs
+import eu.hxreborn.amznkiller.ui.component.CelebrationOverlay
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.screen.settings.DiagnosticsDialog
+import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 private const val REPO = "hxreborn/amznkiller"
 private const val REPO_URL = "https://github.com/$REPO"
@@ -114,6 +128,8 @@ private val ChevronSlot = 40.dp
 private val CookieSize = 88.dp
 private const val COOKIE_SPIN_MS = 8_000
 private const val FULL_TURN = 360f
+private const val HINT_MILLIS = 2_200L
+
 private const val ADAPTIVE_ICON_ZOOM = 1.5f
 private val ConnectedButtonHeight = 52.dp
 private val SectionGap = 14.dp
@@ -151,9 +167,21 @@ fun AboutScreen(
     onBack: () -> Unit,
 ) {
     val shareholderEgg = rememberShareholderEgg()
+    var iconCenterInRoot by remember { mutableStateOf(Offset.Zero) }
     DetailScaffold(
         title = stringResource(R.string.settings_about),
         onBack = onBack,
+        overlay = {
+            if (shareholderEgg.showCelebration) {
+                CelebrationOverlay(
+                    originInRoot = iconCenterInRoot,
+                    startedAtNanos = shareholderEgg.startedAtNanos,
+                    seed = shareholderEgg.seed,
+                    firstTime = shareholderEgg.firstTime,
+                    onDismiss = shareholderEgg.onDismiss,
+                )
+            }
+        },
     ) {
         Column(
             Modifier
@@ -161,7 +189,13 @@ fun AboutScreen(
                 .padding(horizontal = readableGutter(), vertical = 16.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
         ) {
-            IdentityCard(tileShape(1, 0), actions.onOpenUrl, shareholderEgg.onVersionTap)
+            IdentityCard(
+                shape = tileShape(1, 0),
+                onOpenUrl = actions.onOpenUrl,
+                onIconTap = shareholderEgg.onVersionTap,
+                onIconPositioned = { iconCenterInRoot = it },
+                hint = shareholderEgg.hint,
+            )
             Spacer(Modifier.height(SectionGap))
             Group(null, 5) { index, shape ->
                 when (index) {
@@ -223,18 +257,23 @@ fun AboutScreen(
             DeviceGroup(framework)
         }
     }
-    if (shareholderEgg.showBalloons) {
-        BalloonsOverlay(onDismiss = shareholderEgg.onDismissBalloons)
-    }
 }
 
 @Stable
 private class ShareholderEggState(
-    showBalloonsProvider: () -> Boolean,
-    val onDismissBalloons: () -> Unit,
+    showCelebrationProvider: () -> Boolean,
+    hintProvider: () -> String?,
+    private val startedAtProvider: () -> Long,
+    private val seedProvider: () -> Int,
+    private val firstTimeProvider: () -> Boolean,
+    val onDismiss: () -> Unit,
     val onVersionTap: () -> Unit,
 ) {
-    val showBalloons: Boolean by derivedStateOf(showBalloonsProvider)
+    val showCelebration: Boolean by derivedStateOf(showCelebrationProvider)
+    val hint: String? by derivedStateOf(hintProvider)
+    val startedAtNanos: Long get() = startedAtProvider()
+    val seed: Int get() = seedProvider()
+    val firstTime: Boolean get() = firstTimeProvider()
 }
 
 @Composable
@@ -248,42 +287,58 @@ private fun rememberShareholderEgg(): ShareholderEggState {
 
     var tapCount by rememberSaveable { mutableIntStateOf(0) }
     var alreadyShareholder by rememberSaveable { mutableStateOf(false) }
-    var showBalloons by remember { mutableStateOf(false) }
-    val countdownToast = remember { mutableStateOf<Toast?>(null) }
-
-    fun showToast(text: CharSequence) {
-        countdownToast.value?.cancel()
-        countdownToast.value = Toast.makeText(context, text, Toast.LENGTH_SHORT).also { it.show() }
+    var showCelebration by rememberSaveable { mutableStateOf(false) }
+    var startedAtNanos by rememberSaveable { mutableLongStateOf(0L) }
+    var seed by rememberSaveable { mutableIntStateOf(0) }
+    var firstTime by rememberSaveable { mutableStateOf(false) }
+    var hint by rememberSaveable { mutableStateOf<String?>(null) }
+    var hintShownAt by remember { mutableLongStateOf(0L) }
+    val haptics = LocalHapticFeedback.current
+    val prefs = remember(context) { App.from(context).prefsRepository }
+    LaunchedEffect(hintShownAt) {
+        if (hint == null) return@LaunchedEffect
+        delay(HINT_MILLIS)
+        hint = null
     }
 
-    DisposableEffect(Unit) {
-        onDispose { countdownToast.value?.cancel() }
+    fun showHint(text: String) {
+        hint = text
+        hintShownAt = System.nanoTime()
     }
 
     return remember {
         ShareholderEggState(
-            showBalloonsProvider = { showBalloons },
-            onDismissBalloons = { showBalloons = false },
+            showCelebrationProvider = { showCelebration },
+            hintProvider = { hint },
+            startedAtProvider = { startedAtNanos },
+            seedProvider = { seed },
+            firstTimeProvider = { firstTime },
+            onDismiss = { showCelebration = false },
             onVersionTap = onVersionTap@{
                 when {
-                    showBalloons -> {
+                    showCelebration -> {
                         return@onVersionTap
                     }
 
                     alreadyShareholder -> {
-                        showToast(alreadyMsg)
+                        showHint(alreadyMsg)
                     }
 
                     else -> {
                         tapCount += 1
                         val remaining = SHAREHOLDER_TAPS - tapCount
                         if (remaining == 0) {
-                            countdownToast.value?.cancel()
+                            hint = null
                             tapCount = 0
                             alreadyShareholder = true
-                            showBalloons = true
+                            firstTime = !prefs.read(Prefs.EASTER_EGG_SEEN)
+                            prefs.save(Prefs.EASTER_EGG_SEEN, true)
+                            startedAtNanos = System.nanoTime()
+                            seed = Random.nextInt()
+                            showCelebration = true
+                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                         } else if (remaining in 1..countdownLabels.size) {
-                            showToast(countdownLabels[remaining - 1])
+                            showHint(countdownLabels[remaining - 1])
                         }
                     }
                 }
@@ -298,6 +353,8 @@ private fun IdentityCard(
     shape: RoundedCornerShape,
     onOpenUrl: (String) -> Unit,
     onIconTap: () -> Unit,
+    onIconPositioned: (Offset) -> Unit,
+    hint: String?,
 ) {
     val scheme = MaterialTheme.colorScheme
     Surface(shape = shape, color = scheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
@@ -320,6 +377,8 @@ private fun IdentityCard(
                         rotationZ = rotation
                         this.shape = cookie
                         clip = true
+                    }.onGloballyPositioned {
+                        onIconPositioned(it.positionInRoot() + Offset(it.size.width / 2f, it.size.height / 2f))
                     }.clickable(onClick = onIconTap),
             ) {
                 Image(
@@ -335,6 +394,17 @@ private fun IdentityCard(
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmallEmphasized)
+                AnimatedVisibility(visible = hint != null, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
+                    var shown by remember { mutableStateOf(hint) }
+                    if (hint != null) shown = hint
+                    Text(
+                        shown.orEmpty(),
+                        style = TileSupporting,
+                        color = scheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
                 Text(
                     stringResource(R.string.app_desc),
                     style = TileSupporting,
@@ -540,32 +610,36 @@ private fun readableGutter(): Dp {
 private fun DetailScaffold(
     title: String,
     onBack: () -> Unit,
+    overlay: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
-        topBar = {
-            val navigationIcon: @Composable () -> Unit = {
-                IconButton(onClick = onBack, shapes = IconButtonDefaults.shapes()) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+    Box {
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+            topBar = {
+                val navigationIcon: @Composable () -> Unit = {
+                    IconButton(onClick = onBack, shapes = IconButtonDefaults.shapes()) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                    }
                 }
-            }
-            if (compactHeight()) {
-                TopAppBar(title = { Text(title) }, navigationIcon = navigationIcon, scrollBehavior = scrollBehavior)
-            } else {
-                LargeFlexibleTopAppBar(title = { Text(title) }, navigationIcon = navigationIcon, scrollBehavior = scrollBehavior)
-            }
-        },
-    ) { innerPadding ->
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding),
-        ) { content() }
+                if (compactHeight()) {
+                    TopAppBar(title = { Text(title) }, navigationIcon = navigationIcon, scrollBehavior = scrollBehavior)
+                } else {
+                    LargeFlexibleTopAppBar(title = { Text(title) }, navigationIcon = navigationIcon, scrollBehavior = scrollBehavior)
+                }
+            },
+        ) { innerPadding ->
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .consumeWindowInsets(innerPadding),
+            ) { content() }
+        }
+        overlay()
     }
 }
 

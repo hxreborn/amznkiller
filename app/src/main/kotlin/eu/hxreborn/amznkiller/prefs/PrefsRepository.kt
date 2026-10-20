@@ -67,6 +67,8 @@ class PrefsRepository(
                 System.currentTimeMillis() - lastFetched > Prefs.STALE_THRESHOLD_MS
         }
 
+    fun <T> read(pref: PrefSpec<T>): T = pref.read(local)
+
     fun <T> save(
         pref: PrefSpec<T>,
         value: T,

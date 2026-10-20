@@ -30,6 +30,7 @@ object Prefs {
 
     val DARK_THEME_CONFIG = stringPref("dark_theme_config", "follow_system")
     val USE_DYNAMIC_COLOR = boolPref("use_dynamic_color", true)
+    val EASTER_EGG_SEEN = boolPref("easter_egg_seen", false)
 
     val all: List<PrefSpec<*>> =
         listOf(
