@@ -51,7 +51,7 @@ data class Release(
 
     private fun notesOf(kind: Note.Kind) = notes.filter { it.kind == kind }.map { it.text }
 
-    val newer: Boolean get() = versionCode > versionCodeOf(BuildConfig.VERSION_NAME)
+    val isNewer: Boolean get() = versionCode > versionCodeOf(BuildConfig.VERSION_NAME)
 
     companion object {
         private const val MAJOR = 10_000
@@ -199,7 +199,7 @@ sealed interface InstallStep {
         val actual: String?,
         val checksum: String? = null,
     ) : InstallStep {
-        val releaseKey: Boolean get() =
+        val isReleaseSigned: Boolean get() =
             cause == Cause.SIGNER &&
                 actual == BuildConfig.RELEASE_SIGNER
 

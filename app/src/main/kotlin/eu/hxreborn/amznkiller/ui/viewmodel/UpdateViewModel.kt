@@ -35,7 +35,7 @@ data class UpdateUiState(
     val postponedVersion: Int,
     val install: InstallStep,
 ) {
-    val available: Release? get() = release.known?.takeIf { it.newer }
+    val available: Release? get() = release.known?.takeIf { it.isNewer }
     val showUpdateCard: Boolean get() = available?.let { it.versionCode > postponedVersion } == true
 }
 
@@ -213,7 +213,7 @@ class UpdateViewModel(
                     }
                 if (!job.isActive) return@launch
                 if (rejection != null) {
-                    if (rejection.releaseKey) {
+                    if (rejection.isReleaseSigned) {
                         verifiedApk = file
                         verifiedVersion = release.versionCode
                     } else {

@@ -166,7 +166,7 @@ fun UpdateSheet(
             }
 
             is InstallStep.Rejected -> {
-                if (step.releaseKey) {
+                if (step.isReleaseSigned) {
                     Block(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.onSurface, Icons.Outlined.Key) {
                         Text(stringResource(R.string.update_release_signer), style = MaterialTheme.typography.titleSmall)
                         Text(
@@ -215,7 +215,7 @@ fun UpdateSheet(
 
                     else -> {}
                 }
-                if (step.releaseKey) {
+                if (step.isReleaseSigned) {
                     Primary(stringResource(R.string.update_install_anyway), Icons.Outlined.Download, actions.onInstallAnyway)
                 } else {
                     Primary(stringResource(R.string.update_download_again), Icons.Outlined.Download, actions.onInstall)
