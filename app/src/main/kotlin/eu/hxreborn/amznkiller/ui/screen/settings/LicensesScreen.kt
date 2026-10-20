@@ -1,7 +1,9 @@
 package eu.hxreborn.amznkiller.ui.screen.settings
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -58,6 +60,7 @@ fun LicensesScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
+            contentPadding = WindowInsets.navigationBars.asPaddingValues(),
             variantColors =
                 LibraryDefaults.m3VariantColors(
                     licenseHueResolver = accentDerivedLicenseHueResolver(isDark = isDark, contrastLevel = ContrastLevel.High),
