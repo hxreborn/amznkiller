@@ -61,6 +61,12 @@ import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.ForceDarkMode
 import eu.hxreborn.amznkiller.prefs.Prefs
+import eu.hxreborn.amznkiller.ui.component.ChoiceButtonGroup
+import eu.hxreborn.amznkiller.ui.component.ForceDarkModeButtons
+import eu.hxreborn.amznkiller.ui.component.PreferenceTitle
+import eu.hxreborn.amznkiller.ui.component.groupedPreference
+import eu.hxreborn.amznkiller.ui.component.sectionPreferenceTheme
+import eu.hxreborn.amznkiller.ui.component.switchPreference
 import eu.hxreborn.amznkiller.ui.preview.FakeAppViewModel
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
@@ -127,13 +133,7 @@ fun SettingsScreen(
         val surface = AmznKillerSurfaceDefaults.cardContainerColor
         val rowActions = updateState?.let { updateActions?.withHaptics(it.release) }
 
-        ProvidePreferenceLocals(
-            theme =
-                preferenceTheme(
-                    categoryColor = MaterialTheme.colorScheme.primary,
-                    categoryTextStyle = MaterialTheme.typography.labelLargeEmphasized,
-                ),
-        ) {
+        ProvidePreferenceLocals(theme = sectionPreferenceTheme()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(horizontal = Tokens.ScreenHorizontalPadding),
                 contentPadding =
@@ -149,7 +149,7 @@ fun SettingsScreen(
                     )
 
                     preference(
-                        modifier = Modifier.preferenceModifier(surface, shapeForPosition(2, 0)),
+                        modifier = Modifier.groupedPreference(surface, shapeForPosition(2, 0)),
                         key = "update_check",
                         icon = { Icon(Icons.Outlined.SystemUpdate, contentDescription = null) },
                         title = { PreferenceTitle(R.string.update_check) },
@@ -161,7 +161,7 @@ fun SettingsScreen(
                     item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
                     switchPreference(
-                        modifier = Modifier.preferenceModifier(surface, shapeForPosition(2, 1)),
+                        modifier = Modifier.groupedPreference(surface, shapeForPosition(2, 1)),
                         key = "update_auto_check",
                         value = updateState.autoCheckUpdates,
                         icon = { Icon(Icons.Outlined.Autorenew, contentDescription = null) },
@@ -178,7 +178,7 @@ fun SettingsScreen(
                 val appearanceItemCount = 2
                 val themeShape = shapeForPosition(appearanceItemCount, 0)
                 item(key = "theme", contentType = "ChoicePreference") {
-                    Column(modifier = Modifier.preferenceModifier(surface, themeShape)) {
+                    Column(modifier = Modifier.groupedPreference(surface, themeShape)) {
                         Preference(
                             icon = { Icon(Icons.Outlined.Palette, contentDescription = null) },
                             title = { PreferenceTitle(R.string.settings_theme) },
@@ -188,7 +188,6 @@ fun SettingsScreen(
                             selected = prefs.darkThemeConfig,
                             onSelect = { viewModel.savePref(Prefs.DARK_THEME_CONFIG, it.name.lowercase()) },
                             label = { themeLabel(it) },
-                            modifier = choiceButtonGroupModifier,
                         )
                     }
                 }
@@ -197,7 +196,7 @@ fun SettingsScreen(
 
                 val dynamicColorShape = shapeForPosition(appearanceItemCount, 1)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, dynamicColorShape),
+                    modifier = Modifier.groupedPreference(surface, dynamicColorShape),
                     key = "dynamic_color",
                     value = prefs.useDynamicColor,
                     icon = { Icon(Icons.Outlined.FormatPaint, contentDescription = null) },
@@ -214,7 +213,7 @@ fun SettingsScreen(
                 val adBlockItemCount = 3
                 val filteringShape = shapeForPosition(adBlockItemCount, 0)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, filteringShape),
+                    modifier = Modifier.groupedPreference(surface, filteringShape),
                     key = "css_injection",
                     value = prefs.injectionEnabled,
                     icon = { Icon(Icons.Outlined.Block, contentDescription = null) },
@@ -227,7 +226,7 @@ fun SettingsScreen(
 
                 val syncShape = shapeForPosition(adBlockItemCount, 1)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, syncShape),
+                    modifier = Modifier.groupedPreference(surface, syncShape),
                     key = "auto_update",
                     value = prefs.autoUpdate,
                     icon = { Icon(Icons.Outlined.CloudSync, contentDescription = null) },
@@ -240,7 +239,7 @@ fun SettingsScreen(
 
                 val filterSourcesShape = shapeForPosition(adBlockItemCount, 2)
                 preference(
-                    modifier = Modifier.preferenceModifier(surface, filterSourcesShape),
+                    modifier = Modifier.groupedPreference(surface, filterSourcesShape),
                     key = "filter_sources",
                     icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
                     title = { PreferenceTitle(R.string.settings_filter_sources) },
@@ -256,7 +255,7 @@ fun SettingsScreen(
                 val displayItemCount = 5
                 val keepaShape = shapeForPosition(displayItemCount, 0)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, keepaShape),
+                    modifier = Modifier.groupedPreference(surface, keepaShape),
                     key = "price_chart_keepa",
                     value = prefs.priceChartKeepa,
                     icon = { Icon(Icons.AutoMirrored.Outlined.TrendingUp, contentDescription = null) },
@@ -269,7 +268,7 @@ fun SettingsScreen(
 
                 val camelShape = shapeForPosition(displayItemCount, 1)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, camelShape),
+                    modifier = Modifier.groupedPreference(surface, camelShape),
                     key = "price_chart_camel",
                     value = prefs.priceChartCamel,
                     icon = { Icon(Icons.AutoMirrored.Outlined.ShowChart, contentDescription = null) },
@@ -282,7 +281,7 @@ fun SettingsScreen(
 
                 val autoplayShape = shapeForPosition(displayItemCount, 2)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, autoplayShape),
+                    modifier = Modifier.groupedPreference(surface, autoplayShape),
                     key = "disable_video_autoplay",
                     value = prefs.disableVideoAutoplay,
                     icon = { Icon(Icons.Outlined.VideocamOff, contentDescription = null) },
@@ -295,7 +294,7 @@ fun SettingsScreen(
 
                 val hideRufusShape = shapeForPosition(displayItemCount, 3)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, hideRufusShape),
+                    modifier = Modifier.groupedPreference(surface, hideRufusShape),
                     key = "hide_rufus",
                     value = prefs.hideRufus,
                     icon = { Icon(Icons.Outlined.SmartToy, contentDescription = null) },
@@ -308,18 +307,15 @@ fun SettingsScreen(
 
                 val darkModeShape = shapeForPosition(displayItemCount, 4)
                 item(key = "force_dark_mode", contentType = "ChoicePreference") {
-                    Column(modifier = Modifier.preferenceModifier(surface, darkModeShape)) {
+                    Column(modifier = Modifier.groupedPreference(surface, darkModeShape)) {
                         Preference(
                             icon = { Icon(Icons.Outlined.DarkMode, contentDescription = null) },
                             title = { PreferenceTitle(R.string.settings_dark_mode) },
                             summary = { Text(stringResource(R.string.settings_dark_mode_summary)) },
                         )
-                        ChoiceButtonGroup(
-                            options = ForceDarkMode.entries,
+                        ForceDarkModeButtons(
                             selected = prefs.forceDarkMode,
                             onSelect = { viewModel.savePref(Prefs.FORCE_DARK_MODE, it.prefValue) },
-                            label = { forceDarkModeLabel(it) },
-                            modifier = choiceButtonGroupModifier,
                         )
                     }
                 }
@@ -332,7 +328,7 @@ fun SettingsScreen(
                 val advancedItemCount = 3
                 val hideLauncherShape = shapeForPosition(advancedItemCount, 0)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, hideLauncherShape),
+                    modifier = Modifier.groupedPreference(surface, hideLauncherShape),
                     key = "hide_launcher_icon",
                     value = prefs.isLauncherIconHidden,
                     icon = { Icon(Icons.Outlined.PhonelinkErase, contentDescription = null) },
@@ -345,7 +341,7 @@ fun SettingsScreen(
 
                 val webviewDebugShape = shapeForPosition(advancedItemCount, 1)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, webviewDebugShape),
+                    modifier = Modifier.groupedPreference(surface, webviewDebugShape),
                     key = "webview_debugging",
                     value = prefs.webviewDebugging,
                     icon = { Icon(Icons.Rounded.DeveloperMode, contentDescription = null) },
@@ -358,7 +354,7 @@ fun SettingsScreen(
 
                 val debugShape = shapeForPosition(advancedItemCount, 2)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, debugShape),
+                    modifier = Modifier.groupedPreference(surface, debugShape),
                     key = "debug_logs",
                     value = prefs.debugLogs,
                     icon = { Icon(Icons.Rounded.BugReport, contentDescription = null) },
@@ -373,7 +369,7 @@ fun SettingsScreen(
                 )
 
                 preference(
-                    modifier = Modifier.preferenceModifier(surface, shapeForPosition(1, 0)),
+                    modifier = Modifier.groupedPreference(surface, shapeForPosition(1, 0)),
                     key = "about",
                     icon = { Icon(Icons.Rounded.Info, contentDescription = null) },
                     title = { PreferenceTitle(R.string.app_name) },
@@ -386,17 +382,6 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun PreferenceTitle(resId: Int) {
-    Text(
-        text = stringResource(resId),
-        style = MaterialTheme.typography.bodyLarge,
-    )
-}
-
-private val choiceButtonGroupModifier =
-    Modifier.padding(start = Tokens.SpacingLg, end = Tokens.SpacingLg, bottom = Tokens.SpacingLg)
-
-@Composable
 private fun themeLabel(config: DarkThemeConfig): String =
     stringResource(
         when (config) {
@@ -405,65 +390,6 @@ private fun themeLabel(config: DarkThemeConfig): String =
             DarkThemeConfig.DARK -> R.string.settings_theme_dark
         },
     )
-
-@Composable
-private fun forceDarkModeLabel(mode: ForceDarkMode): String =
-    stringResource(
-        when (mode) {
-            ForceDarkMode.OFF -> R.string.settings_force_dark_off
-            ForceDarkMode.FOLLOW_SYSTEM -> R.string.settings_force_dark_follow_system
-            ForceDarkMode.ON -> R.string.settings_force_dark_on
-        },
-    )
-
-private fun Modifier.preferenceModifier(
-    surface: Color,
-    shape: Shape,
-): Modifier = padding(horizontal = Tokens.ScreenHorizontalPadding).background(color = surface, shape = shape)
-
-internal inline fun LazyListScope.switchPreference(
-    key: String,
-    value: Boolean,
-    crossinline title: @Composable (Boolean) -> Unit,
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    crossinline enabled: (Boolean) -> Boolean = { true },
-    noinline icon: @Composable ((Boolean) -> Unit)? = null,
-    noinline summary: @Composable ((Boolean) -> Unit)? = null,
-    noinline onValueChange: (Boolean) -> Unit,
-) {
-    item(key = key, contentType = "SwitchPreference") {
-        val isEnabled = enabled(value)
-        Preference(
-            title = { title(value) },
-            modifier = modifier.toggleable(value, isEnabled, Role.Switch, onValueChange = onValueChange),
-            enabled = isEnabled,
-            icon = icon?.let { { it(value) } },
-            summary = summary?.let { { it(value) } },
-            widgetContainer = {
-                val theme = LocalPreferenceTheme.current
-                Switch(
-                    checked = value,
-                    onCheckedChange = null,
-                    modifier =
-                        Modifier.padding(
-                            start = theme.horizontalSpacing,
-                            top = theme.padding.calculateTopPadding(),
-                            end = theme.padding.calculateEndPadding(LocalLayoutDirection.current),
-                            bottom = theme.padding.calculateBottomPadding(),
-                        ),
-                    enabled = isEnabled,
-                    thumbContent = {
-                        Icon(
-                            imageVector = if (value) Icons.Rounded.Check else Icons.Rounded.Close,
-                            contentDescription = null,
-                            modifier = Modifier.size(SwitchDefaults.IconSize),
-                        )
-                    },
-                )
-            },
-        )
-    }
-}
 
 @Suppress("ViewModelConstructorInComposable")
 @PreviewLightDark
