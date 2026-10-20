@@ -49,17 +49,13 @@ open class AppViewModel(
 
     private val refreshing = MutableStateFlow(false)
     private val lastRefreshOutcome = MutableStateFlow<SelectorSyncOutcome?>(null)
-    private val launcherIconHidden = MutableStateFlow(false)
+    private val launcherIconHidden =
+        MutableStateFlow(
+            runCatching { !LauncherIconHelper.isLauncherIconVisible(application) }
+                .getOrDefault(false),
+        )
 
     @Volatile private var autoUpdateTriggered = false
-
-    init {
-        viewModelScope.launch {
-            runCatching {
-                launcherIconHidden.value = !LauncherIconHelper.isLauncherIconVisible(application)
-            }
-        }
-    }
 
     private val _dashboardUiState by lazy {
         combine(
