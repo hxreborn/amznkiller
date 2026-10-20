@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
+import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.DarkMode
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PhonelinkErase
 import androidx.compose.material.icons.outlined.SmartToy
+import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.outlined.VideocamOff
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Check
@@ -74,6 +76,10 @@ import eu.hxreborn.amznkiller.ui.component.BalloonsOverlay
 import eu.hxreborn.amznkiller.ui.preview.FakeAppViewModel
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.screen.update.UpdateRowAction
+import eu.hxreborn.amznkiller.ui.screen.update.UpdateRowSummary
+import eu.hxreborn.amznkiller.ui.screen.update.UpdateSettingsActions
+import eu.hxreborn.amznkiller.ui.screen.update.settingsRowAction
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Ready
 import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
@@ -81,6 +87,7 @@ import eu.hxreborn.amznkiller.ui.theme.DarkThemeConfig
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
+import eu.hxreborn.amznkiller.ui.viewmodel.UpdateUiState
 import me.zhanghai.compose.preference.LocalPreferenceTheme
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -97,6 +104,8 @@ fun SettingsScreen(
     viewModel: AppViewModel,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onNavigateToLicenses: () -> Unit = {},
+    updateState: UpdateUiState? = null,
+    updateActions: UpdateSettingsActions? = null,
 ) {
     val uiState by viewModel.settingsUiState.collectAsStateWithLifecycle()
     val prefs =
@@ -147,6 +156,34 @@ fun SettingsScreen(
                         bottom = contentPadding.calculateBottomPadding() + Tokens.SpacingLg,
                     ),
             ) {
+                if (updateState != null && updateActions != null) {
+                    preferenceCategory(
+                        key = "category_updates",
+                        title = { Text(stringResource(R.string.settings_updates)) },
+                    )
+
+                    preference(
+                        modifier = Modifier.preferenceModifier(surface, shapeForPosition(2, 0)),
+                        key = "update_check",
+                        icon = { Icon(Icons.Outlined.SystemUpdate, contentDescription = null) },
+                        title = { PreferenceTitle(R.string.update_check) },
+                        summary = { UpdateRowSummary(updateState) },
+                        widgetContainer = { UpdateRowAction(updateState, updateActions) },
+                        onClick = updateState.settingsRowAction(updateActions),
+                    )
+
+                    item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                    switchPreference(
+                        modifier = Modifier.preferenceModifier(surface, shapeForPosition(2, 1)),
+                        key = "update_auto_check",
+                        value = updateState.autoCheckUpdates,
+                        icon = { Icon(Icons.Outlined.Autorenew, contentDescription = null) },
+                        title = { PreferenceTitle(R.string.update_auto_check) },
+                        onValueChange = updateActions.onAutoCheck,
+                    )
+                }
+
                 preferenceCategory(
                     key = "category_appearance",
                     title = { Text(stringResource(R.string.settings_appearance)) },

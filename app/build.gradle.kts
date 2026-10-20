@@ -30,6 +30,11 @@ android {
             "TARGET_PACKAGES",
             cfgTargetPackages.joinToString(prefix = "{", postfix = "}") { "\"$it\"" },
         )
+        buildConfigField(
+            "String",
+            "RELEASE_SIGNER",
+            "\"32b98dc709a7ee15fae073493a1aeca5d428316cc0d8b8f878eed64ba37f3297\"",
+        )
     }
 
     @Suppress("UnstableApiUsage")

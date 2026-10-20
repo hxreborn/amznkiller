@@ -41,6 +41,7 @@ import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
 fun DashboardScreen(
     viewModel: AppViewModel,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    updateCard: @Composable () -> Unit = {},
 ) {
     val uiState by viewModel.dashboardUiState.collectAsStateWithLifecycle()
     val state =
@@ -104,6 +105,8 @@ fun DashboardScreen(
                     bottom = contentPadding.calculateBottomPadding() + 16.dp,
                 ),
         ) {
+            item { updateCard() }
+
             item {
                 UpdatesCard(
                     isRefreshing = state.isRefreshing,

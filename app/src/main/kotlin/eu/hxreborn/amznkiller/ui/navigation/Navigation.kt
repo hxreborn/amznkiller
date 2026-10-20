@@ -1,5 +1,7 @@
 package eu.hxreborn.amznkiller.ui.navigation
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandHorizontally
@@ -29,6 +31,7 @@ import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.ToggleButtonShapes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -44,10 +47,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -60,8 +70,13 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.screen.dashboard.DashboardScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.LicensesScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.SettingsScreen
+import eu.hxreborn.amznkiller.ui.screen.update.UpdateActions
+import eu.hxreborn.amznkiller.ui.screen.update.UpdateCard
+import eu.hxreborn.amznkiller.ui.screen.update.UpdateSettingsActions
+import eu.hxreborn.amznkiller.ui.screen.update.UpdateSheet
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
+import eu.hxreborn.amznkiller.ui.viewmodel.UpdateViewModel
 import kotlinx.serialization.Serializable
 import soup.compose.material.motion.animation.materialSharedAxisXIn
 import soup.compose.material.motion.animation.materialSharedAxisXOut
@@ -75,6 +90,9 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object Licenses : Screen
+
+    @Serializable
+    data object Update : Screen
 }
 
 data class BottomNavItem(
@@ -119,11 +137,17 @@ fun MainNavDisplay(
     modifier: Modifier = Modifier,
 ) {
     val slideInDistance = with(LocalDensity.current) { Tokens.NavSlideDistance.roundToPx() }
+    val updates: UpdateViewModel = viewModel()
+    val updateState by updates.state.collectAsStateWithLifecycle()
+    val sheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
+    val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
 
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
         modifier = modifier,
+        sceneStrategies = listOf(sheetStrategy),
         transitionSpec = {
             val forward = isForwardTabTransition(initialState, targetState)
             materialSharedAxisXIn(forward = forward, slideDistance = slideInDistance) togetherWith
@@ -152,6 +176,20 @@ fun MainNavDisplay(
                     DashboardScreen(
                         viewModel = viewModel,
                         contentPadding = contentPadding,
+                        updateCard = {
+                            val release = updateState.available
+                            if (release != null && updateState.showUpdateCard) {
+                                UpdateCard(
+                                    release = release,
+                                    onLater = { updates.postponeUpdate(release.versionCode) },
+                                    modifier = Modifier.padding(bottom = 16.dp),
+                                    onUpdate = {
+                                        updates.resetInstall()
+                                        backStack.add(Screen.Update)
+                                    },
+                                )
+                            }
+                        },
                     )
                 }
                 entry<Screen.Settings> {
@@ -159,10 +197,50 @@ fun MainNavDisplay(
                         viewModel = viewModel,
                         contentPadding = contentPadding,
                         onNavigateToLicenses = { backStack.add(Screen.Licenses) },
+                        updateState = updateState,
+                        updateActions =
+                            UpdateSettingsActions(
+                                onCheck = { updates.checkRelease(force = true) },
+                                onUpdate = {
+                                    updates.resetInstall()
+                                    backStack.add(Screen.Update)
+                                },
+                                onAutoCheck = updates::setAutoCheckUpdates,
+                            ),
                     )
                 }
                 entry<Screen.Licenses> {
                     LicensesScreen(onBack = { backStack.removeLastOrNull() })
+                }
+                entry<Screen.Update>(metadata = BottomSheetSceneStrategy.bottomSheet()) {
+                    val release = updateState.available
+                    if (release == null) {
+                        LaunchedEffect(Unit) { backStack.remove(Screen.Update) }
+                    } else {
+                        LifecycleResumeEffect(release) {
+                            updates.resumeAfterInstallPermission()
+                            onPauseOrDispose {}
+                        }
+                        UpdateSheet(
+                            release = release,
+                            step = updateState.install,
+                            actions =
+                                UpdateActions(
+                                    onInstall = { updates.startInstall(release) },
+                                    onInstallAnyway = { updates.installAnyway(release) },
+                                    onOpenSettings = {
+                                        context.startActivity(
+                                            Intent(
+                                                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                                "package:${context.packageName}".toUri(),
+                                            ),
+                                        )
+                                    },
+                                    onGitHub = { uriHandler.openUri(release.url) },
+                                    onCancel = updates::cancelInstall,
+                                ),
+                        )
+                    }
                 }
             },
     )
@@ -182,7 +260,7 @@ fun BottomNav(
     val haptics = LocalHapticFeedback.current
     val buttonBounds = remember { mutableStateMapOf<Int, Rect>() }
 
-    val highlightKey: NavKey? = if (currentKey == Screen.Licenses) Screen.Settings else currentKey
+    val highlightKey: NavKey? = backStack.lastOrNull { key -> bottomNavItems.any { it.key == key } }
     val currentIndex = bottomNavItems.indexOfFirst { it.key == highlightKey }.coerceAtLeast(0)
     val targetRect = buttonBounds[currentIndex]
     val anchorRect = buttonBounds[0]
