@@ -10,6 +10,7 @@ import android.graphics.Point
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -481,10 +482,17 @@ object ForceDarkHook {
         badges: List<Rect>,
     ): Boolean {
         val at = locationInWindow
+        val glyph =
+            RectF(drawable.bounds).also {
+                imageMatrix.mapRect(it)
+                it.inset(it.width() / 4, it.height() / 4)
+            }
+        val left = at.x - origin.x + paddingLeft + glyph.left.toInt()
+        val top = at.y - origin.y + paddingTop + glyph.top.toInt()
         var bright = 0
         var scanned = 0
-        for (x in at.x - origin.x until at.x - origin.x + width step SCAN_STEP) {
-            for (y in at.y - origin.y until at.y - origin.y + height step SCAN_STEP) {
+        for (x in left until left + glyph.width().toInt() step SCAN_STEP) {
+            for (y in top until top + glyph.height().toInt() step SCAN_STEP) {
                 if (x !in 0 until shot.width || y !in 0 until shot.height) continue
                 if (badges.any { it.contains(x, y) }) continue
                 scanned++
