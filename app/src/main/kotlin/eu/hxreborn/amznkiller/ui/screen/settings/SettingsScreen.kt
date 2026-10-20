@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material.icons.outlined.Block
@@ -250,21 +251,34 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_shopping_display)) },
                 )
 
-                val displayItemCount = 4
-                val chartsShape = shapeForPosition(displayItemCount, 0)
+                val displayItemCount = 5
+                val keepaShape = shapeForPosition(displayItemCount, 0)
                 switchPreference(
-                    modifier = Modifier.preferenceModifier(surface, chartsShape),
-                    key = "price_charts",
-                    value = prefs.priceChartsEnabled,
+                    modifier = Modifier.preferenceModifier(surface, keepaShape),
+                    key = "price_chart_keepa",
+                    value = prefs.priceChartKeepa,
                     icon = { Icon(Icons.AutoMirrored.Outlined.TrendingUp, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_marketplace_insights) },
-                    summary = { Text(stringResource(R.string.settings_marketplace_insights_summary)) },
-                    onValueChange = { viewModel.savePref(Prefs.PRICE_CHARTS_ENABLED, it) },
+                    title = { PreferenceTitle(R.string.settings_price_chart_keepa) },
+                    summary = { Text(stringResource(R.string.settings_price_chart_keepa_summary)) },
+                    onValueChange = { viewModel.savePref(Prefs.PRICE_CHART_KEEPA, it) },
                 )
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
-                val autoplayShape = shapeForPosition(displayItemCount, 1)
+                val camelShape = shapeForPosition(displayItemCount, 1)
+                switchPreference(
+                    modifier = Modifier.preferenceModifier(surface, camelShape),
+                    key = "price_chart_camel",
+                    value = prefs.priceChartCamel,
+                    icon = { Icon(Icons.AutoMirrored.Outlined.ShowChart, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_price_chart_camel) },
+                    summary = { Text(stringResource(R.string.settings_price_chart_camel_summary)) },
+                    onValueChange = { viewModel.savePref(Prefs.PRICE_CHART_CAMEL, it) },
+                )
+
+                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                val autoplayShape = shapeForPosition(displayItemCount, 2)
                 switchPreference(
                     modifier = Modifier.preferenceModifier(surface, autoplayShape),
                     key = "disable_video_autoplay",
@@ -277,7 +291,7 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
-                val hideRufusShape = shapeForPosition(displayItemCount, 2)
+                val hideRufusShape = shapeForPosition(displayItemCount, 3)
                 switchPreference(
                     modifier = Modifier.preferenceModifier(surface, hideRufusShape),
                     key = "hide_rufus",
@@ -290,7 +304,7 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
-                val darkModeShape = shapeForPosition(displayItemCount, 3)
+                val darkModeShape = shapeForPosition(displayItemCount, 4)
                 item(key = "force_dark_mode", contentType = "ChoicePreference") {
                     Column(modifier = Modifier.preferenceModifier(surface, darkModeShape)) {
                         Preference(

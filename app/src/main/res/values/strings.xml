@@ -61,8 +61,10 @@
     <string name="settings_dynamic_color_summary">Use colors from your wallpaper</string>
     <string name="settings_content_filtering">Remove ads</string>
     <string name="settings_content_filtering_summary">Hide ads and sponsored products in Amazon Shopping</string>
-    <string name="settings_marketplace_insights">Price history charts</string>
-    <string name="settings_marketplace_insights_summary">Show Keepa and CamelCamelCamel charts on product pages</string>
+    <string name="settings_price_chart_keepa">Keepa price chart</string>
+    <string name="settings_price_chart_keepa_summary">Show the Keepa price history on product pages</string>
+    <string name="settings_price_chart_camel">CamelCamelCamel price chart</string>
+    <string name="settings_price_chart_camel_summary">Show the CamelCamelCamel price history on product pages</string>
     <string name="settings_disable_video_autoplay">Disable video autoplay</string>
     <string name="settings_disable_video_autoplay_summary">Stop videos from playing automatically. Tap to play</string>
     <string name="settings_hide_rufus">Hide Rufus AI</string>

@@ -20,6 +20,8 @@ object Prefs {
     val FORCE_DARK_WEBVIEW = boolPref("force_dark_webview", false)
     val FORCE_DARK_MODE = stringPref("force_dark_mode", ForceDarkMode.OFF.prefValue)
     val PRICE_CHARTS_ENABLED = boolPref("price_charts_enabled", false)
+    val PRICE_CHART_KEEPA = boolPref("price_chart_keepa", false)
+    val PRICE_CHART_CAMEL = boolPref("price_chart_camel", false)
     val DISABLE_VIDEO_AUTOPLAY = boolPref("disable_video_autoplay", true)
 
     val HIDE_RUFUS = boolPref("hide_rufus", false)
@@ -42,6 +44,8 @@ object Prefs {
             FORCE_DARK_WEBVIEW,
             FORCE_DARK_MODE,
             PRICE_CHARTS_ENABLED,
+            PRICE_CHART_KEEPA,
+            PRICE_CHART_CAMEL,
             DISABLE_VIDEO_AUTOPLAY,
             AUTO_UPDATE,
             DARK_THEME_CONFIG,
@@ -57,5 +61,15 @@ object Prefs {
             ForceDarkMode.ON
         } else {
             ForceDarkMode.OFF
+        }
+
+    fun readPriceChart(
+        prefs: android.content.SharedPreferences,
+        source: PrefSpec<Boolean>,
+    ): Boolean =
+        if (prefs.contains(source.key)) {
+            source.read(prefs)
+        } else {
+            PRICE_CHARTS_ENABLED.read(prefs)
         }
 }

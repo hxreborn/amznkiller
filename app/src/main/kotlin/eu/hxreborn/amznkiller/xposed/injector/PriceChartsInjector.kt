@@ -3,7 +3,8 @@ package eu.hxreborn.amznkiller.xposed.injector
 import android.webkit.WebView
 import eu.hxreborn.amznkiller.util.Logger
 import eu.hxreborn.amznkiller.xposed.hook.forceDarkWebview
-import eu.hxreborn.amznkiller.xposed.hook.priceChartsEnabled
+import eu.hxreborn.amznkiller.xposed.hook.priceChartCamel
+import eu.hxreborn.amznkiller.xposed.hook.priceChartKeepa
 import eu.hxreborn.amznkiller.xposed.js.ScriptId
 import eu.hxreborn.amznkiller.xposed.js.ScriptRepository
 import eu.hxreborn.amznkiller.xposed.js.WebViewJsExecutor
@@ -44,14 +45,16 @@ object PriceChartsInjector {
         webView: WebView,
         amazon: AmazonUrlInfo,
     ) {
-        if (!priceChartsEnabled) return
+        val showKeepa = priceChartKeepa
+        val showCamel = priceChartCamel
+        if (!showKeepa && !showCamel) return
         if (!amazon.isProductPage) return
         val asin = amazon.asin ?: return
         val domain = amazon.domain ?: return
         val keepaId = KEEPA_DOMAINS[domain] ?: 1
         val camelLocale = CAMEL_LOCALES[domain] ?: "us"
 
-        Logger.debug { "charts inject asin=$asin domain=$domain" }
+        Logger.debug { "charts inject asin=$asin domain=$domain keepa=$showKeepa camel=$showCamel" }
         val args =
             JSONObject().apply {
                 put("asin", asin)
@@ -59,6 +62,8 @@ object PriceChartsInjector {
                 put("keepaId", keepaId)
                 put("camelLocale", camelLocale)
                 put("dark", forceDarkWebview)
+                put("keepa", showKeepa)
+                put("camel", showCamel)
             }
         val script =
             ScriptRepository.get(ScriptId.CHARTS) + "\n" + "window.AmznKiller.injectCharts($args);"

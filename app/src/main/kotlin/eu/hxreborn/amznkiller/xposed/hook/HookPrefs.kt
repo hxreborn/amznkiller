@@ -20,7 +20,9 @@ import io.github.libxposed.api.XposedInterface
 
 @Volatile internal var forceDarkMode: ForceDarkMode = ForceDarkMode.OFF
 
-@Volatile internal var priceChartsEnabled: Boolean = Prefs.PRICE_CHARTS_ENABLED.default
+@Volatile internal var priceChartKeepa: Boolean = Prefs.PRICE_CHART_KEEPA.default
+
+@Volatile internal var priceChartCamel: Boolean = Prefs.PRICE_CHART_CAMEL.default
 
 @Volatile internal var disableVideoAutoplay: Boolean = Prefs.DISABLE_VIDEO_AUTOPLAY.default
 
@@ -74,7 +76,8 @@ internal fun loadHookPrefs(prefs: SharedPreferences) {
         injectionEnabled = Prefs.INJECTION_ENABLED.read(prefs)
         webviewDebugging = Prefs.WEBVIEW_DEBUGGING.read(prefs)
         forceDarkMode = Prefs.readForceDarkMode(prefs)
-        priceChartsEnabled = Prefs.PRICE_CHARTS_ENABLED.read(prefs)
+        priceChartKeepa = Prefs.readPriceChart(prefs, Prefs.PRICE_CHART_KEEPA)
+        priceChartCamel = Prefs.readPriceChart(prefs, Prefs.PRICE_CHART_CAMEL)
         disableVideoAutoplay = Prefs.DISABLE_VIDEO_AUTOPLAY.read(prefs)
         hideRufus = Prefs.HIDE_RUFUS.read(prefs)
     }.onFailure { Logger.log(Log.ERROR, "prefs refresh", it) }

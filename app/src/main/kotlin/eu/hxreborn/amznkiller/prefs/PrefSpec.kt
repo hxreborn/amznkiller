@@ -23,7 +23,8 @@ class PrefSpec<T>(
         editor: SharedPreferences.Editor,
     ): Boolean {
         val value = read(from)
-        if (read(to) == value) return false
+        val targetLacksExplicitValue = from.contains(key) && !to.contains(key)
+        if (read(to) == value && !targetLacksExplicitValue) return false
         write(editor, value)
         return true
     }
