@@ -31,6 +31,7 @@ import java.util.WeakHashMap
 
 object ForceDarkHook {
     private const val BOTTOM_TABS_BAR = "com.amazon.mShop.rendering.BottomTabsBarV2"
+    private const val TAB_LAYOUT = "com.google.android.material.tabs.TabLayout"
     private const val BASE_TAB_CONTROLLER = "com.amazon.mShop.chrome.bottomtabs.BaseTabController"
     private const val NAVIGABLE = "com.amazon.platform.navigation.api.state.Navigable"
     private const val UI_RENDERING_MODE = "com.amazon.mShop.chrome.UiRenderingMode"
@@ -40,6 +41,7 @@ object ForceDarkHook {
     private const val METHOD_SWITCH_COLOR_MODE = "switchColorMode"
     private const val METHOD_UPDATE_TAB_ITEM = "updateTabItemWithMode"
     private const val METHOD_UPDATE_UI = "updateUI"
+    private const val METHOD_INDICATOR_COLOR = "setSelectedTabIndicatorColor"
     private const val FIELD_TAB_ICON = "mBottomTabIcon"
     private const val ENUM_DARK_MODE = "DarkMode"
     private const val TAB_ICON_ID_PREFIX = "bottom_tab_button_icon"
@@ -403,6 +405,29 @@ object ForceDarkHook {
             result
         }
         hookTabIconRetint(xposed, classLoader)
+        hookTabIndicator(xposed, classLoader)
+    }
+
+    private fun hookTabIndicator(
+        xposed: XposedInterface,
+        classLoader: ClassLoader,
+    ) {
+        val tabLayout = classLoader.loadOrNull(TAB_LAYOUT) ?: return
+        hookMethod(
+            xposed,
+            tabLayout,
+            METHOD_INDICATOR_COLOR,
+            Int::class.javaPrimitiveType!!,
+        ) { chain ->
+            val color = chain.getArg(0) as Int
+            val dark = Color.alpha(color) >= OPAQUE_ALPHA && luminance(color) < DARK_TINT
+            if (!forceDarkWebview || inversion == Inversion.SKIPS_BAR ||
+                !dark
+            ) {
+                return@hookMethod chain.proceed()
+            }
+            chain.proceed(arrayOf(READABLE_ICON))
+        }
     }
 
     private fun View.hasUncheckedIcons(): Boolean =
