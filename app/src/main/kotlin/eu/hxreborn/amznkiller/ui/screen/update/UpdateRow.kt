@@ -19,8 +19,15 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
@@ -34,6 +41,30 @@ class UpdateSettingsActions(
     val onUpdate: () -> Unit,
     val onAutoCheck: (Boolean) -> Unit,
 )
+
+@Composable
+fun UpdateSettingsActions.withHaptics(release: ReleaseCheck): UpdateSettingsActions {
+    val haptics = LocalHapticFeedback.current
+    var awaitingCheck by remember { mutableStateOf(false) }
+    LaunchedEffect(release) {
+        if (!awaitingCheck) return@LaunchedEffect
+        when (release) {
+            is ReleaseCheck.Done -> haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            is ReleaseCheck.Failed -> haptics.performHapticFeedback(HapticFeedbackType.Reject)
+            else -> return@LaunchedEffect
+        }
+        awaitingCheck = false
+    }
+    return UpdateSettingsActions(
+        onCheck = {
+            haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+            awaitingCheck = true
+            onCheck()
+        },
+        onUpdate = onUpdate,
+        onAutoCheck = onAutoCheck,
+    )
+}
 
 fun UpdateUiState.settingsRowAction(actions: UpdateSettingsActions): () -> Unit =
     when {

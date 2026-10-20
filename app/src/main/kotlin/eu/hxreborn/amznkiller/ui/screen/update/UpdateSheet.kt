@@ -34,10 +34,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -71,6 +78,18 @@ fun UpdateSheet(
     step: InstallStep,
     actions: UpdateActions,
 ) {
+    val haptics = LocalHapticFeedback.current
+    var shownStep by remember { mutableStateOf(step) }
+    LaunchedEffect(step) {
+        val previous = shownStep
+        shownStep = step
+        if (previous == step) return@LaunchedEffect
+        when (step) {
+            is InstallStep.DownloadFailed -> haptics.performHapticFeedback(HapticFeedbackType.Reject)
+            InstallStep.Installing -> haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            else -> Unit
+        }
+    }
     Column(
         Modifier.padding(start = 16.dp, end = 16.dp, bottom = 20.dp).verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp),

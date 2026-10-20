@@ -68,6 +68,7 @@ import eu.hxreborn.amznkiller.ui.screen.update.UpdateRowAction
 import eu.hxreborn.amznkiller.ui.screen.update.UpdateRowSummary
 import eu.hxreborn.amznkiller.ui.screen.update.UpdateSettingsActions
 import eu.hxreborn.amznkiller.ui.screen.update.settingsRowAction
+import eu.hxreborn.amznkiller.ui.screen.update.withHaptics
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Loading
 import eu.hxreborn.amznkiller.ui.state.SettingsUiState.Ready
 import eu.hxreborn.amznkiller.ui.theme.AmznKillerSurfaceDefaults
@@ -124,6 +125,7 @@ fun SettingsScreen(
         },
     ) { innerPadding ->
         val surface = AmznKillerSurfaceDefaults.cardContainerColor
+        val rowActions = updateState?.let { updateActions?.withHaptics(it.release) }
 
         ProvidePreferenceLocals(
             theme =
@@ -140,7 +142,7 @@ fun SettingsScreen(
                         bottom = contentPadding.calculateBottomPadding() + Tokens.SpacingLg,
                     ),
             ) {
-                if (updateState != null && updateActions != null) {
+                if (updateState != null && rowActions != null) {
                     preferenceCategory(
                         key = "category_updates",
                         title = { Text(stringResource(R.string.settings_updates)) },
@@ -152,8 +154,8 @@ fun SettingsScreen(
                         icon = { Icon(Icons.Outlined.SystemUpdate, contentDescription = null) },
                         title = { PreferenceTitle(R.string.update_check) },
                         summary = { UpdateRowSummary(updateState) },
-                        widgetContainer = { UpdateRowAction(updateState, updateActions) },
-                        onClick = updateState.settingsRowAction(updateActions),
+                        widgetContainer = { UpdateRowAction(updateState, rowActions) },
+                        onClick = updateState.settingsRowAction(rowActions),
                     )
 
                     item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
@@ -164,7 +166,7 @@ fun SettingsScreen(
                         value = updateState.autoCheckUpdates,
                         icon = { Icon(Icons.Outlined.Autorenew, contentDescription = null) },
                         title = { PreferenceTitle(R.string.update_auto_check) },
-                        onValueChange = updateActions.onAutoCheck,
+                        onValueChange = rowActions.onAutoCheck,
                     )
                 }
 
