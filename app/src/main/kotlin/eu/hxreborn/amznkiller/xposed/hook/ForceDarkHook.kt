@@ -84,6 +84,7 @@ object ForceDarkHook {
 
     private val forceInvertEnabled: Boolean by lazy {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) return@lazy false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) return@lazy true
         val flag =
             A11Y_FLAG_CLASSES.firstNotNullOfOrNull { name ->
                 runCatching {
