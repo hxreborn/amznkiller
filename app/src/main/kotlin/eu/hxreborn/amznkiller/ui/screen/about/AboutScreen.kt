@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -80,7 +79,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -156,12 +154,11 @@ fun AboutScreen(
     DetailScaffold(
         title = stringResource(R.string.settings_about),
         onBack = onBack,
-        contentPadding = PaddingValues(horizontal = readableGutter(), vertical = 16.dp),
-    ) { padding ->
+    ) {
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(padding)
+                .padding(horizontal = readableGutter(), vertical = 16.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
         ) {
             IdentityCard(tileShape(1, 0), actions.onOpenUrl, shareholderEgg.onVersionTap)
@@ -412,18 +409,12 @@ private fun LinkTile(
     Tile(shape = shape, onClick = onClick) {
         TileLeading(icon)
         TileText(title, summary, supportingStyle = supportingStyle)
-        if (external) {
-            Box(Modifier.width(ChevronSlot), contentAlignment = Alignment.Center) {
-                Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        } else {
-            Box(Modifier.width(ChevronSlot), contentAlignment = Alignment.Center) {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+        Box(Modifier.width(ChevronSlot), contentAlignment = Alignment.Center) {
+            Icon(
+                if (external) Icons.AutoMirrored.Outlined.OpenInNew else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -486,7 +477,6 @@ private fun tileShape(
 @Composable
 private fun Tile(
     shape: RoundedCornerShape,
-    color: Color = MaterialTheme.colorScheme.surfaceContainer,
     onClick: (() -> Unit)? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
@@ -501,6 +491,7 @@ private fun Tile(
             content = content,
         )
     }
+    val color = MaterialTheme.colorScheme.surfaceContainer
     if (onClick != null) {
         Surface(onClick = onClick, shape = shape, color = color, modifier = Modifier.fillMaxWidth()) { row() }
     } else {
@@ -549,8 +540,7 @@ private fun readableGutter(): Dp {
 private fun DetailScaffold(
     title: String,
     onBack: () -> Unit,
-    contentPadding: PaddingValues,
-    content: @Composable ColumnScope.(PaddingValues) -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
@@ -575,7 +565,7 @@ private fun DetailScaffold(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding),
-        ) { content(contentPadding) }
+        ) { content() }
     }
 }
 
