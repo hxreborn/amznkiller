@@ -26,6 +26,9 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.descendants
 import eu.hxreborn.amznkiller.util.Logger
 import io.github.libxposed.api.XposedInterface
+import java.lang.reflect.Constructor
+import java.lang.reflect.Executable
+import java.lang.reflect.Method
 import java.util.Collections
 import java.util.WeakHashMap
 
@@ -91,10 +94,14 @@ object ForceDarkHook {
         flag ?: false
     }
 
+    private var previousExecutables: List<Executable> = emptyList()
+
     fun hook(
         xposed: XposedInterface,
         classLoader: ClassLoader,
+        previousExecutables: List<Executable>,
     ) {
+        this.previousExecutables = previousExecutables
         Logger.debug {
             "dark probe device=${Build.MANUFACTURER}/${Build.MODEL} " +
                 "sdk=${Build.VERSION.SDK_INT} hw=${Build.HARDWARE} forceInvert=$forceInvertEnabled"
@@ -188,6 +195,21 @@ object ForceDarkHook {
         }
     }
 
+    private fun declaredMethod(
+        clazz: Class<*>,
+        name: String,
+        vararg params: Class<*>,
+    ): Method =
+        previousExecutables.filterIsInstance<Method>().firstOrNull {
+            it.declaringClass == clazz && it.name == name && it.parameterTypes.contentEquals(params)
+        } ?: clazz.getDeclaredMethod(name, *params)
+
+    private fun declaredConstructors(clazz: Class<*>): Set<Constructor<*>> =
+        clazz.declaredConstructors.toSet() +
+            previousExecutables
+                .filterIsInstance<Constructor<*>>()
+                .filter { it.declaringClass == clazz }
+
     private fun hookMethod(
         xposed: XposedInterface,
         clazz: Class<*>,
@@ -196,7 +218,7 @@ object ForceDarkHook {
         interceptor: XposedInterface.Hooker,
     ) {
         runCatching {
-            xposed.hook(clazz.getDeclaredMethod(name, *params)).intercept(interceptor)
+            xposed.hook(declaredMethod(clazz, name, *params)).intercept(interceptor)
         }.onSuccess {
             Logger.debug { "hooked target=${clazz.simpleName}.$name" }
         }.onFailure {
@@ -258,7 +280,7 @@ object ForceDarkHook {
                         }.map { it.name }
                 "dark probe vri-methods count=${names.size}"
             }
-            xposed.hook(clazz.getDeclaredMethod("determineForceDarkType")).intercept { chain ->
+            xposed.hook(declaredMethod(clazz, "determineForceDarkType")).intercept { chain ->
                 val result = chain.proceed()
                 if (!forceDarkWebview) return@intercept result
                 if (result !is Int) {
@@ -300,7 +322,7 @@ object ForceDarkHook {
             for (param in params) {
                 val ok =
                     runCatching {
-                        val method = clazz.getDeclaredMethod("setForceDark", param)
+                        val method = declaredMethod(clazz, "setForceDark", param)
                         xposed.hook(method).intercept { chain ->
                             if (!forceDarkWebview) {
                                 return@intercept chain.proceed()
@@ -342,7 +364,7 @@ object ForceDarkHook {
 
     private fun hookWebViewBackground(xposed: XposedInterface) {
         var hookedCtors = 0
-        for (ctor in WebView::class.java.declaredConstructors) {
+        for (ctor in declaredConstructors(WebView::class.java)) {
             runCatching {
                 xposed.hook(ctor).intercept { chain ->
                     chain.proceed()

@@ -45,7 +45,7 @@ internal fun setFallbackSelectors(fallback: List<String>) {
 
 internal fun installHookPrefs(xposed: XposedInterface) {
     runCatching {
-        remotePrefs?.unregisterOnSharedPreferenceChangeListener(prefsListener)
+        uninstallHookPrefs()
         val prefs = xposed.getRemotePreferences(Prefs.GROUP)
         remotePrefs = prefs
         loadHookPrefs(prefs)
@@ -58,6 +58,12 @@ internal fun installHookPrefs(xposed: XposedInterface) {
         prefs.registerOnSharedPreferenceChangeListener(l)
         Logger.info("prefs ready count=${selectors.size}")
     }.onFailure { Logger.log(Log.ERROR, "prefs init", it) }
+}
+
+internal fun uninstallHookPrefs() {
+    remotePrefs?.unregisterOnSharedPreferenceChangeListener(prefsListener)
+    remotePrefs = null
+    prefsListener = null
 }
 
 internal fun loadHookPrefs(prefs: SharedPreferences) {
