@@ -13,7 +13,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -96,6 +95,7 @@ import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -461,6 +461,7 @@ private fun MorphingLogo(
                 label = "morph",
             )
     }
+    val icon = painterResource(R.mipmap.ic_launcher_foreground)
     Box(
         modifier
             .graphicsLayer {
@@ -468,7 +469,7 @@ private fun MorphingLogo(
                 scaleY = pulse.scale.value
             }.drawWithCache {
                 val center = size.center
-                onDrawWithContent {
+                onDrawBehind {
                     val progress = cycle.value + pulse.morph.value
                     val whole = floor(progress)
                     val index = Math.floorMod(whole.toInt(), morphs.size)
@@ -479,20 +480,12 @@ private fun MorphingLogo(
                     spinMatrix.rotateZ(rotation.value)
                     spinMatrix.translate(-center.x, -center.y)
                     shape.transform(spinMatrix)
-                    clipPath(shape) { this@onDrawWithContent.drawContent() }
+                    clipPath(shape) {
+                        scale(ADAPTIVE_ICON_ZOOM, center) { with(icon) { draw(size) } }
+                    }
                 }
             },
-    ) {
-        Image(
-            painterResource(R.mipmap.ic_launcher_foreground),
-            contentDescription = null,
-            modifier =
-                Modifier.fillMaxSize().graphicsLayer {
-                    scaleX = ADAPTIVE_ICON_ZOOM
-                    scaleY = ADAPTIVE_ICON_ZOOM
-                },
-        )
-    }
+    )
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -519,7 +512,7 @@ private fun IdentityCard(
                         .size(CookieSize)
                         .onGloballyPositioned {
                             onIconPositioned(it.positionInRoot() + Offset(it.size.width / 2f, it.size.height / 2f))
-                        }.clickable(onClick = onIconTap),
+                        }.clickable(interactionSource = null, indication = null, onClick = onIconTap),
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmallEmphasized)
