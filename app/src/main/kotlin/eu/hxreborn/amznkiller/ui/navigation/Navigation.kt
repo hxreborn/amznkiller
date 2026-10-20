@@ -389,28 +389,16 @@ fun BottomNav(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                            contentDescription = stringResource(item.titleRes),
+                            contentDescription = null,
                         )
-                        AnimatedVisibility(
-                            visible = selected,
-                            enter =
-                                expandHorizontally(
-                                    animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+                        Text(
+                            text = stringResource(item.titleRes),
+                            modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
+                            style =
+                                MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold,
                                 ),
-                            exit =
-                                shrinkHorizontally(
-                                    animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-                                ),
-                        ) {
-                            Text(
-                                text = stringResource(item.titleRes),
-                                modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
-                                style =
-                                    MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                    ),
-                            )
-                        }
+                        )
                     }
                 }
             }
