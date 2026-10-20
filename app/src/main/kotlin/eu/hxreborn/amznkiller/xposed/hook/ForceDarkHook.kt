@@ -5,10 +5,12 @@ import android.content.ContextWrapper
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.ColorFilter
 import android.graphics.Point
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -47,6 +49,8 @@ object ForceDarkHook {
     private const val MID_LUMINANCE = 128
     private const val LEGIBLE_BRIGHT_RATIO = 0.05f
     private const val INSETS_HOST = "android.view.ViewRootInsetsControllerHost"
+    private const val DARK_TINT = 100
+    private const val OPAQUE_ALPHA = 0x80
     private const val LIGHT_BARS =
         WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
             WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
@@ -81,6 +85,7 @@ object ForceDarkHook {
         hookRendererSetForceDark(xposed)
         hookWebViewBackground(xposed)
         hookSystemBarsAppearance(xposed)
+        hookDarkTints(xposed)
         hookBottomTabsDarkMode(xposed, classLoader)
     }
 
@@ -94,6 +99,57 @@ object ForceDarkHook {
             chain.proceed(arrayOf(appearance and LIGHT_BARS.inv(), chain.getArg(1)))
         }
     }
+
+    private fun hookDarkTints(xposed: XposedInterface) {
+        val filterClass = PorterDuffColorFilter::class.java
+        val getColor = runCatching { filterClass.getMethod("getColor") }.getOrNull()
+        val getMode = runCatching { filterClass.getMethod("getMode") }.getOrNull()
+        if (getColor != null && getMode != null) {
+            hookMethod(
+                xposed,
+                ImageView::class.java,
+                "setColorFilter",
+                ColorFilter::class.java,
+            ) { chain ->
+                val filter = chain.getArg(0) as? PorterDuffColorFilter
+                if (!forceDarkWebview || filter == null) return@hookMethod chain.proceed()
+                val color = getColor.invoke(filter) as Int
+                val mode = getMode.invoke(filter) as PorterDuff.Mode
+                if (!isDarkTint(color, mode)) return@hookMethod chain.proceed()
+                chain.proceed(arrayOf(PorterDuffColorFilter(readableTint(color), mode)))
+            }
+        }
+        val int = Int::class.javaPrimitiveType!!
+        hookMethod(
+            xposed,
+            Drawable::class.java,
+            "setColorFilter",
+            int,
+            PorterDuff.Mode::class.java,
+        ) { chain ->
+            val color = chain.getArg(0) as Int
+            val mode = chain.getArg(1) as PorterDuff.Mode
+            if (!isDarkTint(color, mode)) return@hookMethod chain.proceed()
+            chain.proceed(arrayOf<Any>(readableTint(color), mode))
+        }
+    }
+
+    private fun isDarkTint(
+        color: Int,
+        mode: PorterDuff.Mode,
+    ): Boolean =
+        forceDarkWebview &&
+            (mode == PorterDuff.Mode.SRC_IN || mode == PorterDuff.Mode.SRC_ATOP) &&
+            Color.alpha(color) >= OPAQUE_ALPHA &&
+            luminance(color) < DARK_TINT
+
+    private fun readableTint(color: Int): Int =
+        Color.argb(
+            Color.alpha(color),
+            Color.red(READABLE_ICON),
+            Color.green(READABLE_ICON),
+            Color.blue(READABLE_ICON),
+        )
 
     private fun probeForceDarkType() {
         runCatching {
