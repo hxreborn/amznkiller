@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 data class XposedState(
     val active: Boolean = false,
     val frameworkVersion: String? = null,
+    val frameworkLabel: String? = null,
 )
 
 class App :
@@ -46,6 +47,7 @@ class App :
             XposedState(
                 active = true,
                 frameworkVersion = "${service.frameworkName} v${service.frameworkVersion}",
+                frameworkLabel = frameworkLabel(service),
             )
     }
 
@@ -53,6 +55,13 @@ class App :
         Log.w(TAG, "service died")
         mService = null
         _xposedState.value = XposedState()
+    }
+
+    private fun frameworkLabel(service: XposedService): String {
+        val version =
+            Regex("""^\S+(?: \(\d+\))?""").find(service.frameworkVersion)?.value
+                ?: service.frameworkVersion
+        return "${service.frameworkName} $version\nAPI ${service.apiVersion}"
     }
 
     companion object {

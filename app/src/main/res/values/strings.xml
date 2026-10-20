@@ -94,13 +94,8 @@
     <string name="settings_selector_url_https_required">Must start with https://</string>
 
     <string name="settings_about">About</string>
-    <string name="settings_app_version">App version</string>
     <string name="settings_git_repo">Source code</string>
-    <string name="settings_git_repo_summary">Browse the project on GitHub</string>
     <string name="settings_licenses">Third-party licenses</string>
-    <string name="settings_licenses_summary">Libraries used in this app and their licenses</string>
-    <string name="settings_report_issue">Report an issue</string>
-    <string name="settings_report_issue_summary">Report a bug or suggest a feature on GitHub</string>
 
     <string-array name="taglines">
         <item>Jeff won\'t miss the $0.02</item>

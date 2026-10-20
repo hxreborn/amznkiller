@@ -1,7 +1,5 @@
 package eu.hxreborn.amznkiller.ui.screen.settings
 
-import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,12 +20,8 @@ import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.FormatPaint
-import androidx.compose.material.icons.outlined.Gavel
-import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PhonelinkErase
 import androidx.compose.material.icons.outlined.SmartToy
@@ -48,13 +42,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -63,18 +52,14 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.ForceDarkMode
 import eu.hxreborn.amznkiller.prefs.Prefs
-import eu.hxreborn.amznkiller.ui.component.BalloonsOverlay
 import eu.hxreborn.amznkiller.ui.preview.FakeAppViewModel
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
@@ -97,17 +82,12 @@ import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.preferenceTheme
 
-private const val REPO_URL = "https://github.com/hxreborn/amznkiller"
-private const val SHAREHOLDER_TAPS = 7
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: AppViewModel,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onNavigateToLicenses: () -> Unit = {},
-    onNavigateToWhatsNew: () -> Unit = {},
-    onNavigateToChangelog: () -> Unit = {},
+    onNavigateToAbout: () -> Unit = {},
     updateState: UpdateUiState? = null,
     updateActions: UpdateSettingsActions? = null,
 ) {
@@ -120,7 +100,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var showUrlDialog by rememberSaveable { mutableStateOf(false) }
-    val shareholderEgg = rememberShareholderEgg()
 
     if (showUrlDialog) {
         SelectorUrlDialog(
@@ -377,148 +356,16 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_about)) },
                 )
 
-                val aboutItemCount = 6
-                val versionShape = shapeForPosition(aboutItemCount, 0)
                 preference(
-                    modifier = Modifier.preferenceModifier(surface, versionShape),
-                    key = "app_version",
+                    modifier = Modifier.preferenceModifier(surface, shapeForPosition(1, 0)),
+                    key = "about",
                     icon = { Icon(Icons.Rounded.Info, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_app_version) },
+                    title = { PreferenceTitle(R.string.app_name) },
                     summary = { Text("v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})") },
-                    onClick = shareholderEgg.onVersionTap,
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                preference(
-                    modifier = Modifier.preferenceModifier(surface, shapeForPosition(aboutItemCount, 1)),
-                    key = "whats_new",
-                    icon = { Icon(Icons.Outlined.NewReleases, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.whats_new) },
-                    summary = { Text(stringResource(R.string.whats_new_summary, BuildConfig.VERSION_NAME)) },
-                    onClick = onNavigateToWhatsNew,
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                preference(
-                    modifier = Modifier.preferenceModifier(surface, shapeForPosition(aboutItemCount, 2)),
-                    key = "changelog",
-                    icon = { Icon(Icons.Outlined.History, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.changelog) },
-                    summary = { Text(stringResource(R.string.changelog_summary)) },
-                    onClick = onNavigateToChangelog,
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val gitRepoShape = shapeForPosition(aboutItemCount, 3)
-                preference(
-                    modifier = Modifier.preferenceModifier(surface, gitRepoShape),
-                    key = "git_repo",
-                    icon = { Icon(painterResource(R.drawable.ic_github_24), contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_git_repo) },
-                    summary = { Text(stringResource(R.string.settings_git_repo_summary)) },
-                    onClick = {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, REPO_URL.toUri()))
-                    },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val licensesShape = shapeForPosition(aboutItemCount, 4)
-                preference(
-                    modifier = Modifier.preferenceModifier(surface, licensesShape),
-                    key = "licenses",
-                    icon = { Icon(Icons.Outlined.Gavel, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_licenses) },
-                    summary = { Text(stringResource(R.string.settings_licenses_summary)) },
-                    onClick = onNavigateToLicenses,
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val issueShape = shapeForPosition(aboutItemCount, 5)
-                preference(
-                    modifier = Modifier.preferenceModifier(surface, issueShape),
-                    key = "report_issue",
-                    icon = { Icon(Icons.Outlined.Feedback, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_report_issue) },
-                    summary = { Text(stringResource(R.string.settings_report_issue_summary)) },
-                    onClick = {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, "$REPO_URL/issues/new/choose".toUri()))
-                    },
+                    onClick = onNavigateToAbout,
                 )
             }
         }
-    }
-
-    if (shareholderEgg.showBalloons) {
-        BalloonsOverlay(onDismiss = shareholderEgg.onDismissBalloons)
-    }
-}
-
-@Stable
-private class ShareholderEggState(
-    showBalloonsProvider: () -> Boolean,
-    val onDismissBalloons: () -> Unit,
-    val onVersionTap: () -> Unit,
-) {
-    val showBalloons: Boolean by derivedStateOf(showBalloonsProvider)
-}
-
-@Composable
-private fun rememberShareholderEgg(): ShareholderEggState {
-    val context = LocalContext.current
-    val alreadyMsg = stringResource(R.string.easter_shareholder_already)
-    val countdownLabels =
-        (1 until SHAREHOLDER_TAPS - 2).map { n ->
-            pluralStringResource(R.plurals.easter_shareholder_countdown, n, n)
-        }
-
-    var tapCount by rememberSaveable { mutableIntStateOf(0) }
-    var alreadyShareholder by rememberSaveable { mutableStateOf(false) }
-    var showBalloons by remember { mutableStateOf(false) }
-    val countdownToast = remember { mutableStateOf<Toast?>(null) }
-
-    fun showToast(text: CharSequence) {
-        countdownToast.value?.cancel()
-        countdownToast.value = Toast.makeText(context, text, Toast.LENGTH_SHORT).also { it.show() }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { countdownToast.value?.cancel() }
-    }
-
-    return remember {
-        ShareholderEggState(
-            showBalloonsProvider = { showBalloons },
-            onDismissBalloons = { showBalloons = false },
-            onVersionTap = onVersionTap@{
-                when {
-                    showBalloons -> {
-                        return@onVersionTap
-                    }
-
-                    alreadyShareholder -> {
-                        showToast(alreadyMsg)
-                    }
-
-                    else -> {
-                        tapCount += 1
-                        val remaining = SHAREHOLDER_TAPS - tapCount
-                        if (remaining == 0) {
-                            countdownToast.value?.cancel()
-                            tapCount = 0
-                            alreadyShareholder = true
-                            showBalloons = true
-                        } else if (remaining in 1..countdownLabels.size) {
-                            showToast(countdownLabels[remaining - 1])
-                        }
-                    }
-                }
-            },
-        )
     }
 }
 

@@ -64,9 +64,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
+import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.screen.about.AboutActions
+import eu.hxreborn.amznkiller.ui.screen.about.AboutScreen
 import eu.hxreborn.amznkiller.ui.screen.dashboard.DashboardScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.LicensesScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.SettingsScreen
@@ -92,6 +95,9 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object Licenses : Screen
+
+    @Serializable
+    data object About : Screen
 
     @Serializable
     data object Update : Screen
@@ -205,9 +211,7 @@ fun MainNavDisplay(
                     SettingsScreen(
                         viewModel = viewModel,
                         contentPadding = contentPadding,
-                        onNavigateToLicenses = { backStack.add(Screen.Licenses) },
-                        onNavigateToWhatsNew = { backStack.add(Screen.WhatsNew) },
-                        onNavigateToChangelog = { backStack.add(Screen.Changelog) },
+                        onNavigateToAbout = { backStack.add(Screen.About) },
                         updateState = updateState,
                         updateActions =
                             UpdateSettingsActions(
@@ -218,6 +222,20 @@ fun MainNavDisplay(
                                 },
                                 onAutoCheck = updates::setAutoCheckUpdates,
                             ),
+                    )
+                }
+                entry<Screen.About> {
+                    val xposed by App.from(context).xposedState.collectAsStateWithLifecycle()
+                    AboutScreen(
+                        framework = xposed.frameworkLabel,
+                        actions =
+                            AboutActions(
+                                onWhatsNew = { backStack.add(Screen.WhatsNew) },
+                                onChangelog = { backStack.add(Screen.Changelog) },
+                                onLicenses = { backStack.add(Screen.Licenses) },
+                                onOpenUrl = uriHandler::openUri,
+                            ),
+                        onBack = { backStack.removeLastOrNull() },
                     )
                 }
                 entry<Screen.Licenses> {

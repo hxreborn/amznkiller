@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="star_on_github">Star on GitHub</string>
+    <string name="kofi">Donate on Ko-fi</string>
+    <string name="suggest_feature">Suggest a feature</string>
+    <string name="suggest_feature_summary">Opens a feature request on GitHub</string>
+    <string name="licenses">Open source licenses</string>
+    <string name="licenses_summary">Libraries this app is built with</string>
+    <string name="settings_this_device">This device</string>
+    <string name="settings_framework">Framework</string>
+</resources>
