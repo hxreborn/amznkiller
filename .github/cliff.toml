@@ -20,7 +20,7 @@ https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
   {% if commit.remote.username %} by @{{ commit.remote.username }}\
   {%- if commit.remote.pr_number %} in [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}){% endif %}{% endif %}
 {%- for footer in commit.footers %}
-{%- if footer.token != "Signed-off-by" and footer.token != "Co-authored-by" %}
+{%- if footer.token not in ["Signed-off-by", "Co-authored-by", "Closes", "Fixes", "Resolves"] %}
 
   > {{ footer.token }}{{ footer.separator }}{{ footer.value }}
 {%- endif %}
@@ -28,7 +28,17 @@ https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {% endmacro -%}
 
 ## What's Changed
-
+{% set_global closed = [] -%}
+{% for commit in commits -%}
+{% for footer in commit.footers -%}
+{% if footer.token in ["Closes", "Fixes", "Resolves"] -%}
+{% set_global closed = closed | concat(with="#" ~ footer.value) -%}
+{% endif -%}
+{% endfor -%}
+{% endfor -%}
+{% if closed | length > 0 %}
+Closes {{ closed | unique | join(sep=", ") }}
+{% endif %}
 {% if commits | length == 0 -%}
 No user-facing changes in this release.
 {%- else %}
@@ -50,6 +60,7 @@ footer = ""
 trim = false
 postprocessors = [
   { pattern = ' +\n', replace = "\n" },
+  { pattern = 'by @hxreborn in \[#71\]', replace = "by @dependabot[bot] in [#71]" },
 ]
 
 [git]
@@ -60,6 +71,13 @@ commit_preprocessors = [
   { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "" },
 ]
 commit_parsers = [
+  { sha = "7339348db2435b5e02b746321f49f2b4de97ee71", skip = true },
+  { sha = "3c1afc26b70b1b493cf15b20b5c0b3d0057ac6ed", skip = true },
+  { sha = "0fb49800bc167befb1989a84794df198ac894c92", skip = true },
+  { sha = "57f5801d1abc6d172f7729fe2bf522274a29bf26", skip = true },
+  { sha = "4cad07416700223b151a34c06d619289c20a1e68", skip = true },
+  { sha = "a6762ba49e8d160ada52a76e98aba7b1c7e750e8", skip = true },
+  { sha = "8b8ccfe379f10af443694e656ca0555770092f66", skip = true },
   { message = "^feat", group = "<!-- 00 -->Features" },
   { message = "^[fF]ix", group = "<!-- 01 -->Bug Fixes" },
   { message = "^perf", group = "<!-- 02 -->Performance Improvements" },
