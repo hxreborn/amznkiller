@@ -1,5 +1,10 @@
 package eu.hxreborn.amznkiller.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarExitDirection
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -45,6 +51,8 @@ fun MainScaffold(
 ) {
     val backStack = rememberNavBackStack(Screen.Dashboard)
     val currentKey = backStack.lastOrNull() as? Screen
+    val topScreen = backStack.lastOrNull { it !is Screen.WhatsNew && it !is Screen.Update }
+    val showBottomNav = topScreen is Screen.Dashboard || topScreen is Screen.Settings
     val scrollBehavior =
         FloatingToolbarDefaults.exitAlwaysScrollBehavior(
             exitDirection = FloatingToolbarExitDirection.Bottom,
@@ -73,13 +81,23 @@ fun MainScaffold(
         modifier = modifier.nestedScroll(scrollBehavior),
         snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-                BottomNav(
-                    backStack = backStack,
-                    currentKey = currentKey,
-                    scrollBehavior = scrollBehavior,
-                    modifier = Modifier.padding(bottom = navBarBottom + Tokens.FloatingBarBottomPadding),
-                )
+            AnimatedVisibility(
+                visible = showBottomNav,
+                enter =
+                    fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) +
+                        slideInVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) { it },
+                exit =
+                    fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()) +
+                        slideOutVertically(MaterialTheme.motionScheme.fastSpatialSpec()) { it },
+            ) {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+                    BottomNav(
+                        backStack = backStack,
+                        currentKey = currentKey,
+                        scrollBehavior = scrollBehavior,
+                        modifier = Modifier.padding(bottom = navBarBottom + Tokens.FloatingBarBottomPadding),
+                    )
+                }
             }
         },
     ) { contentPadding ->
