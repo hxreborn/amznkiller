@@ -168,8 +168,10 @@ object ForceDarkHook {
     ): Boolean =
         forceDarkWebview &&
             (mode == PorterDuff.Mode.SRC_IN || mode == PorterDuff.Mode.SRC_ATOP) &&
-            Color.alpha(color) >= OPAQUE_ALPHA &&
-            luminance(color) < DARK_TINT
+            isDarkColor(color)
+
+    private fun isDarkColor(color: Int): Boolean =
+        Color.alpha(color) >= OPAQUE_ALPHA && luminance(color) < DARK_TINT
 
     private fun readableTint(color: Int): Int =
         Color.argb(
@@ -459,9 +461,9 @@ object ForceDarkHook {
             Int::class.javaPrimitiveType!!,
         ) { chain ->
             val color = chain.getArg(0) as Int
-            val dark = Color.alpha(color) >= OPAQUE_ALPHA && luminance(color) < DARK_TINT
             val lighten =
-                forceDarkWebview && dark && !forceInvertEnabled && inversion != Inversion.SKIPS_BAR
+                forceDarkWebview && isDarkColor(color) && !forceInvertEnabled &&
+                    inversion != Inversion.SKIPS_BAR
             Logger.debug { "dark tab indicator color=%08x lighten=$lighten".format(color) }
             if (!lighten) return@hookMethod chain.proceed()
             chain.proceed(arrayOf(READABLE_ICON))
