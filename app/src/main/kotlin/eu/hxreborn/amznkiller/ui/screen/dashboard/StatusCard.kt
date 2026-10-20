@@ -196,8 +196,8 @@ internal fun StatusCard(
                 },
             ) { target ->
                 Column(verticalArrangement = Arrangement.spacedBy(Tokens.SpacingXs)) {
-                    Text(stringResource(target.title), style = MaterialTheme.typography.titleLargeEmphasized)
-                    Text(statusBody(target, selectorCount, lastFetched), style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(target.title), style = MaterialTheme.typography.titleMediumEmphasized)
+                    Text(statusBody(target, selectorCount, lastFetched), style = MaterialTheme.typography.bodyMedium)
                     val updated = (lastRefreshOutcome?.event as? SelectorSyncEvent.Updated)?.takeIf { it.added > 0 || it.removed > 0 }
                     if (updated != null && lastRefreshOutcome != null) {
                         key(lastRefreshOutcome.id) {
