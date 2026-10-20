@@ -76,6 +76,7 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
+import me.zhanghai.compose.preference.preferenceTheme
 
 private const val REPO_URL = "https://github.com/hxreborn/amznkiller"
 private const val SHAREHOLDER_TAPS = 7
@@ -133,7 +134,13 @@ fun SettingsScreen(
     ) { innerPadding ->
         val surface = AmznKillerSurfaceDefaults.cardContainerColor
 
-        ProvidePreferenceLocals {
+        ProvidePreferenceLocals(
+            theme =
+                preferenceTheme(
+                    categoryColor = MaterialTheme.colorScheme.primary,
+                    categoryTextStyle = MaterialTheme.typography.labelLargeEmphasized,
+                ),
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(horizontal = Tokens.ScreenHorizontalPadding),
                 contentPadding =
