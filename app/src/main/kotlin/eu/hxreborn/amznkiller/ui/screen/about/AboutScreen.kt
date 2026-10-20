@@ -1,10 +1,13 @@
 package eu.hxreborn.amznkiller.ui.screen.about
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -70,21 +73,29 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.toShape
+import androidx.compose.material3.toPath
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.center
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -109,15 +120,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.graphics.shapes.Morph
 import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.component.CelebrationOverlay
+import eu.hxreborn.amznkiller.ui.component.fitted
+import eu.hxreborn.amznkiller.ui.component.rotationSafeScale
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.screen.settings.DiagnosticsDialog
+import eu.hxreborn.amznkiller.ui.util.rememberReducedMotion
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.floor
 import kotlin.random.Random
 
 private const val REPO = "hxreborn/amznkiller"
@@ -128,8 +146,20 @@ private val ChevronSlot = 40.dp
 private val CookieSize = 88.dp
 private const val COOKIE_SPIN_MS = 8_000
 private const val FULL_TURN = 360f
+private const val LOGO_SHAPE_MILLIS = 3_200
+private const val LOGO_MORPH_SHARE = 0.55f
+private const val LOGO_TAP_PULSE = 0.45f
+private const val LOGO_POP_SCALE = 1.18f
 private const val HINT_MILLIS = 2_200L
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private val LogoPolygons =
+    listOf(
+        MaterialShapes.Cookie9Sided,
+        MaterialShapes.Sunny,
+        MaterialShapes.Cookie12Sided,
+        MaterialShapes.Clover8Leaf,
+    )
 private const val ADAPTIVE_ICON_ZOOM = 1.5f
 private val ConnectedButtonHeight = 52.dp
 private val SectionGap = 14.dp
@@ -168,6 +198,10 @@ fun AboutScreen(
 ) {
     val shareholderEgg = rememberShareholderEgg()
     var iconCenterInRoot by remember { mutableStateOf(Offset.Zero) }
+    val logoPulse = rememberLogoPulse()
+    LaunchedEffect(shareholderEgg.showCelebration) {
+        if (shareholderEgg.showCelebration) logoPulse.pop()
+    }
     DetailScaffold(
         title = stringResource(R.string.settings_about),
         onBack = onBack,
@@ -192,8 +226,12 @@ fun AboutScreen(
             IdentityCard(
                 shape = tileShape(1, 0),
                 onOpenUrl = actions.onOpenUrl,
-                onIconTap = shareholderEgg.onVersionTap,
+                onIconTap = {
+                    logoPulse.tap()
+                    shareholderEgg.onVersionTap()
+                },
                 onIconPositioned = { iconCenterInRoot = it },
+                logoPulse = logoPulse,
                 hint = shareholderEgg.hint,
             )
             Spacer(Modifier.height(SectionGap))
@@ -347,6 +385,116 @@ private fun rememberShareholderEgg(): ShareholderEggState {
     }
 }
 
+@Stable
+private class LogoPulse(
+    private val scope: CoroutineScope,
+    private val enabled: Boolean,
+) {
+    val morph = Animatable(0f)
+    val scale = Animatable(1f)
+
+    fun tap() {
+        if (!enabled) return
+        scope.launch {
+            morph.animateTo(LOGO_TAP_PULSE, spring(dampingRatio = 0.55f, stiffness = 900f))
+            morph.animateTo(0f, spring(dampingRatio = 0.75f, stiffness = 260f))
+        }
+    }
+
+    fun pop() {
+        if (!enabled) return
+        scope.launch {
+            scale.animateTo(LOGO_POP_SCALE, spring(dampingRatio = 0.45f, stiffness = 1_200f))
+            scale.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 380f))
+        }
+        scope.launch {
+            morph.animateTo(1f, spring(dampingRatio = 0.6f, stiffness = 420f))
+            morph.animateTo(0f, spring(dampingRatio = 0.8f, stiffness = 180f))
+        }
+    }
+}
+
+@Composable
+private fun rememberLogoPulse(): LogoPulse {
+    val scope = rememberCoroutineScope()
+    val enabled = !rememberReducedMotion()
+    return remember(scope, enabled) { LogoPulse(scope, enabled) }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun MorphingLogo(
+    pulse: LogoPulse,
+    modifier: Modifier = Modifier,
+) {
+    val reducedMotion = rememberReducedMotion()
+    val morphs =
+        remember {
+            LogoPolygons.indices.map {
+                Morph(LogoPolygons[it].normalized(), LogoPolygons[(it + 1) % LogoPolygons.size].normalized())
+            }
+        }
+    val scaleFactor = remember { rotationSafeScale(LogoPolygons) }
+    val path = remember { Path() }
+    val scaleMatrix = remember { Matrix() }
+    val spinMatrix = remember { Matrix() }
+    val easing = remember { CubicBezierEasing(0.4f, 0f, 0.2f, 1f) }
+    val rotation: State<Float>
+    val cycle: State<Float>
+    if (reducedMotion) {
+        rotation = remember { mutableFloatStateOf(0f) }
+        cycle = remember { mutableFloatStateOf(0f) }
+    } else {
+        val infinite = rememberInfiniteTransition(label = "cookie")
+        rotation =
+            infinite.animateFloat(
+                initialValue = 0f,
+                targetValue = FULL_TURN,
+                animationSpec = infiniteRepeatable(tween(COOKIE_SPIN_MS, easing = LinearEasing)),
+                label = "rotation",
+            )
+        cycle =
+            infinite.animateFloat(
+                initialValue = 0f,
+                targetValue = LogoPolygons.size.toFloat(),
+                animationSpec = infiniteRepeatable(tween(LOGO_SHAPE_MILLIS * LogoPolygons.size, easing = LinearEasing)),
+                label = "morph",
+            )
+    }
+    Box(
+        modifier
+            .graphicsLayer {
+                scaleX = pulse.scale.value
+                scaleY = pulse.scale.value
+            }.drawWithCache {
+                val center = size.center
+                onDrawWithContent {
+                    val progress = cycle.value + pulse.morph.value
+                    val whole = floor(progress)
+                    val index = Math.floorMod(whole.toInt(), morphs.size)
+                    val segment = ((progress - whole) / LOGO_MORPH_SHARE).coerceIn(0f, 1f)
+                    val shape = fitted(morphs[index].toPath(easing.transform(segment), path), size, scaleFactor, scaleMatrix)
+                    spinMatrix.reset()
+                    spinMatrix.translate(center.x, center.y)
+                    spinMatrix.rotateZ(rotation.value)
+                    spinMatrix.translate(-center.x, -center.y)
+                    shape.transform(spinMatrix)
+                    clipPath(shape) { this@onDrawWithContent.drawContent() }
+                }
+            },
+    ) {
+        Image(
+            painterResource(R.mipmap.ic_launcher_foreground),
+            contentDescription = null,
+            modifier =
+                Modifier.fillMaxSize().graphicsLayer {
+                    scaleX = ADAPTIVE_ICON_ZOOM
+                    scaleY = ADAPTIVE_ICON_ZOOM
+                },
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun IdentityCard(
@@ -354,6 +502,7 @@ private fun IdentityCard(
     onOpenUrl: (String) -> Unit,
     onIconTap: () -> Unit,
     onIconPositioned: (Offset) -> Unit,
+    logoPulse: LogoPulse,
     hint: String?,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -363,35 +512,15 @@ private fun IdentityCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            val rotation by rememberInfiniteTransition(label = "cookie").animateFloat(
-                initialValue = 0f,
-                targetValue = FULL_TURN,
-                animationSpec = infiniteRepeatable(tween(COOKIE_SPIN_MS, easing = LinearEasing)),
-                label = "rotation",
+            MorphingLogo(
+                pulse = logoPulse,
+                modifier =
+                    Modifier
+                        .size(CookieSize)
+                        .onGloballyPositioned {
+                            onIconPositioned(it.positionInRoot() + Offset(it.size.width / 2f, it.size.height / 2f))
+                        }.clickable(onClick = onIconTap),
             )
-            val cookie = MaterialShapes.Cookie9Sided.toShape()
-            Box(
-                Modifier
-                    .size(CookieSize)
-                    .graphicsLayer {
-                        rotationZ = rotation
-                        this.shape = cookie
-                        clip = true
-                    }.onGloballyPositioned {
-                        onIconPositioned(it.positionInRoot() + Offset(it.size.width / 2f, it.size.height / 2f))
-                    }.clickable(onClick = onIconTap),
-            ) {
-                Image(
-                    painterResource(R.mipmap.ic_launcher_foreground),
-                    contentDescription = null,
-                    modifier =
-                        Modifier.fillMaxSize().graphicsLayer {
-                            rotationZ = -rotation
-                            scaleX = ADAPTIVE_ICON_ZOOM
-                            scaleY = ADAPTIVE_ICON_ZOOM
-                        },
-                )
-            }
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmallEmphasized)
                 AnimatedVisibility(visible = hint != null, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {

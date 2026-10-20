@@ -60,8 +60,9 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.graphics.shapes.Morph
-import androidx.graphics.shapes.RoundedPolygon
 import eu.hxreborn.amznkiller.R
+import eu.hxreborn.amznkiller.ui.component.fitted
+import eu.hxreborn.amznkiller.ui.component.rotationSafeScale
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState
@@ -72,7 +73,6 @@ import eu.hxreborn.amznkiller.ui.util.relativeTime
 import eu.hxreborn.amznkiller.ui.util.rememberReducedMotion
 import kotlinx.coroutines.delay
 import kotlin.math.floor
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 internal enum class DashboardStatus(
@@ -318,29 +318,6 @@ private fun StatusBadge(
             if (icon != null) Icon(imageVector = icon, contentDescription = null, tint = onAccent)
         }
     }
-}
-
-private fun rotationSafeScale(polygons: List<RoundedPolygon>): Float {
-    val bounds = FloatArray(4)
-    val maxBounds = FloatArray(4)
-    return polygons.minOf { polygon ->
-        polygon.calculateBounds(bounds)
-        polygon.calculateMaxBounds(maxBounds)
-        max((bounds[2] - bounds[0]) / (maxBounds[2] - maxBounds[0]), (bounds[3] - bounds[1]) / (maxBounds[3] - maxBounds[1]))
-    }
-}
-
-private fun fitted(
-    path: Path,
-    size: Size,
-    scaleFactor: Float,
-    scaleMatrix: Matrix,
-): Path {
-    scaleMatrix.reset()
-    scaleMatrix.scale(x = size.width * scaleFactor, y = size.height * scaleFactor)
-    path.transform(scaleMatrix)
-    path.translate(size.center - path.getBounds().center)
-    return path
 }
 
 @PreviewLightDark
