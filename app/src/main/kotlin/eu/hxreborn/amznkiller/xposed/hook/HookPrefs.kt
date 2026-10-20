@@ -3,11 +3,14 @@ package eu.hxreborn.amznkiller.xposed.hook
 import android.app.Application
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import eu.hxreborn.amznkiller.prefs.ForceDarkMode
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.selectors.SelectorSanitizer
 import eu.hxreborn.amznkiller.util.Logger
+import eu.hxreborn.amznkiller.xposed.injector.WebViewDebuggingGate
 import io.github.libxposed.api.XposedInterface
 
 @Volatile internal var selectors: List<String> = emptyList()
@@ -55,6 +58,9 @@ internal fun installHookPrefs(xposed: XposedInterface) {
             SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                 runCatching { loadHookPrefs(prefs) }
                     .onFailure { Logger.log(Log.ERROR, "prefs reload key=$key", it) }
+                if (key == Prefs.WEBVIEW_DEBUGGING.key) {
+                    Handler(Looper.getMainLooper()).post { WebViewDebuggingGate.sync() }
+                }
             }
         prefsListener = l
         prefs.registerOnSharedPreferenceChangeListener(l)

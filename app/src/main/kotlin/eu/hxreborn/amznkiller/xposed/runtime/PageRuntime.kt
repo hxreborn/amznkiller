@@ -21,7 +21,7 @@ object PageRuntime {
     ) {
         val amazon = AmazonUrlParser.parse(url)
         if (!amazon.isAmazon) return
-        WebViewDebuggingGate.tryEnable()
+        WebViewDebuggingGate.sync()
         DarkModeInjector.inject(webView)
         CssInjector.inject(webView, url)
         VideoAutoplayInjector.inject(webView)

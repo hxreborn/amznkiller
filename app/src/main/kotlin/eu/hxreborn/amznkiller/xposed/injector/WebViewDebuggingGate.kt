@@ -9,13 +9,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 object WebViewDebuggingGate {
     private val enabled = AtomicBoolean(false)
 
-    fun tryEnable() {
-        if (!webviewDebugging) return
-        if (!enabled.compareAndSet(false, true)) return
+    fun sync() {
+        val wanted = webviewDebugging
+        if (enabled.get() == wanted) return
         runCatching {
-            WebView.setWebContentsDebuggingEnabled(true)
+            WebView.setWebContentsDebuggingEnabled(wanted)
         }.onSuccess {
-            Logger.debug { "webview debug enabled" }
+            enabled.set(wanted)
+            Logger.debug { "webview debug enabled=$wanted" }
         }.onFailure {
             Logger.log(Log.ERROR, "webview debug fail", it)
         }
