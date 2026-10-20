@@ -119,9 +119,8 @@ open class AppViewModel(
         get() = _settingsUiState
 
     open fun refreshAll() {
-        if (refreshing.value) return
+        if (!refreshing.compareAndSet(expect = false, update = true)) return
         viewModelScope.launch(Dispatchers.IO) {
-            refreshing.value = true
             val mark = TimeSource.Monotonic.markNow()
             try {
                 repository.save(Prefs.LAST_REFRESH_FAILED, false)
