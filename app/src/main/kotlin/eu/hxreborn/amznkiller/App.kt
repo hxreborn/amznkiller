@@ -36,6 +36,7 @@ class App :
             PrefsRepository(local) {
                 runCatching { mService?.getRemotePreferences(Prefs.GROUP) }.getOrNull()
             }
+        prefsRepository.migratePriceCharts()
         XposedServiceHelper.registerListener(this)
     }
 

@@ -77,6 +77,16 @@ class PrefsRepository(
         runCatching { remoteProvider()?.edit(commit = true) { pref.write(this, value) } }
     }
 
+    fun migratePriceCharts() {
+        if (Prefs.PRICE_CHARTS_MIGRATED.read(local)) return
+        val legacy = Prefs.PRICE_CHARTS_ENABLED.read(local)
+        local.edit {
+            Prefs.PRICE_CHART_KEEPA.write(this, legacy)
+            Prefs.PRICE_CHART_CAMEL.write(this, legacy)
+            Prefs.PRICE_CHARTS_MIGRATED.write(this, true)
+        }
+    }
+
     fun syncToRemote() {
         val remote = remoteProvider() ?: return
         runCatching {
