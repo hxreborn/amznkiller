@@ -165,6 +165,7 @@ internal fun SelectorUrlDialog(
                             }
                         },
                         enabled = isHttps && !isTesting,
+                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(R.string.settings_selector_url_test))
                     }
@@ -201,17 +202,19 @@ internal fun SelectorUrlDialog(
                             url = Prefs.SELECTOR_URL.default
                             testResult = null
                         },
+                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(R.string.settings_filter_list_default))
                     }
                     Spacer(Modifier.weight(1f))
-                    TextButton(onClick = onDismiss) {
+                    TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) {
                         Text(stringResource(AndroidR.string.cancel))
                     }
                     Spacer(Modifier.width(Tokens.SpacingSm))
                     Button(
                         onClick = { onSave(url.trim()) },
                         enabled = isHttps,
+                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(R.string.settings_selector_url_save))
                     }
