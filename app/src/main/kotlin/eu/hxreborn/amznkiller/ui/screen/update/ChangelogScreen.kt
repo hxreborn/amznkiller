@@ -121,7 +121,7 @@ private enum class NoteArea(
     }
 }
 
-private fun formatIso(isoDate: String?): String? =
+private fun localizedDate(isoDate: String?): String? =
     isoDate?.let {
         runCatching {
             DateTimeFormatter
@@ -248,7 +248,7 @@ private fun ReleaseSection(
         ) {
             Text(release.versionName, style = MaterialTheme.typography.titleLargeEmphasized)
             Text(
-                formatIso(release.publishedAt).orEmpty(),
+                localizedDate(release.publishedAt).orEmpty(),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
@@ -372,7 +372,7 @@ fun WhatsNewSheet(
     ) {
         SheetHeader(
             stringResource(R.string.whats_new_title, BuildConfig.VERSION_NAME),
-            installed?.let { formatIso(it.publishedAt) }?.let { stringResource(R.string.whats_new_released, it) },
+            installed?.let { localizedDate(it.publishedAt) }?.let { stringResource(R.string.whats_new_released, it) },
         )
         when {
             installed != null -> {
