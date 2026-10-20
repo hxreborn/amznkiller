@@ -39,6 +39,18 @@ data class UpdateUiState(
     val showUpdateCard: Boolean get() = available?.let { it.versionCode > postponedVersion } == true
 }
 
+sealed interface ChangelogState {
+    data object Loading : ChangelogState
+
+    data class Loaded(
+        val releases: List<Release>,
+    ) : ChangelogState
+
+    data class Failed(
+        val reason: String,
+    ) : ChangelogState
+}
+
 class UpdateViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
@@ -58,10 +70,14 @@ class UpdateViewModel(
                 UpdateUiState(releaseCheck.value, autoCheck.value, postponed.value, installStep.value),
             )
 
+    private val _changelog = MutableStateFlow<ChangelogState>(ChangelogState.Loading)
+    val changelog: StateFlow<ChangelogState> = _changelog.asStateFlow()
+
     private val _updatedNotice =
         MutableStateFlow(prefs.getInt(LAST_RUN_VERSION, 0) in 1 until BuildConfig.VERSION_CODE)
     val updatedNotice: StateFlow<Boolean> = _updatedNotice.asStateFlow()
 
+    private var changelogJob: Job? = null
     private var installJob: Job? = null
     private var verifiedApk: File? = null
     private var verifiedVersion: Int? = null
@@ -147,6 +163,29 @@ class UpdateViewModel(
                 gitHub
             }
         }
+    }
+
+    fun loadChangelog() {
+        if (_changelog.value is ChangelogState.Loaded || changelogJob?.isActive == true) return
+        _changelog.value = ChangelogState.Loading
+        changelogJob =
+            viewModelScope.launch(Dispatchers.IO) {
+                _changelog.value =
+                    when (val reply = ReleaseClient.fetchAll()) {
+                        is ApiResponse.Ok -> {
+                            runCatching { ChangelogState.Loaded(Release.parseList(reply.body)) }
+                                .getOrElse { ChangelogState.Failed(it.message ?: "bad release json") }
+                        }
+
+                        is ApiResponse.Retryable -> {
+                            ChangelogState.Failed(reply.reason)
+                        }
+
+                        is ApiResponse.Refused -> {
+                            ChangelogState.Failed(reply.reason)
+                        }
+                    }
+            }
     }
 
     fun startInstall(release: Release) {

@@ -12,6 +12,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import eu.hxreborn.amznkiller.BuildConfig
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
@@ -146,6 +147,13 @@ data class Release(
         }
 
         fun parse(body: String): Release = fromGitHub(JSONObject(body))
+
+        fun parseList(body: String): List<Release> {
+            val array = JSONArray(body)
+            return List(array.length()) { array.getJSONObject(it) }
+                .filterNot { it.optBoolean("draft") || it.optBoolean("prerelease") }
+                .map(::fromGitHub)
+        }
     }
 }
 

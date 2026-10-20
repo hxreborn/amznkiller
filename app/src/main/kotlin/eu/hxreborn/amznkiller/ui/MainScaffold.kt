@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,11 +54,15 @@ fun MainScaffold(
     val updatedNotice by updates.updatedNotice.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val updatedText = stringResource(R.string.updated_to, BuildConfig.VERSION_NAME)
+    val whatsNewLabel = stringResource(R.string.whats_new)
     val noticeScope = rememberCoroutineScope()
     LaunchedEffect(updatedNotice) {
         if (!updatedNotice) return@LaunchedEffect
         updates.consumeUpdatedNotice()
-        noticeScope.launch { snackbar.showSnackbar(updatedText, duration = SnackbarDuration.Short) }
+        noticeScope.launch {
+            val result = snackbar.showSnackbar(updatedText, whatsNewLabel, duration = SnackbarDuration.Long)
+            if (result == SnackbarResult.ActionPerformed) backStack.add(Screen.WhatsNew)
+        }
     }
     LifecycleResumeEffect(Unit) {
         updates.checkRelease(force = false)

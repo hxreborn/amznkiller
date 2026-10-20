@@ -25,7 +25,9 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.FormatPaint
 import androidx.compose.material.icons.outlined.Gavel
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PhonelinkErase
 import androidx.compose.material.icons.outlined.SmartToy
@@ -104,6 +106,8 @@ fun SettingsScreen(
     viewModel: AppViewModel,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onNavigateToLicenses: () -> Unit = {},
+    onNavigateToWhatsNew: () -> Unit = {},
+    onNavigateToChangelog: () -> Unit = {},
     updateState: UpdateUiState? = null,
     updateActions: UpdateSettingsActions? = null,
 ) {
@@ -373,7 +377,7 @@ fun SettingsScreen(
                     title = { Text(stringResource(R.string.settings_about)) },
                 )
 
-                val aboutItemCount = 4
+                val aboutItemCount = 6
                 val versionShape = shapeForPosition(aboutItemCount, 0)
                 preference(
                     modifier = Modifier.preferenceModifier(surface, versionShape),
@@ -386,7 +390,29 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
-                val gitRepoShape = shapeForPosition(aboutItemCount, 1)
+                preference(
+                    modifier = Modifier.preferenceModifier(surface, shapeForPosition(aboutItemCount, 1)),
+                    key = "whats_new",
+                    icon = { Icon(Icons.Outlined.NewReleases, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.whats_new) },
+                    summary = { Text(stringResource(R.string.whats_new_summary, BuildConfig.VERSION_NAME)) },
+                    onClick = onNavigateToWhatsNew,
+                )
+
+                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                preference(
+                    modifier = Modifier.preferenceModifier(surface, shapeForPosition(aboutItemCount, 2)),
+                    key = "changelog",
+                    icon = { Icon(Icons.Outlined.History, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.changelog) },
+                    summary = { Text(stringResource(R.string.changelog_summary)) },
+                    onClick = onNavigateToChangelog,
+                )
+
+                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                val gitRepoShape = shapeForPosition(aboutItemCount, 3)
                 preference(
                     modifier = Modifier.preferenceModifier(surface, gitRepoShape),
                     key = "git_repo",
@@ -400,7 +426,7 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
-                val licensesShape = shapeForPosition(aboutItemCount, 2)
+                val licensesShape = shapeForPosition(aboutItemCount, 4)
                 preference(
                     modifier = Modifier.preferenceModifier(surface, licensesShape),
                     key = "licenses",
@@ -412,7 +438,7 @@ fun SettingsScreen(
 
                 item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
 
-                val issueShape = shapeForPosition(aboutItemCount, 3)
+                val issueShape = shapeForPosition(aboutItemCount, 5)
                 preference(
                     modifier = Modifier.preferenceModifier(surface, issueShape),
                     key = "report_issue",

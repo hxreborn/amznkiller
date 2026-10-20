@@ -56,8 +56,11 @@ object ReleaseClient {
     private const val HTTP_TOO_MANY = 429
     private const val HTTP_SERVER_ERRORS = 500
     private const val MILLIS = 1000
+    private const val CHANGELOG_PAGE = 100
 
     fun fetchLatest(etag: String?): ApiResponse = request("$API/latest", etag)
+
+    fun fetchAll(): ApiResponse = request("$API?per_page=$CHANGELOG_PAGE", null)
 
     private fun request(
         url: String,

@@ -70,10 +70,12 @@ import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.screen.dashboard.DashboardScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.LicensesScreen
 import eu.hxreborn.amznkiller.ui.screen.settings.SettingsScreen
+import eu.hxreborn.amznkiller.ui.screen.update.ChangelogScreen
 import eu.hxreborn.amznkiller.ui.screen.update.UpdateActions
 import eu.hxreborn.amznkiller.ui.screen.update.UpdateCard
 import eu.hxreborn.amznkiller.ui.screen.update.UpdateSettingsActions
 import eu.hxreborn.amznkiller.ui.screen.update.UpdateSheet
+import eu.hxreborn.amznkiller.ui.screen.update.WhatsNewSheet
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
 import eu.hxreborn.amznkiller.ui.viewmodel.UpdateViewModel
@@ -93,6 +95,12 @@ sealed interface Screen : NavKey {
 
     @Serializable
     data object Update : Screen
+
+    @Serializable
+    data object WhatsNew : Screen
+
+    @Serializable
+    data object Changelog : Screen
 }
 
 data class BottomNavItem(
@@ -139,6 +147,7 @@ fun MainNavDisplay(
     val slideInDistance = with(LocalDensity.current) { Tokens.NavSlideDistance.roundToPx() }
     val updates: UpdateViewModel = viewModel()
     val updateState by updates.state.collectAsStateWithLifecycle()
+    val changelog by updates.changelog.collectAsStateWithLifecycle()
     val sheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -197,6 +206,8 @@ fun MainNavDisplay(
                         viewModel = viewModel,
                         contentPadding = contentPadding,
                         onNavigateToLicenses = { backStack.add(Screen.Licenses) },
+                        onNavigateToWhatsNew = { backStack.add(Screen.WhatsNew) },
+                        onNavigateToChangelog = { backStack.add(Screen.Changelog) },
                         updateState = updateState,
                         updateActions =
                             UpdateSettingsActions(
@@ -211,6 +222,25 @@ fun MainNavDisplay(
                 }
                 entry<Screen.Licenses> {
                     LicensesScreen(onBack = { backStack.removeLastOrNull() })
+                }
+                entry<Screen.WhatsNew>(metadata = BottomSheetSceneStrategy.bottomSheet()) {
+                    LaunchedEffect(Unit) { updates.loadChangelog() }
+                    WhatsNewSheet(
+                        state = changelog,
+                        onFullChangelog = {
+                            backStack.remove(Screen.WhatsNew)
+                            backStack.add(Screen.Changelog)
+                        },
+                        onClose = { backStack.remove(Screen.WhatsNew) },
+                    )
+                }
+                entry<Screen.Changelog> {
+                    LaunchedEffect(Unit) { updates.loadChangelog() }
+                    ChangelogScreen(
+                        state = changelog,
+                        onRetry = updates::loadChangelog,
+                        onBack = { backStack.removeLastOrNull() },
+                    )
                 }
                 entry<Screen.Update>(metadata = BottomSheetSceneStrategy.bottomSheet()) {
                     val release = updateState.available

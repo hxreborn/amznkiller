@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="close">Close</string>
+    <string name="whats_new">What\'s new</string>
+    <string name="whats_new_summary">Changes in %1$s</string>
+    <string name="whats_new_title">What\'s new in %1$s</string>
+    <string name="whats_new_released">Released %1$s</string>
+    <string name="whats_new_missing">This version is not in the changelog</string>
+    <string name="changelog">Changelog</string>
+    <string name="changelog_summary">Every release</string>
+    <string name="changelog_see_full">See full changelog</string>
+    <string name="changelog_installed">installed</string>
+    <string name="changelog_open_commit">Open commit</string>
+    <string name="changelog_failed">Couldn\'t load the changelog</string>
+    <string name="changelog_jump_top">Jump to the newest release</string>
+    <string name="changelog_jump_bottom">Jump to the oldest release</string>
+    <string name="changelog_area_blocking">Ad blocking</string>
+    <string name="changelog_area_hooks">Hooks</string>
+    <string name="changelog_area_settings">Settings</string>
+    <string name="changelog_area_updates">Updates</string>
+    <string name="changelog_area_ui">Interface</string>
+    <string name="changelog_area_app">App</string>
+    <string name="changelog_area_other">Other</string>
+    <plurals name="changelog_count">
+        <item quantity="one">%1$d release</item>
+        <item quantity="other">%1$d releases</item>
+    </plurals>
+</resources>
