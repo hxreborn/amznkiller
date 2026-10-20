@@ -22,6 +22,8 @@
     '[data-csa-c-painter=single-creative-card]{color-scheme:only light!important}' +
     '.new-dot-t2{color-scheme:only light!important;background-color:#6f7373!important;border-color:#6f7373!important}' +
     '.new-dot-t2.dot-selected-t2{background-color:#fff!important;border-color:#fff!important}' +
+    '.s-color-swatch-outer-circle-selected{color-scheme:only light!important;background-color:transparent!important;' +
+    'box-shadow:0 0 0 2px #e8e8e8!important}' +
     '#wd-color-image-backdrop,#wd-backdrop-overscroll{filter:brightness(.3)!important}' +
     '#wd-backdrop-gradient{background-image:linear-gradient(to top,#1a1a1a 10%,rgba(26,26,26,.5) 24%,' +
     'rgba(26,26,26,.33) 75%,rgba(26,26,26,0) 98%)!important}' +
