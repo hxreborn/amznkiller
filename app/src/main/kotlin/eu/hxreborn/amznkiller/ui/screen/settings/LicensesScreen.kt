@@ -26,6 +26,7 @@ import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.m3.style.accentDerivedLicenseHueResolver
 import com.mikepenz.aboutlibraries.ui.compose.m3.style.m3VariantColors
+import com.mikepenz.aboutlibraries.ui.compose.m3.style.m3VariantTextStyles
 import com.mikepenz.aboutlibraries.ui.compose.style.ContrastLevel
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
@@ -69,6 +70,7 @@ fun LicensesScreen(
                 LibraryDefaults.m3VariantColors(
                     licenseHueResolver = accentDerivedLicenseHueResolver(isDark = isDark, contrastLevel = ContrastLevel.High),
                 ),
+            variantTextStyles = LibraryDefaults.m3VariantTextStyles(nameTextStyle = MaterialTheme.typography.titleSmallEmphasized),
         )
     }
 }
