@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +60,7 @@ internal fun SelectorUrlDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var url by remember { mutableStateOf(currentUrl) }
+    var url by rememberSaveable { mutableStateOf(currentUrl) }
     var isTesting by remember { mutableStateOf(false) }
     var testResult by remember { mutableStateOf<TestOutcome?>(null) }
     val isHttps = HttpClient.isHttps(url)

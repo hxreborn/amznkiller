@@ -106,7 +106,7 @@ fun SettingsScreen(
         }
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    var showUrlDialog by remember { mutableStateOf(false) }
+    var showUrlDialog by rememberSaveable { mutableStateOf(false) }
     val shareholderEgg = rememberShareholderEgg()
 
     if (showUrlDialog) {
