@@ -18,7 +18,7 @@ object WebViewJsExecutor {
         }
 
         runCatching {
-            if (webView.handler?.looper == Looper.getMainLooper()) {
+            if (Looper.myLooper() == webView.webViewLooper) {
                 run()
             } else {
                 webView.post { run() }
