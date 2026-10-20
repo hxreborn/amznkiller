@@ -47,6 +47,7 @@ import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.outlined.Troubleshoot
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -105,6 +106,7 @@ import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.component.BalloonsOverlay
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.screen.settings.DiagnosticsDialog
 
 private const val REPO = "hxreborn/amznkiller"
 private const val REPO_URL = "https://github.com/$REPO"
@@ -428,11 +430,25 @@ private fun LinkTile(
 
 @Composable
 private fun DeviceGroup(framework: String?) {
-    framework ?: return
-    Group(stringResource(R.string.settings_this_device), 1) { _, shape ->
-        Tile(shape = shape) {
-            TileLeading(Icons.Outlined.Extension)
-            TileText(stringResource(R.string.settings_framework), framework.replace("\n", " \u00B7 "), supportingStyle = Meta)
+    var showDiagnostics by rememberSaveable { mutableStateOf(false) }
+    if (showDiagnostics) {
+        DiagnosticsDialog(frameworkVersion = framework, onDismiss = { showDiagnostics = false })
+    }
+    val tiles = if (framework == null) 1 else 2
+    Group(stringResource(R.string.settings_this_device), tiles) { index, shape ->
+        if (index == 0 && framework != null) {
+            Tile(shape = shape) {
+                TileLeading(Icons.Outlined.Extension)
+                TileText(stringResource(R.string.settings_framework), framework.replace("\n", " \u00B7 "), supportingStyle = Meta)
+            }
+        } else {
+            LinkTile(
+                shape = shape,
+                icon = Icons.Outlined.Troubleshoot,
+                title = stringResource(R.string.settings_diagnostics),
+                summary = stringResource(R.string.settings_diagnostics_summary),
+                onClick = { showDiagnostics = true },
+            )
         }
     }
 }
