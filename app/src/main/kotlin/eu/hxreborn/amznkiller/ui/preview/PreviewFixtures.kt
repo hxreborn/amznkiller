@@ -15,13 +15,17 @@ internal object PreviewFixtures {
     val dashboardReady: DashboardUiState.Ready =
         DashboardUiState.Ready(
             isXposedActive = true,
-            frameworkVersion = "LSPosed v1.11.0",
             isRefreshing = false,
             isRefreshFailed = false,
             isStale = false,
             selectorCount = 42,
             lastFetched = 1_710_000_000_000L,
             injectionEnabled = true,
+            priceChartKeepa = true,
+            priceChartCamel = false,
+            disableVideoAutoplay = true,
+            hideRufus = false,
+            forceDarkMode = ForceDarkMode.FOLLOW_SYSTEM,
             lastRefreshOutcome = null,
         )
 
@@ -30,8 +34,6 @@ internal object PreviewFixtures {
             darkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
             useDynamicColor = true,
             debugLogs = false,
-            injectionEnabled = true,
-            forceDarkMode = ForceDarkMode.FOLLOW_SYSTEM,
         )
 }
 

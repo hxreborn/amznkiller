@@ -21,12 +21,14 @@ import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.FormatPaint
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PhonelinkErase
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.material.icons.outlined.Troubleshoot
 import androidx.compose.material.icons.outlined.VideocamOff
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Check
@@ -62,7 +64,6 @@ import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.prefs.ForceDarkMode
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.component.ChoiceButtonGroup
-import eu.hxreborn.amznkiller.ui.component.ForceDarkModeButtons
 import eu.hxreborn.amznkiller.ui.component.PreferenceTitle
 import eu.hxreborn.amznkiller.ui.component.groupedPreference
 import eu.hxreborn.amznkiller.ui.component.sectionPreferenceTheme
@@ -171,6 +172,35 @@ fun SettingsScreen(
                 }
 
                 preferenceCategory(
+                    key = "category_rules",
+                    title = { Text(stringResource(R.string.settings_rules)) },
+                )
+
+                val rulesItemCount = 2
+                val filterSourcesShape = shapeForPosition(rulesItemCount, 0)
+                preference(
+                    modifier = Modifier.groupedPreference(surface, filterSourcesShape),
+                    key = "filter_sources",
+                    icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_filter_sources) },
+                    summary = { Text(stringResource(R.string.settings_filter_sources_summary)) },
+                    onClick = { showUrlDialog = true },
+                )
+
+                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
+
+                val syncShape = shapeForPosition(rulesItemCount, 1)
+                switchPreference(
+                    modifier = Modifier.groupedPreference(surface, syncShape),
+                    key = "auto_update",
+                    value = prefs.autoUpdate,
+                    icon = { Icon(Icons.Outlined.CloudSync, contentDescription = null) },
+                    title = { PreferenceTitle(R.string.settings_background_sync) },
+                    summary = { Text(stringResource(R.string.settings_background_sync_summary)) },
+                    onValueChange = { viewModel.savePref(Prefs.AUTO_UPDATE, it) },
+                )
+
+                preferenceCategory(
                     key = "category_appearance",
                     title = { Text(stringResource(R.string.settings_appearance)) },
                 )
@@ -204,121 +234,6 @@ fun SettingsScreen(
                     summary = { Text(stringResource(R.string.settings_dynamic_color_summary)) },
                     onValueChange = { viewModel.savePref(Prefs.USE_DYNAMIC_COLOR, it) },
                 )
-
-                preferenceCategory(
-                    key = "category_ad_blocking",
-                    title = { Text(stringResource(R.string.settings_ad_blocking)) },
-                )
-
-                val adBlockItemCount = 3
-                val filteringShape = shapeForPosition(adBlockItemCount, 0)
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, filteringShape),
-                    key = "css_injection",
-                    value = prefs.injectionEnabled,
-                    icon = { Icon(Icons.Outlined.Block, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_content_filtering) },
-                    summary = { Text(stringResource(R.string.settings_content_filtering_summary)) },
-                    onValueChange = { viewModel.savePref(Prefs.INJECTION_ENABLED, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val syncShape = shapeForPosition(adBlockItemCount, 1)
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, syncShape),
-                    key = "auto_update",
-                    value = prefs.autoUpdate,
-                    icon = { Icon(Icons.Outlined.CloudSync, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_background_sync) },
-                    summary = { Text(stringResource(R.string.settings_background_sync_summary)) },
-                    onValueChange = { viewModel.savePref(Prefs.AUTO_UPDATE, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val filterSourcesShape = shapeForPosition(adBlockItemCount, 2)
-                preference(
-                    modifier = Modifier.groupedPreference(surface, filterSourcesShape),
-                    key = "filter_sources",
-                    icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_filter_sources) },
-                    summary = { Text(stringResource(R.string.settings_filter_sources_summary)) },
-                    onClick = { showUrlDialog = true },
-                )
-
-                preferenceCategory(
-                    key = "category_shopping_display",
-                    title = { Text(stringResource(R.string.settings_shopping_display)) },
-                )
-
-                val displayItemCount = 5
-                val keepaShape = shapeForPosition(displayItemCount, 0)
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, keepaShape),
-                    key = "price_chart_keepa",
-                    value = prefs.priceChartKeepa,
-                    icon = { Icon(Icons.AutoMirrored.Outlined.TrendingUp, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_price_chart_keepa) },
-                    summary = { Text(stringResource(R.string.settings_price_chart_keepa_summary)) },
-                    onValueChange = { viewModel.savePref(Prefs.PRICE_CHART_KEEPA, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val camelShape = shapeForPosition(displayItemCount, 1)
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, camelShape),
-                    key = "price_chart_camel",
-                    value = prefs.priceChartCamel,
-                    icon = { Icon(Icons.AutoMirrored.Outlined.ShowChart, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_price_chart_camel) },
-                    summary = { Text(stringResource(R.string.settings_price_chart_camel_summary)) },
-                    onValueChange = { viewModel.savePref(Prefs.PRICE_CHART_CAMEL, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val autoplayShape = shapeForPosition(displayItemCount, 2)
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, autoplayShape),
-                    key = "disable_video_autoplay",
-                    value = prefs.disableVideoAutoplay,
-                    icon = { Icon(Icons.Outlined.VideocamOff, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_disable_video_autoplay) },
-                    summary = { Text(stringResource(R.string.settings_disable_video_autoplay_summary)) },
-                    onValueChange = { viewModel.savePref(Prefs.DISABLE_VIDEO_AUTOPLAY, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val hideRufusShape = shapeForPosition(displayItemCount, 3)
-                switchPreference(
-                    modifier = Modifier.groupedPreference(surface, hideRufusShape),
-                    key = "hide_rufus",
-                    value = prefs.hideRufus,
-                    icon = { Icon(Icons.Outlined.SmartToy, contentDescription = null) },
-                    title = { PreferenceTitle(R.string.settings_hide_rufus) },
-                    summary = { Text(stringResource(R.string.settings_hide_rufus_summary)) },
-                    onValueChange = { viewModel.savePref(Prefs.HIDE_RUFUS, it) },
-                )
-
-                item { Spacer(Modifier.height(Tokens.PreferenceItemGap)) }
-
-                val darkModeShape = shapeForPosition(displayItemCount, 4)
-                item(key = "force_dark_mode", contentType = "ChoicePreference") {
-                    Column(modifier = Modifier.groupedPreference(surface, darkModeShape)) {
-                        Preference(
-                            icon = { Icon(Icons.Outlined.DarkMode, contentDescription = null) },
-                            title = { PreferenceTitle(R.string.settings_dark_mode) },
-                            summary = { Text(stringResource(R.string.settings_dark_mode_summary)) },
-                        )
-                        ForceDarkModeButtons(
-                            selected = prefs.forceDarkMode,
-                            onSelect = { viewModel.savePref(Prefs.FORCE_DARK_MODE, it.prefValue) },
-                        )
-                    }
-                }
 
                 preferenceCategory(
                     key = "category_advanced",

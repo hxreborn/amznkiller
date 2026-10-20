@@ -66,13 +66,17 @@ open class AppViewModel(
         ) { prefs, isRefreshing, xposed, outcome ->
             DashboardReady(
                 isXposedActive = xposed.active,
-                frameworkVersion = xposed.frameworkVersion,
                 isRefreshing = isRefreshing,
                 isRefreshFailed = prefs.isRefreshFailed,
                 isStale = prefs.isStale,
                 lastFetched = prefs.lastFetched,
                 selectorCount = prefs.selectorCount,
                 injectionEnabled = prefs.injectionEnabled,
+                priceChartKeepa = prefs.priceChartKeepa,
+                priceChartCamel = prefs.priceChartCamel,
+                disableVideoAutoplay = prefs.disableVideoAutoplay,
+                hideRufus = prefs.hideRufus,
+                forceDarkMode = prefs.forceDarkMode,
                 lastRefreshOutcome = outcome,
             )
         }.stateIn(
@@ -93,14 +97,8 @@ open class AppViewModel(
             SettingsReady(
                 selectorUrl = prefs.selectorUrl,
                 autoUpdate = prefs.autoUpdate,
-                injectionEnabled = prefs.injectionEnabled,
                 debugLogs = prefs.debugLogs,
                 webviewDebugging = prefs.webviewDebugging,
-                forceDarkMode = prefs.forceDarkMode,
-                priceChartKeepa = prefs.priceChartKeepa,
-                priceChartCamel = prefs.priceChartCamel,
-                disableVideoAutoplay = prefs.disableVideoAutoplay,
-                hideRufus = prefs.hideRufus,
                 darkThemeConfig = prefs.darkThemeConfig,
                 useDynamicColor = prefs.useDynamicColor,
                 isLauncherIconHidden = iconHidden,

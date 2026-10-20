@@ -5,11 +5,11 @@
         <item quantity="other">%d rules</item>
     </plurals>
     <plurals name="delta_added_a11y">
-        <item quantity="one">%d selector added</item>
-        <item quantity="other">%d selectors added</item>
+        <item quantity="one">%d rule added</item>
+        <item quantity="other">%d rules added</item>
     </plurals>
     <plurals name="delta_removed_a11y">
-        <item quantity="one">%d selector removed</item>
-        <item quantity="other">%d selectors removed</item>
+        <item quantity="one">%d rule removed</item>
+        <item quantity="other">%d rules removed</item>
     </plurals>
 </resources>

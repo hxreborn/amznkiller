@@ -33,8 +33,8 @@ internal fun DiagnosticsDialog(
 ) {
     val context = LocalContext.current
     val title = stringResource(R.string.settings_diagnostics)
-    val notActive = stringResource(R.string.dashboard_module_inactive)
-    val notInstalled = stringResource(R.string.dashboard_not_installed)
+    val notActive = stringResource(R.string.diagnostics_not_active)
+    val notInstalled = stringResource(R.string.diagnostics_not_installed)
     val rows =
         remember(frameworkVersion) {
             val packageManager = context.packageManager

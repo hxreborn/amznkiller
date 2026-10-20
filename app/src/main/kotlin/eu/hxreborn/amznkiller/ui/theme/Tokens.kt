@@ -14,10 +14,9 @@ object Tokens {
     val SectionVerticalSpacing = SpacingLg
     val CardInnerPadding = SpacingLg
 
-    val IconLg = 32.dp
+    val StatusBadgeSize = 56.dp
 
     val CardShape = RoundedCornerShape(SpacingXl)
-    val ThumbnailShape = RoundedCornerShape(6.dp)
 
     val NavSlideDistance = 96.dp
 
