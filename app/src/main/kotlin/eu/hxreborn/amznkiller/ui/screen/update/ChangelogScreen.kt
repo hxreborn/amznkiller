@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -49,7 +51,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
@@ -68,6 +69,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
@@ -82,6 +84,8 @@ import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
+import eu.hxreborn.amznkiller.ui.theme.Tokens
+import eu.hxreborn.amznkiller.ui.util.shapeForPosition
 import eu.hxreborn.amznkiller.ui.viewmodel.ChangelogState
 import eu.hxreborn.amznkiller.update.Release
 import kotlinx.coroutines.launch
@@ -91,7 +95,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 private val ChipRadius = 8.dp
-private val ReleaseGap = 20.dp
+private val ReleaseCardPadding = 12.dp
 private val AreaIconSize = 16.dp
 private val BadgeHeight = 22.dp
 private val BadgeIconSize = 14.dp
@@ -195,10 +199,8 @@ fun ChangelogScreen(
                         contentPadding = PaddingValues(start = ScreenGutter, end = ScreenGutter, top = 8.dp, bottom = navBottom + 88.dp),
                     ) {
                         itemsIndexed(releases, key = { _, release -> release.versionName }) { index, release ->
-                            if (index > 0) {
-                                HorizontalDivider(Modifier.padding(vertical = ReleaseGap), color = MaterialTheme.colorScheme.outlineVariant)
-                            }
-                            ReleaseSection(release)
+                            if (index > 0) Spacer(Modifier.height(Tokens.PreferenceItemGap))
+                            ReleaseSection(release, shapeForPosition(releases.size, index))
                         }
                     }
                 }
@@ -228,8 +230,17 @@ fun ChangelogScreen(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ReleaseSection(release: Release) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun ReleaseSection(
+    release: Release,
+    shape: Shape,
+) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer, shape)
+            .padding(ReleaseCardPadding),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         Row(
             Modifier.padding(horizontal = 4.dp).semantics { heading() },
             verticalAlignment = Alignment.CenterVertically,
