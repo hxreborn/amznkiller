@@ -59,6 +59,11 @@ object ForceDarkHook {
             WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
 
     private val READABLE_ICON = Color.rgb(232, 232, 232)
+    private val A11Y_FLAG_CLASSES =
+        listOf(
+            "android.view.accessibility.Flags",
+            "com.android.internal.hidden_from_bootclasspath.android.view.accessibility.Flags",
+        )
     private val READABLE_TINT = ColorStateList.valueOf(READABLE_ICON)
 
     // Whether force dark reaches the bottom bar differs by device, and decides the whole approach
@@ -74,13 +79,25 @@ object ForceDarkHook {
     @Volatile
     private var inversion = Inversion.UNKNOWN
 
+    private val forceInvertEnabled: Boolean by lazy {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) return@lazy false
+        val flag =
+            A11Y_FLAG_CLASSES.firstNotNullOfOrNull { name ->
+                runCatching {
+                    Class.forName(name).getMethod("forceInvertColor").invoke(null) as Boolean
+                }.getOrNull()
+            }
+        if (flag == null) Logger.debug { "dark probe force invert flag missing" }
+        flag ?: false
+    }
+
     fun hook(
         xposed: XposedInterface,
         classLoader: ClassLoader,
     ) {
         Logger.debug {
             "dark probe device=${Build.MANUFACTURER}/${Build.MODEL} " +
-                "sdk=${Build.VERSION.SDK_INT} hw=${Build.HARDWARE}"
+                "sdk=${Build.VERSION.SDK_INT} hw=${Build.HARDWARE} forceInvert=$forceInvertEnabled"
         }
         probeForceDarkType()
         hookActivityOnCreate(xposed)
@@ -230,7 +247,6 @@ object ForceDarkHook {
     }
 
     // Amazon sets android:forceDarkAllowed=false in AmazonTheme
-    // Override determineForceDarkType result from 0 (NONE) to 2 (ALWAYS)
     private fun hookDetermineForceDarkType(xposed: XposedInterface) {
         runCatching {
             val clazz = Class.forName("android.view.ViewRootImpl")
@@ -421,11 +437,10 @@ object ForceDarkHook {
         ) { chain ->
             val color = chain.getArg(0) as Int
             val dark = Color.alpha(color) >= OPAQUE_ALPHA && luminance(color) < DARK_TINT
-            if (!forceDarkWebview || inversion == Inversion.SKIPS_BAR ||
-                !dark
-            ) {
-                return@hookMethod chain.proceed()
-            }
+            val lighten =
+                forceDarkWebview && dark && !forceInvertEnabled && inversion != Inversion.SKIPS_BAR
+            Logger.debug { "dark tab indicator color=%08x lighten=$lighten".format(color) }
+            if (!lighten) return@hookMethod chain.proceed()
             chain.proceed(arrayOf(READABLE_ICON))
         }
     }
