@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">AmznKiller</string>
     <string name="app_bar_title">AmznKiller</string>
-    <string name="app_desc">Strip out ads and purge low-quality promotional products from Amazon Shopping</string>
+    <string name="app_desc">Hide ads and sponsored products in Amazon Shopping</string>
 
     <string name="target_title">Amazon Shopping</string>
 
@@ -42,8 +42,8 @@
     <string name="cd_refresh">Refresh selectors</string>
     <string name="cd_retry">Retry sync</string>
 
-    <string name="snackbar_fetch_failed_bundled">Remote fetch failed, using bundled rules instead</string>
-    <string name="snackbar_no_selectors">No selectors fetched</string>
+    <string name="snackbar_fetch_failed_bundled">Couldn\'t download rules. Using built-in rules</string>
+    <string name="snackbar_no_selectors">No blocking rules found</string>
     <string name="snackbar_update_failed">Update failed</string>
 
     <string name="tab_dashboard">Dashboard</string>
@@ -54,42 +54,42 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_dynamic_color">Dynamic color</string>
-    <string name="settings_shopping_display">Shopping &amp; Display</string>
-    <string name="settings_ad_blocking">Ad Blocking</string>
+    <string name="settings_shopping_display">Shopping &amp; display</string>
+    <string name="settings_ad_blocking">Ad blocking</string>
     <string name="settings_advanced">Advanced</string>
     <string name="settings_debug_logs">Debug logs</string>
-    <string name="settings_dynamic_color_summary">Use Material You colors from wallpaper</string>
+    <string name="settings_dynamic_color_summary">Use colors from your wallpaper</string>
     <string name="settings_content_filtering">Remove ads</string>
-    <string name="settings_content_filtering_summary">Inject CSS rules into Amazon app to hide ads and sponsored junk</string>
+    <string name="settings_content_filtering_summary">Hide ads and sponsored products in Amazon Shopping</string>
     <string name="settings_marketplace_insights">Price history charts</string>
     <string name="settings_marketplace_insights_summary">Show Keepa and CamelCamelCamel charts on product pages</string>
     <string name="settings_disable_video_autoplay">Disable video autoplay</string>
-    <string name="settings_disable_video_autoplay_summary">Stop videos from playing automatically. Tapping play still works</string>
+    <string name="settings_disable_video_autoplay_summary">Stop videos from playing automatically. Tap to play</string>
     <string name="settings_hide_rufus">Hide Rufus AI</string>
-    <string name="settings_hide_rufus_summary">Disable Amazon\'s Rufus AI assistant. Requires force stopping Amazon to take effect</string>
+    <string name="settings_hide_rufus_summary">Hide Amazon\'s Rufus assistant. Force stop Amazon Shopping to apply</string>
     <string name="settings_dark_mode">Dark mode (experimental)</string>
-    <string name="settings_dark_mode_summary">Requires force stopping Amazon. Needs Android 15 or newer, and some non-Pixel ROMs do not support it</string>
+    <string name="settings_dark_mode_summary">Needs Android 15 or newer. Some non-Pixel ROMs don\'t support it. Force stop Amazon Shopping to apply</string>
     <string name="settings_force_dark_off">Off</string>
     <string name="settings_force_dark_follow_system">System</string>
     <string name="settings_force_dark_on">On</string>
     <string name="settings_webview_debugging">WebView debugging</string>
-    <string name="settings_webview_debugging_summary">Attach DevTools to Amazon WebViews. Requires force stopping Amazon to take effect</string>
-    <string name="settings_debug_logs_summary">Write verbose hook and injection logs. Disable when not debugging</string>
+    <string name="settings_webview_debugging_summary">Connect DevTools to Amazon Shopping WebViews. Force stop Amazon Shopping to apply</string>
+    <string name="settings_debug_logs_summary">Record detailed debug logs. Turn off when you\'re done debugging</string>
     <string name="settings_hide_launcher_icon">Hide launcher icon</string>
-    <string name="settings_hide_launcher_icon_summary">Hides app from launcher. You can still open it from LSPosed manager</string>
+    <string name="settings_hide_launcher_icon_summary">Hide AmznKiller from your launcher. Open it from the LSPosed manager</string>
 
-    <string name="settings_filter_sources">Selector sources</string>
-    <string name="settings_filter_sources_summary">Set the remote URL for selector lists</string>
-    <string name="settings_filter_list_default">Default</string>
-    <string name="settings_background_sync">Fetch rules automatically</string>
-    <string name="settings_background_sync_summary">Check for updated selectors on app launch</string>
-    <string name="settings_selector_url_dialog_title">Selector URL</string>
-    <string name="settings_selector_url_dialog_subtitle">Enter the URL for the remote filter list source.</string>
+    <string name="settings_filter_sources">Rule source</string>
+    <string name="settings_filter_sources_summary">Choose where to download blocking rules</string>
+    <string name="settings_filter_list_default">Use default</string>
+    <string name="settings_background_sync">Update rules automatically</string>
+    <string name="settings_background_sync_summary">Check for rule updates when you open AmznKiller</string>
+    <string name="settings_selector_url_dialog_title">Rule source URL</string>
+    <string name="settings_selector_url_dialog_subtitle">Enter the URL of a blocking rule list</string>
     <string name="settings_selector_url_save">Save</string>
     <string name="settings_selector_url_test">Test</string>
     <string name="settings_selector_url_testing">Testing\u2026</string>
-    <string name="settings_selector_url_test_found">%1$d selectors found</string>
-    <string name="settings_selector_url_test_partial">Failed, using %1$d bundled selectors</string>
+    <string name="settings_selector_url_test_found">%1$d rules found</string>
+    <string name="settings_selector_url_test_partial">Download failed. Using %1$d built-in rules</string>
     <string name="settings_selector_url_test_failed">Failed: %1$s</string>
     <string name="settings_selector_url_https_required">Must start with https://</string>
 
@@ -125,9 +125,9 @@
         <item>!ads</item>
     </string-array>
 
-    <string name="easter_shareholder_already">No need. You are already an Amazon shareholder</string>
+    <string name="easter_shareholder_already">No need. You\'re already an Amazon shareholder</string>
     <plurals name="easter_shareholder_countdown">
-        <item quantity="one">You are now %d step away from becoming an Amazon shareholder</item>
-        <item quantity="other">You are now %d steps away from becoming an Amazon shareholder</item>
+        <item quantity="one">You\'re %d step away from becoming an Amazon shareholder</item>
+        <item quantity="other">You\'re %d steps away from becoming an Amazon shareholder</item>
     </plurals>
 </resources>
