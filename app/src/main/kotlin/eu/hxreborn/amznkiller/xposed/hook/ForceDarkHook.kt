@@ -290,11 +290,10 @@ object ForceDarkHook {
         Logger.debug { "dark webview ctors hooked=$hookedCtors" }
         hookMethod(
             xposed,
-            View::class.java,
+            WebView::class.java,
             "setBackgroundColor",
             Int::class.javaPrimitiveType!!,
         ) { chain ->
-            if (chain.thisObject !is WebView) return@hookMethod chain.proceed()
             if (!forceDarkWebview) return@hookMethod chain.proceed()
             val color = chain.getArg(0) as? Int ?: return@hookMethod chain.proceed()
             val r = (color shr 16) and 0xFF
