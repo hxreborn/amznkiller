@@ -65,7 +65,7 @@ internal fun MetricsGrid(
                     } else {
                         stringResource(R.string.dashboard_injection_paused)
                     },
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMediumEmphasized,
             )
         }
 
@@ -96,7 +96,7 @@ internal fun MetricsGrid(
                     } else {
                         stringResource(R.string.dashboard_no_active_rules)
                     },
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMediumEmphasized,
             )
         }
     }
