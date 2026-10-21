@@ -98,6 +98,10 @@ data class Release(
                 val heading = sectionHeading.find(line)
                 if (heading != null) {
                     val title = heading.groupValues[1]
+                    if (title == "New Contributors") {
+                        section = null
+                        return@forEach
+                    }
                     val kind =
                         when (title) {
                             "Features", "Added" -> Note.Kind.NEW
