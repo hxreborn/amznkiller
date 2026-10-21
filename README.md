@@ -22,22 +22,42 @@ An Xposed module that hides ads and sponsored products in the Amazon Shopping ap
 > [!NOTE]
 > The blocking is cosmetic. Amazon still sends its ad requests. Pair it with a DNS blocker such as AdGuard, NextDNS or Pi-hole to stop those too.
 
-<details>
-<summary><img src="assets/icons/photo_library.svg" width="20" alt=""> Screenshots</summary>
+## Before and after
+
+Search query: _"macbook air m1 16gb 512"_
+
+| Stock (2 real results, rest are ads) | Patched |
+| --- | --- |
+| <img src="https://github.com/user-attachments/assets/4c2fb092-0e63-4a34-b9ba-afe1a4028b09" width="280" alt="Stock Amazon app" /> | <img src="https://github.com/user-attachments/assets/135e1fec-b0e9-4dc1-9d58-49fabd825262" width="280" alt="Patched Amazon app" /> |
 
 <table>
   <tr>
-    <td><img src="assets/screenshots/search-stock.webp" width="240" alt="Search without AmznKiller"><br><sub>Search, stock</sub></td>
-    <td><img src="assets/screenshots/search.webp" width="240" alt="Search with AmznKiller"><br><sub>Search, ads removed</sub></td>
-    <td><img src="assets/screenshots/charts.webp" width="240" alt="Price charts"><br><sub>Price charts</sub></td>
+    <th></th>
+    <th>Stock</th>
+    <th>With AmznKiller</th>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/dark.webp" width="240" alt="Force dark"><br><sub>Force dark</sub></td>
+    <td>Price charts</td>
+    <td><img src="assets/screenshots/charts-stock.webp" width="280" alt="Product page without price charts"></td>
+    <td><img src="assets/screenshots/charts.webp" width="280" alt="Product page with Keepa and CamelCamelCamel charts"></td>
+  </tr>
+  <tr>
+    <td>Dark mode</td>
+    <td><img src="assets/screenshots/dark-stock.webp" width="280" alt="Product page in Amazon's own theme"></td>
+    <td><img src="assets/screenshots/dark.webp" width="280" alt="Product page with dark mode on"></td>
+  </tr>
+</table>
+
+<details>
+<summary><img src="assets/icons/photo_library.svg" width="20" alt=""> Companion app</summary>
+
+<table>
+  <tr>
     <td><img src="assets/screenshots/dashboard.webp" width="240" alt="Dashboard"><br><sub>Dashboard</sub></td>
     <td><img src="assets/screenshots/settings.webp" width="240" alt="Settings"><br><sub>Settings</sub></td>
+    <td><img src="assets/screenshots/about.webp" width="240" alt="About"><br><sub>About</sub></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/about.webp" width="240" alt="About"><br><sub>About</sub></td>
     <td><img src="assets/screenshots/changelog.webp" width="240" alt="Changelog"><br><sub>Changelog</sub></td>
     <td><img src="assets/screenshots/update.webp" width="240" alt="Update"><br><sub>Update</sub></td>
   </tr>
@@ -47,7 +67,7 @@ An Xposed module that hides ads and sponsored products in the Amazon Shopping ap
 
 ## Install
 
-Needs Android 10 or newer, root and an Xposed framework with libxposed API 101 or newer (LSPosed or Vector). AmznKiller targets API 102, so on a framework with hot reload an update reinstalls its hooks without restarting Amazon.
+Needs Android 10 or newer, root and an Xposed framework with libxposed API 101 or newer (LSPosed or Vector).
 
 1. Download the APK:
 
@@ -57,6 +77,10 @@ Needs Android 10 or newer, root and an Xposed framework with libxposed API 101 o
 2. Enable AmznKiller in your Xposed manager. The scope is fixed to Amazon Shopping (`com.amazon.mShop.android.shopping`), Amazon India (`in.amazon.mShop.android.shopping`) and Amazon Business (`com.amazon.mShop.android.business.shopping`).
 3. Force stop Amazon Shopping and open it again.
 4. Open AmznKiller. The dashboard says Ads are blocked once the module is active.
+
+Settings apply while Amazon is running, on the next page load: Remove ads, rule updates, Keepa, CamelCamelCamel, video autoplay and WebView debugging. Hide Rufus AI and Dark mode need a force stop of Amazon Shopping.
+
+AmznKiller targets libxposed API 102, so on a framework with hot reload a new version takes effect without restarting Amazon.
 
 ## Force dark
 
