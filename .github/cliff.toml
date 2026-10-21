@@ -71,6 +71,8 @@ commit_preprocessors = [
   { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "" },
 ]
 commit_parsers = [
+  { sha = "45c87d2726ec6ca9c84268dffb726834fd8083bc", skip = true },
+  { sha = "421356e40ac8ea83ae724e72d6ff76a0a2648169", skip = true },
   { sha = "7339348db2435b5e02b746321f49f2b4de97ee71", skip = true },
   { sha = "3c1afc26b70b1b493cf15b20b5c0b3d0057ac6ed", skip = true },
   { sha = "0fb49800bc167befb1989a84794df198ac894c92", skip = true },
