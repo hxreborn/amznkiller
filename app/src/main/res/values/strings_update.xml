@@ -15,6 +15,11 @@
     <string name="notes_new">New</string>
     <string name="notes_fixed">Fixed</string>
     <string name="notes_other">Other</string>
+    <string name="chip_fix">Fix</string>
+    <string name="chip_perf">Perf</string>
+    <string name="chip_deps">Deps</string>
+    <string name="chip_revert">Revert</string>
+    <string name="chip_misc">Misc</string>
     <plurals name="notes_count">
         <item quantity="one">%1$d change</item>
         <item quantity="other">%1$d changes</item>

@@ -328,6 +328,14 @@ private fun NoteRow(note: Release.Note) {
     }
 }
 
+private val ShortSections =
+    mapOf(
+        "Performance Improvements" to R.string.chip_perf,
+        "Dependencies" to R.string.chip_deps,
+        "Reverts" to R.string.chip_revert,
+        "Miscellaneous" to R.string.chip_misc,
+    )
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun KindBadge(note: Release.Note) {
@@ -339,11 +347,15 @@ private fun KindBadge(note: Release.Note) {
             }
 
             Release.Note.Kind.FIXED -> {
-                Triple(stringResource(R.string.notes_fixed), Icons.Outlined.Build, scheme.tertiaryContainer to scheme.onTertiaryContainer)
+                Triple(stringResource(R.string.chip_fix), Icons.Outlined.Build, scheme.tertiaryContainer to scheme.onTertiaryContainer)
             }
 
             Release.Note.Kind.OTHER -> {
-                Triple(note.section, Icons.Outlined.Code, scheme.surfaceContainerHighest to scheme.onSurfaceVariant)
+                Triple(
+                    ShortSections[note.section]?.let { stringResource(it) } ?: note.section,
+                    Icons.Outlined.Code,
+                    scheme.surfaceContainerHighest to scheme.onSurfaceVariant,
+                )
             }
         }
     Surface(shape = RoundedCornerShape(ChipRadius), color = colors.first, contentColor = colors.second) {
