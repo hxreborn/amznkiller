@@ -73,12 +73,24 @@ class AmznkillerModule : XposedModule() {
             Logger.info("embedded fallback count=${selectors.size}")
         }
 
-        runCatching { WebViewHook.hook(this) }
-            .onFailure { Logger.log(Log.ERROR, "hook fail name=WebViewHook", it) }
-        runCatching { ForceDarkHook.hook(this, classLoader, previousExecutables) }
-            .onFailure { Logger.log(Log.ERROR, "hook fail name=ForceDarkHook", it) }
-        runCatching { RufusHook.hook(this, classLoader) }
-            .onFailure { Logger.log(Log.ERROR, "hook fail name=RufusHook", it) }
+        installGuarded("WebViewHook") { WebViewHook.hook(this) }
+        installGuarded("ForceDarkHook") {
+            ForceDarkHook.hook(this, classLoader, previousExecutables)
+        }
+        installGuarded("RufusHook") { RufusHook.hook(this, classLoader) }
+    }
+
+    private inline fun installGuarded(
+        name: String,
+        install: () -> Unit,
+    ) {
+        try {
+            install()
+        } catch (e: Exception) {
+            Logger.log(Log.ERROR, "hook fail name=$name", e)
+        } catch (e: LinkageError) {
+            Logger.log(Log.ERROR, "hook fail name=$name", e)
+        }
     }
 
     private fun showToast(classLoader: ClassLoader) {

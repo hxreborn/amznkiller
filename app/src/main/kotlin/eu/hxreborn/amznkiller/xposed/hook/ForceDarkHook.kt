@@ -220,14 +220,31 @@ object ForceDarkHook {
         vararg params: Class<*>,
         interceptor: XposedInterface.Hooker,
     ) {
-        runCatching {
-            xposed.hook(declaredMethod(clazz, name, *params)).intercept(interceptor)
-        }.onSuccess {
-            Logger.debug { "hooked target=${clazz.simpleName}.$name" }
-        }.onFailure {
-            Logger.log(Log.ERROR, "hook fail target=${clazz.simpleName}.$name", it)
-        }
+        val hooked =
+            attemptHook(
+                onFailure = {
+                    Logger.log(Log.ERROR, "hook fail target=${clazz.simpleName}.$name", it)
+                },
+            ) {
+                xposed.hook(declaredMethod(clazz, name, *params)).intercept(interceptor)
+            }
+        if (hooked) Logger.debug { "hooked target=${clazz.simpleName}.$name" }
     }
+
+    private inline fun attemptHook(
+        onFailure: (Throwable) -> Unit,
+        block: () -> Unit,
+    ): Boolean =
+        try {
+            block()
+            true
+        } catch (e: Exception) {
+            onFailure(e)
+            false
+        } catch (e: LinkageError) {
+            onFailure(e)
+            false
+        }
 
     // Bar colors are no-ops under enforced edge to edge, still needed below API 35
     @Suppress("DEPRECATION")
@@ -273,35 +290,43 @@ object ForceDarkHook {
 
     // Amazon sets android:forceDarkAllowed=false in AmazonTheme
     private fun hookDetermineForceDarkType(xposed: XposedInterface) {
-        runCatching {
-            val clazz = Class.forName("android.view.ViewRootImpl")
-            Logger.debug {
-                val names =
-                    clazz.declaredMethods
-                        .filter {
-                            "forcedark" in it.name.lowercase()
-                        }.map { it.name }
-                "dark probe vri-methods count=${names.size}"
-            }
-            xposed.hook(declaredMethod(clazz, "determineForceDarkType")).intercept { chain ->
-                val result = chain.proceed()
-                if (!forceDarkWebview) return@intercept result
-                if (result !is Int) {
-                    Logger.debug { "dark detect type unexpected class=${result?.javaClass?.name}" }
-                    return@intercept result
+        val hooked =
+            attemptHook(
+                onFailure = {
+                    Logger.log(
+                        Log.ERROR,
+                        "hook fail target=ViewRootImpl.determineForceDarkType",
+                        it,
+                    )
+                },
+            ) {
+                val clazz = Class.forName("android.view.ViewRootImpl")
+                Logger.debug {
+                    val names =
+                        clazz.declaredMethods
+                            .filter {
+                                "forcedark" in it.name.lowercase()
+                            }.map { it.name }
+                    "dark probe vri-methods count=${names.size}"
                 }
-                if (result != 0) {
-                    Logger.debug { "dark detect skip already=$result" }
-                    return@intercept result
+                xposed.hook(declaredMethod(clazz, "determineForceDarkType")).intercept { chain ->
+                    val result = chain.proceed()
+                    if (!forceDarkWebview) return@intercept result
+                    if (result !is Int) {
+                        Logger.debug {
+                            "dark detect type unexpected class=${result?.javaClass?.name}"
+                        }
+                        return@intercept result
+                    }
+                    if (result != 0) {
+                        Logger.debug { "dark detect skip already=$result" }
+                        return@intercept result
+                    }
+                    Logger.debug { "dark detect override prev=$result next=2" }
+                    2
                 }
-                Logger.debug { "dark detect override prev=$result next=2" }
-                2
             }
-        }.onSuccess {
-            Logger.debug { "hooked target=ViewRootImpl.determineForceDarkType" }
-        }.onFailure {
-            Logger.log(Log.ERROR, "hook fail target=ViewRootImpl.determineForceDarkType", it)
-        }
+        if (hooked) Logger.debug { "hooked target=ViewRootImpl.determineForceDarkType" }
     }
 
     // Fallback for older Android where determineForceDarkType doesn't exist
@@ -324,7 +349,14 @@ object ForceDarkHook {
                 }
             for (param in params) {
                 val ok =
-                    runCatching {
+                    attemptHook(
+                        onFailure = {
+                            Logger.debug {
+                                "dark renderer skip class=$cls param=${param.simpleName} " +
+                                    "reason=not-found"
+                            }
+                        },
+                    ) {
                         val method = declaredMethod(clazz, "setForceDark", param)
                         xposed.hook(method).intercept { chain ->
                             if (!forceDarkWebview) {
@@ -352,13 +384,9 @@ object ForceDarkHook {
                             chain.proceed()
                         }
                     }
-                if (ok.isSuccess) {
+                if (ok) {
                     Logger.debug { "hooked target=$cls.setForceDark param=${param.simpleName}" }
                     return
-                } else {
-                    Logger.debug {
-                        "dark renderer skip class=$cls param=${param.simpleName} reason=not-found"
-                    }
                 }
             }
         }
@@ -368,7 +396,11 @@ object ForceDarkHook {
     private fun hookWebViewBackground(xposed: XposedInterface) {
         var hookedCtors = 0
         for (ctor in declaredConstructors(WebView::class.java)) {
-            runCatching {
+            attemptHook(
+                onFailure = {
+                    Logger.debug { "hook fail target=WebView.<init> msg=${it.message}" }
+                },
+            ) {
                 xposed.hook(ctor).intercept { chain ->
                     chain.proceed()
                     if (!forceDarkWebview) return@intercept null
@@ -383,8 +415,6 @@ object ForceDarkHook {
                     null
                 }
                 hookedCtors++
-            }.onFailure {
-                Logger.debug { "hook fail target=WebView.<init> msg=${it.message}" }
             }
         }
         Logger.debug { "dark webview ctors hooked=$hookedCtors" }
@@ -586,24 +616,31 @@ object ForceDarkHook {
                 Logger.log(Log.ERROR, "hook fail target=$BASE_TAB_CONTROLLER.$FIELD_TAB_ICON", it)
                 return
             }
-        runCatching {
-            val method = controller.declaredMethods.first { it.name == METHOD_UPDATE_TAB_ITEM }
-            xposed.hook(method).intercept { chain ->
-                val result = chain.proceed()
-                if (!forceDarkWebview) return@intercept result
-                val icon = runCatching { iconField.get(chain.thisObject) as? ImageView }.getOrNull()
-                if (icon != null && icon in unreadableIcons) icon.applyReadableTint()
-                result
+        val hooked =
+            attemptHook(
+                onFailure = {
+                    Logger.log(
+                        Log.ERROR,
+                        "hook fail target=$BASE_TAB_CONTROLLER.$METHOD_UPDATE_TAB_ITEM",
+                        it,
+                    )
+                },
+            ) {
+                val method = controller.declaredMethods.first { it.name == METHOD_UPDATE_TAB_ITEM }
+                xposed.hook(method).intercept { chain ->
+                    val result = chain.proceed()
+                    if (!forceDarkWebview) return@intercept result
+                    val icon =
+                        runCatching {
+                            iconField.get(
+                                chain.thisObject,
+                            ) as? ImageView
+                        }.getOrNull()
+                    if (icon != null && icon in unreadableIcons) icon.applyReadableTint()
+                    result
+                }
             }
-        }.onSuccess {
-            Logger.debug { "hooked target=$BASE_TAB_CONTROLLER.$METHOD_UPDATE_TAB_ITEM" }
-        }.onFailure {
-            Logger.log(
-                Log.ERROR,
-                "hook fail target=$BASE_TAB_CONTROLLER.$METHOD_UPDATE_TAB_ITEM",
-                it,
-            )
-        }
+        if (hooked) Logger.debug { "hooked target=$BASE_TAB_CONTROLLER.$METHOD_UPDATE_TAB_ITEM" }
     }
 
     // Amazon only repaints on navigation, so ask for the dark pass now that the probe called for it
