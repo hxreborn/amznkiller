@@ -40,6 +40,7 @@
 [cel_widget_id*="-creative-desktop_loom-desktop-"]
 [class*="_adFeedbackWrapper_"]
 [data-ad-id]
+[data-card-metrics-id^="universal-detail-ilm-card_"]
 [data-component-type^="aspa-asin-ajax"]
 [id^="ape_"]
 [id^="mobile-dp-ilm"]
