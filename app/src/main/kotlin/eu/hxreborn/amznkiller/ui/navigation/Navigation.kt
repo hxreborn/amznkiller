@@ -81,6 +81,7 @@ import eu.hxreborn.amznkiller.ui.screen.update.UpdateSheet
 import eu.hxreborn.amznkiller.ui.screen.update.WhatsNewSheet
 import eu.hxreborn.amznkiller.ui.theme.Tokens
 import eu.hxreborn.amznkiller.ui.viewmodel.AppViewModel
+import eu.hxreborn.amznkiller.ui.viewmodel.ContributorsViewModel
 import eu.hxreborn.amznkiller.ui.viewmodel.UpdateViewModel
 import kotlinx.serialization.Serializable
 import soup.compose.material.motion.animation.materialSharedAxisXIn
@@ -224,6 +225,8 @@ fun MainNavDisplay(
                 }
                 entry<Screen.About> {
                     val xposed by App.from(context).xposedState.collectAsStateWithLifecycle()
+                    val contributorsViewModel: ContributorsViewModel = viewModel()
+                    val contributors by contributorsViewModel.rows.collectAsStateWithLifecycle()
                     AboutScreen(
                         framework = xposed.frameworkLabel,
                         actions =
@@ -233,6 +236,7 @@ fun MainNavDisplay(
                                 onLicenses = { backStack.add(Screen.Licenses) },
                                 onOpenUrl = uriHandler::openUri,
                             ),
+                        contributors = contributors,
                         onBack = { backStack.removeLastOrNull() },
                     )
                 }

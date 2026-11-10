@@ -94,10 +94,12 @@ if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
 	exit 1
 fi
 
+python3 scripts/update_contributors.py || echo "warning: contributors snapshot not refreshed, keeping the committed one"
+
 sed -i "s/^version\.code=.*/version.code=${VERSION_CODE}/" gradle.properties
 sed -i "s/^version\.name=.*/version.name=${VERSION}/" gradle.properties
 
-git add gradle.properties
+git add gradle.properties contributors
 git commit -m "chore: release $TAG"
 
 git tag -a "$TAG" -m "$TAG"

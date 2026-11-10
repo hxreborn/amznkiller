@@ -1,6 +1,7 @@
 package eu.hxreborn.amznkiller.ui.preview
 
 import android.app.Application
+import eu.hxreborn.amznkiller.contributors.ContributorRow
 import eu.hxreborn.amznkiller.prefs.ForceDarkMode
 import eu.hxreborn.amznkiller.prefs.PrefSpec
 import eu.hxreborn.amznkiller.ui.state.DashboardUiState
@@ -12,6 +13,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 internal object PreviewFixtures {
+    val contributors: List<ContributorRow> =
+        listOf(
+            ContributorRow("hxreborn", true, "https://github.com/hxreborn", 9637, 1964, 4, 0, null),
+            ContributorRow("byemaxx", false, "https://github.com/byemaxx", 290, 309, 2, 2, null),
+        )
+
     val dashboardReady: DashboardUiState.Ready =
         DashboardUiState.Ready(
             isXposedActive = true,

@@ -81,6 +81,12 @@ android {
         includeInBundle = false
     }
 
+    sourceSets {
+        getByName("main") {
+            assets.directories.add(rootProject.file("contributors").path)
+        }
+    }
+
     buildFeatures {
         buildConfig = true
         compose = true

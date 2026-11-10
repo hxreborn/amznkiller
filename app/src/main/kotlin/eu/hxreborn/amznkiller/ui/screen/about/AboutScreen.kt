@@ -124,10 +124,12 @@ import androidx.graphics.shapes.Morph
 import eu.hxreborn.amznkiller.App
 import eu.hxreborn.amznkiller.BuildConfig
 import eu.hxreborn.amznkiller.R
+import eu.hxreborn.amznkiller.contributors.ContributorRow
 import eu.hxreborn.amznkiller.prefs.Prefs
 import eu.hxreborn.amznkiller.ui.component.CelebrationOverlay
 import eu.hxreborn.amznkiller.ui.component.fitted
 import eu.hxreborn.amznkiller.ui.component.rotationSafeScale
+import eu.hxreborn.amznkiller.ui.preview.PreviewFixtures
 import eu.hxreborn.amznkiller.ui.preview.PreviewLightDark
 import eu.hxreborn.amznkiller.ui.preview.PreviewWrapper
 import eu.hxreborn.amznkiller.ui.screen.settings.DiagnosticsDialog
@@ -142,7 +144,7 @@ private const val REPO = "hxreborn/amznkiller"
 private const val REPO_URL = "https://github.com/$REPO"
 private const val KOFI_URL = "https://ko-fi.com/hxreborn"
 private const val LICENSE = "GPL-3.0"
-private val ChevronSlot = 40.dp
+internal val ChevronSlot = 40.dp
 private val CookieSize = 88.dp
 private const val COOKIE_SPIN_MS = 8_000
 private const val FULL_TURN = 360f
@@ -162,7 +164,7 @@ private val LogoPolygons =
     )
 private const val ADAPTIVE_ICON_ZOOM = 1.5f
 private val ConnectedButtonHeight = 52.dp
-private val SectionGap = 14.dp
+internal val SectionGap = 14.dp
 private val ContentMaxWidth = 640.dp
 private val CompactHeight = 480.dp
 private val MinGutter = 16.dp
@@ -177,8 +179,8 @@ private val TileInnerRadius = 4.dp
 private val RowGlyphSize = 24.dp
 private const val SHAREHOLDER_TAPS = 7
 
-private val TileTitle = TextStyle(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium)
-private val TileSupporting = TextStyle(fontSize = 13.sp, lineHeight = 18.sp)
+internal val TileTitle = TextStyle(fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium)
+internal val TileSupporting = TextStyle(fontSize = 13.sp, lineHeight = 18.sp)
 private val Meta = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 12.sp, lineHeight = 16.sp)
 private val ButtonText = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium)
 private val Subheader = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium)
@@ -194,6 +196,7 @@ class AboutActions(
 fun AboutScreen(
     framework: String?,
     actions: AboutActions,
+    contributors: List<ContributorRow>,
     onBack: () -> Unit,
 ) {
     val shareholderEgg = rememberShareholderEgg()
@@ -293,6 +296,7 @@ fun AboutScreen(
             }
             Spacer(Modifier.height(SectionGap))
             DeviceGroup(framework)
+            ContributorsGroup(contributors, actions.onOpenUrl)
         }
     }
 }
@@ -637,7 +641,7 @@ private fun DeviceGroup(framework: String?) {
 }
 
 @Composable
-private fun Group(
+internal fun Group(
     title: String?,
     count: Int,
     content: @Composable (Int, RoundedCornerShape) -> Unit,
@@ -667,7 +671,7 @@ private fun tileShape(
     }
 
 @Composable
-private fun Tile(
+internal fun Tile(
     shape: RoundedCornerShape,
     onClick: (() -> Unit)? = null,
     content: @Composable RowScope.() -> Unit,
@@ -769,6 +773,6 @@ private fun DetailScaffold(
 @Composable
 private fun AboutScreenPreview() {
     PreviewWrapper {
-        AboutScreen("LSPosed 2.2.1\nAPI 102", AboutActions({}, {}, {}, {}), onBack = {})
+        AboutScreen("LSPosed 2.2.1\nAPI 102", AboutActions({}, {}, {}, {}), PreviewFixtures.contributors, onBack = {})
     }
 }

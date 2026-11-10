@@ -12,4 +12,12 @@
         <item quantity="one">%d rule removed</item>
         <item quantity="other">%d rules removed</item>
     </plurals>
+    <plurals name="contributor_lines_added_a11y">
+        <item quantity="one">%d line added</item>
+        <item quantity="other">%d lines added</item>
+    </plurals>
+    <plurals name="contributor_lines_removed_a11y">
+        <item quantity="one">%d line removed</item>
+        <item quantity="other">%d lines removed</item>
+    </plurals>
 </resources>
