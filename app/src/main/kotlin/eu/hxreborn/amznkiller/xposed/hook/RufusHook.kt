@@ -11,7 +11,7 @@ object RufusHook {
         xposed: XposedInterface,
         classLoader: ClassLoader,
     ) {
-        runCatching {
+        try {
             val controller = classLoader.loadClass(SAVX_TAB_CONTROLLER)
 
             xposed.hook(controller.getDeclaredMethod("isEnabled")).intercept { chain ->
@@ -21,10 +21,11 @@ object RufusHook {
             xposed.hook(controller.getDeclaredMethod("didTap")).intercept { chain ->
                 if (hideRufus) null else chain.proceed()
             }
-        }.onSuccess {
             Logger.debug { "hooked target=$SAVX_TAB_CONTROLLER" }
-        }.onFailure {
-            Logger.log(Log.ERROR, "hook fail target=$SAVX_TAB_CONTROLLER", it)
+        } catch (e: Exception) {
+            Logger.log(Log.ERROR, "hook fail target=$SAVX_TAB_CONTROLLER", e)
+        } catch (e: LinkageError) {
+            Logger.log(Log.ERROR, "hook fail target=$SAVX_TAB_CONTROLLER", e)
         }
     }
 }
